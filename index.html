@@ -414,14 +414,6 @@
                     if (snapshot.exists()) {
                         const studentData = snapshot.val();
                         db.ref('classes/' + studentData.class).once('value').then((classSnapshot) => {
-                            const userData = {
-                                firstName: studentData.firstName,
-                                lastName: studentData.lastName,
-                                class: studentData.class,
-                                absences: studentData.absences || [],
-                                schedule: classSnapshot.val()?.schedule || []
-                            };
-                            // Redirect without storing in localStorage
                             document.getElementById('student-modal').classList.remove('show');
                             setTimeout(() => {
                                 document.getElementById('student-modal').classList.add('hidden');
@@ -472,21 +464,12 @@
                 auth.signInWithEmailAndPassword(email, password)
                     .then((userCredential) => {
                         const uid = userCredential.user.uid;
-                        db.ref('users/' + uid).once('value').then((snapshot) => {
-                            if (snapshot.exists() && snapshot.val().role === 'admin') {
-                                document.getElementById('admin-modal').classList.remove('show');
-                                setTimeout(() => {
-                                    document.getElementById('admin-modal').classList.add('hidden');
-                                    window.location.href = `admin.html?uid=${uid}`;
-                                }, 300);
-                                showToast('Login successful');
-                            } else {
-                                showToast('Not authorized as admin');
-                                auth.signOut();
-                            }
-                        }).catch(error => {
-                            showToast('Error checking role: ' + error.message);
-                        });
+                        document.getElementById('admin-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('admin-modal').classList.add('hidden');
+                            window.location.href = `admin.html?uid=${uid}`;
+                        }, 300);
+                        showToast('Login successful');
                     })
                     .catch(error => showToast('Login failed: ' + error.message));
             });
