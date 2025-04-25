@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISET Siliana Attendance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 60px; /* Space for navbar */
+            background-color: #f5f5f5;
+            color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background-color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header img {
+            height: 50px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #2c3e50;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 12px;
+            padding: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-btn:hover, .nav-btn:active {
+            transform: scale(1.1);
+            color: #3498db;
+        }
+
+        .nav-btn span {
+            margin-top: 2px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transform: scale(0.7);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.2s ease;
+        }
+
+        .modal-content input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .modal-content button {
+            padding: 10px 20px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .modal-content button:hover {
+            background-color: #219653;
+            transform: scale(1.05);
+        }
+
+        .dashboard {
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .dashboard.show {
+            opacity: 1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px; /* Above navbar */
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 3000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode header {
+            background-color: #1f2a44;
+        }
+
+        body.dark-mode nav {
+            background-color: #1f2a44;
+        }
+
+        body.dark-mode .modal-content {
+            background-color: #2c3e50;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .modal-content input {
+            background-color: #34495e;
+            color: #fff;
+            border-color: #4a6781;
+        }
+
+        body.dark-mode .dashboard {
+            color: #e0e0e0;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            header img {
+                height: 40px;
+            }
+            .nav-btn {
+                font-size: 10px;
+                padding: 3px;
+            }
+            .modal-content {
+                width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://via.placeholder.com/100x50?text=ISET+Siliana" alt="ISET Siliana Logo">
+    </header>
+    <nav>
+        <button class="nav-btn" id="student-btn"><span>🎓</span><span>Student</span></button>
+        <button class="nav-btn" id="professor-btn"><span>👨‍🏫</span><span>Professor</span></button>
+        <button class="nav-btn" id="admin-btn"><span>🔒</span><span>Admin</span></button>
+        <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
+    </nav>
+    <main class="hidden">
+        <!-- Student Modal -->
+        <div id="student-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Student Access</h2>
+                <input type="text" id="cin-input" placeholder="Enter 8-digit CIN" maxlength="8">
+                <button id="student-submit">Submit</button>
+            </div>
+        </div>
+        <!-- Professor Modal -->
+        <div id="professor-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Professor Login</h2>
+                <input type="email" id="professor-email" placeholder="Email">
+                <input type="password" id="professor-password" placeholder="Password">
+                <button id="professor-login">Login</button>
+            </div>
+        </div>
+        <!-- Admin Modal -->
+        <div id="admin-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Admin Login</h2>
+                <input type="email" id="admin-email" placeholder="Email">
+                <input type="password" id="admin-password" placeholder="Password">
+                <button id="admin-login">Login</button>
+            </div>
+        </div>
+        <!-- Dashboards -->
+        <div id="student-dashboard" class="dashboard hidden">
+            <h2>Welcome, <span id="student-name"></span></h2>
+            <p>Class: <span id="student-class"></span></p>
+            <h3>Absences</h3>
+            <ul id="absences-list"></ul>
+            <h3>Study Schedule (Emploi)</h3>
+            <div id="schedule"></div>
+            <button id="student-logout">Logout</button>
+        </div>
+        <div id="professor-dashboard" class="dashboard hidden">
+            <h2>Professor Dashboard</h2>
+            <p>Welcome, <span id="professor-name"></span></p>
+            <button id="professor-logout">Logout</button>
+            <!-- Professor features to be added -->
+        </div>
+        <div id="admin-dashboard" class="dashboard hidden">
+            <h2>Admin Dashboard</h2>
+            <p>Welcome, <span id="admin-name"></span></p>
+            <button id="admin-logout">Logout</button>
+            <!-- Admin features to be added -->
+        </div>
+    </main>
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script>
+        // Firebase Configuration (Replace with your own config)
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAoXhEeGA22chByuIyxjWzmsFsQJSjqZJY",
+  authDomain: "absence-iset-siliana.firebaseapp.com",
+  databaseURL: "https://absence-iset-siliana-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "absence-iset-siliana",
+  storageBucket: "absence-iset-siliana.firebasestorage.app",
+  messagingSenderId: "519382535146",
+  appId: "1:519382535146:web:94629d286b19b8c103c093",
+  measurementId: "G-3Q9F4KP217"
+};
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Show modals
+        document.getElementById('student-btn').addEventListener('click', () => {
+            showModal('student-modal');
+        });
+
+        document.getElementById('professor-btn').addEventListener('click', () => {
+            showModal('professor-modal');
+        });
+
+        document.getElementById('admin-btn').addEventListener('click', () => {
+            showModal('admin-modal');
+        });
+
+        // Modal show function
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('show'), 10); // Delay for transition
+        }
+
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                    setTimeout(() => modal.classList.add('hidden'), 300);
+                }
+            });
+        });
+
+        // Student CIN submission
+        document.getElementById('student-submit').addEventListener('click', async () => {
+            const cin = document.getElementById('cin-input').value;
+            if (!/^\d{8}$/.test(cin)) {
+                showToast('Please enter a valid 8-digit CIN');
+                return;
+            }
+            try {
+                const studentDoc = await db.collection('students').doc(cin).get();
+                if (studentDoc.exists) {
+                    const studentData = studentDoc.data();
+                    document.getElementById('student-name').textContent = studentData.name;
+                    document.getElementById('student-class').textContent = studentData.class;
+                    const absencesList = document.getElementById('absences-list');
+                    absencesList.innerHTML = studentData.absences.length ? '' : '<li>No absences recorded</li>';
+                    studentData.absences.forEach(date => {
+                        const li = document.createElement('li');
+                        li.textContent = date;
+                        absencesList.appendChild(li);
+                    });
+                    const classDoc = await db.collection('classes').doc(studentData.class).get();
+                    const schedule = classDoc.data().schedule;
+                    const scheduleDiv = document.getElementById('schedule');
+                    scheduleDiv.innerHTML = '';
+                    schedule.forEach(slot => {
+                        const p = document.createElement('p');
+                        p.textContent = `${slot.day} ${slot.time}: ${slot.subject}`;
+                        scheduleDiv.appendChild(p);
+                    });
+                    document.getElementById('student-modal').classList.remove('show');
+                    setTimeout(() => {
+                        document.getElementById('student-modal').classList.add('hidden');
+                        document.getElementById('student-dashboard').classList.remove('hidden');
+                        document.getElementById('student-dashboard').classList.add('show');
+                        document.querySelector('main').classList.remove('hidden');
+                    }, 300);
+                    showToast('Access granted');
+                } else {
+                    showToast('Student not found');
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message);
+            }
+        });
+
+        // Professor login
+        document.getElementById('professor-login').addEventListener('click', () => {
+            const email = document.getElementById('professor-email').value;
+            const password = document.getElementById('professor-password').value;
+            auth.signInWithEmailAndPassword(email, password)
+                .then(async (userCredential) => {
+                    const userDoc = await db.collection('users').doc(userCredential.user.uid).get();
+                    if (userDoc.exists && userDoc.data().role === 'professor') {
+                        document.getElementById('professor-name').textContent = userDoc.data().name || 'Professor';
+                        document.getElementById('professor-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('professor-modal').classList.add('hidden');
+                            document.getElementById('professor-dashboard').classList.remove('hidden');
+                            document.getElementById('professor-dashboard').classList.add('show');
+                            document.querySelector('main').classList.remove('hidden');
+                        }, 300);
+                        showToast('Login successful');
+                    } else {
+                        showToast('Not authorized as professor');
+                        auth.signOut();
+                    }
+                })
+                .catch(error => showToast('Login failed: ' + error.message));
+        });
+
+        // Admin login
+        document.getElementById('admin-login').addEventListener('click', () => {
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+            auth.signInWithEmailAndPassword(email, password)
+                .then(async (userCredential) => {
+                    const userDoc = await db.collection('users').doc(userCredential.user.uid).get();
+                    if (userDoc.exists && userDoc.data().role === 'admin') {
+                        document.getElementById('admin-name').textContent = userDoc.data().name || 'Admin';
+                        document.getElementById('admin-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('admin-modal').classList.add('hidden');
+                            document.getElementById('admin-dashboard').classList.remove('hidden');
+                            document.getElementById('admin-dashboard').classList.add('show');
+                            document.querySelector('main').classList.remove('hidden');
+                        }, 300);
+                        showToast('Login successful');
+                    } else {
+                        showToast('Not authorized as admin');
+                        auth.signOut();
+                    }
+                })
+                .catch(error => showToast('Login failed: ' + error.message));
+        });
+
+        // Logout handlers
+        document.getElementById('student-logout').addEventListener('click', () => {
+            document.getElementById('student-dashboard').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('student-dashboard').classList.add('hidden');
+                document.querySelector('main').classList.add('hidden');
+                document.getElementById('cin-input').value = '';
+            }, 500);
+            showToast('Logged out');
+        });
+
+        document.getElementById('professor-logout').addEventListener('click', () => {
+            auth.signOut();
+            document.getElementById('professor-dashboard').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('professor-dashboard').classList.add('hidden');
+                document.querySelector('main').classList.add('hidden');
+                document.getElementById('professor-email').value = '';
+                document.getElementById('professor-password').value = '';
+            }, 500);
+            showToast('Logged out');
+        });
+
+        document.getElementById('admin-logout').addEventListener('click', () => {
+            auth.signOut();
+            document.getElementById('admin-dashboard').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('admin-dashboard').classList.add('hidden');
+                document.querySelector('main').classList.add('hidden');
+                document.getElementById('admin-email').value = '';
+                document.getElementById('admin-password').value = '';
+            }, 500);
+            showToast('Logged out');
+        });
+
+        // Dark mode toggle
+        document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            showToast(document.body.classList.contains('dark-mode') ? 'Dark mode enabled' : 'Light mode enabled');
+        }
+
+        // Toast notification function
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
