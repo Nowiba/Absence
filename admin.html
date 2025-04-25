@@ -82,111 +82,16 @@
             animation: fadeIn 0.5s ease-in;
         }
 
-        .welcome {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 20px;
-            font-weight: 700;
-            color: #2c3e50;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .form-container {
-            background-color: #ffffff;
-            padding: 24px;
-            border-radius: 12px;
-            border: 2px solid #3498db;
-            width: 90%;
-            max-width: 360px;
-            margin: 0 auto;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            animation: slideUp 0.4s ease;
-        }
-
-        .form-container h2 {
-            margin-bottom: 24px;
-            color: #2c3e50;
-            font-size: 26px;
-            font-weight: 700;
-            position: relative;
-        }
-
-        .form-container h2::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(90deg, #3498db, #5dade2);
-        }
-
-        .form-container input {
-            width: 100%;
-            padding: 14px;
-            margin: 12px 0;
-            border: 1px solid #d1d8e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
-            box-sizing: border-box;
-            opacity: 0;
-            animation: inputFadeIn 0.3s ease forwards;
-        }
-
-        .form-container input:nth-child(2) { animation-delay: 0.1s; }
-        .form-container input:nth-child(3) { animation-delay: 0.2s; }
-        .form-container input:nth-child(4) { animation-delay: 0.3s; }
-        .form-container input:nth-child(5) { animation-delay: 0.4s; }
-
-        .form-container input:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
-            outline: none;
-        }
-
-        .form-container button {
-            width: 100%;
-            padding: 14px;
-            background-color: #3498db;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 700;
-            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-            opacity: 0;
-            animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.5s;
-        }
-
-        .form-container button:hover {
-            background-color: #5dade2;
-            transform: scale(1.03);
-            box-shadow: 0 3px 12px rgba(52, 152, 219, 0.3);
-        }
-
         .modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.75);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: rgba(0,0,0,0.6);
             z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            pointer-events: none;
-        }
-
-        .modal.show {
-            opacity: 1;
-            pointer-events: auto;
+            animation: fadeIn 0.3s ease;
         }
 
         .modal-content {
@@ -196,16 +101,10 @@
             border: 2px solid #3498db;
             width: 90%;
             max-width: 360px;
-            text-align: center;
+            margin: 15% auto;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            transform: translateY(30px) scale(0.95);
-            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.4s ease;
-            opacity: 0;
-        }
-
-        .modal.show .modal-content {
-            transform: translateY(0) scale(1);
-            opacity: 1;
+            animation: slideUp 0.4s ease;
+            position: relative;
         }
 
         .modal-content h2 {
@@ -214,7 +113,6 @@
             font-size: 26px;
             font-weight: 700;
             position: relative;
-            animation: fadeIn 0.3s ease;
         }
 
         .modal-content h2::after {
@@ -228,7 +126,7 @@
             background: linear-gradient(90deg, #3498db, #5dade2);
         }
 
-        .modal-content input {
+        .modal-content input, .modal-content select {
             width: 100%;
             padding: 14px;
             margin: 12px 0;
@@ -239,10 +137,13 @@
             box-sizing: border-box;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.1s;
         }
 
-        .modal-content input:focus {
+        .modal-content input:nth-child(2), .modal-content select:nth-child(2) { animation-delay: 0.1s; }
+        .modal-content input:nth-child(3) { animation-delay: 0.2s; }
+        .modal-content input:nth-child(4) { animation-delay: 0.3s; }
+
+        .modal-content input:focus, .modal-content select:focus {
             border-color: #3498db;
             box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
             outline: none;
@@ -261,7 +162,7 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.2s;
+            animation-delay: 0.4s;
         }
 
         .modal-content button:hover {
@@ -270,27 +171,86 @@
             box-shadow: 0 3px 12px rgba(52, 152, 219, 0.3);
         }
 
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #e74c3c;
+            transform: rotate(90deg);
+        }
+
         .results-container {
-            margin-top: 20px;
-            text-align: left;
-            max-height: 200px;
-            overflow-y: auto;
-            opacity: 0;
-            animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.3s;
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 2px solid #3498db;
+            width: 90%;
+            max-width: 360px;
+            margin: 20px auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease;
+            display: none;
+        }
+
+        .results-container h2 {
+            margin-bottom: 24px;
+            color: #2c3e50;
+            font-size: 26px;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .results-container h2::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #3498db, #5dade2);
         }
 
         .result-item {
             padding: 10px;
             border-bottom: 1px solid #d1d8e0;
             font-size: 14px;
+            opacity: 0;
+            animation: inputFadeIn 0.3s ease forwards;
         }
+
+        .result-item:nth-child(2) { animation-delay: 0.1s; }
+        .result-item:nth-child(3) { animation-delay: 0.2s; }
+        .result-item:nth-child(4) { animation-delay: 0.3s; }
 
         .result-item:last-child {
             border-bottom: none;
         }
 
-        .no-results {
+        .absence-list {
+            margin-top: 10px;
+            padding-left: 20px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .absence-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .absence-item:last-child {
+            border-bottom: none;
+        }
+
+        .no-results, .no-absences {
             color: #e74c3c;
             font-size: 14px;
             text-align: center;
@@ -333,42 +293,57 @@
             background-color: #1f2a44;
         }
 
-        body.dark-mode .welcome {
-            color: #e0e0e0;
-        }
-
-        body.dark-mode .form-container, body.dark-mode .modal-content {
+        body.dark-mode .modal-content {
             background-color: #2c3e50;
             color: #e0e0e0;
             border-color: #5dade2;
         }
 
-        body.dark-mode .form-container h2, body.dark-mode .modal-content h2 {
+        body.dark-mode .modal-content h2 {
             color: #e0e0e0;
         }
 
-        body.dark-mode .form-container input, body.dark-mode .modal-content input {
+        body.dark-mode .modal-content input, body.dark-mode .modal-content select {
             background-color: #34495e;
             color: #e0e0e0;
             border-color: #5dade2;
         }
 
-        body.dark-mode .form-container input:focus, body.dark-mode .modal-content input:focus {
+        body.dark-mode .modal-content input:focus, body.dark-mode .modal-content select:focus {
             border-color: #5dade2;
             box-shadow: 0 0 6px rgba(93, 173, 226, 0.4);
         }
 
-        body.dark-mode .form-container button, body.dark-mode .modal-content button {
+        body.dark-mode .modal-content button {
             background-color: #3498db;
         }
 
-        body.dark-mode .form-container button:hover, body.dark-mode .modal-content button:hover {
+        body.dark-mode .modal-content button:hover {
             background-color: #5dade2;
             box-shadow: 0 3px 12px rgba(93, 173, 226, 0.3);
         }
 
+        body.dark-mode .modal-content .close-btn {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .results-container {
+            background-color: #2c3e50;
+            color: #e0e0e0;
+            border-color: #5dade2;
+        }
+
+        body.dark-mode .results-container h2 {
+            color: #e0e0e0;
+        }
+
         body.dark-mode .result-item {
             border-bottom: 1px solid #5dade2;
+        }
+
+        body.dark-mode .absence-item {
+            border-bottom: 1px solid #5dade2;
+            color: #b0b0b0;
         }
 
         body.dark-mode .toast {
@@ -406,26 +381,30 @@
                 font-size: 10px;
                 padding: 3px;
             }
-            .form-container, .modal-content {
+            .modal-content, .results-container {
                 width: 90%;
                 padding: 20px;
             }
-            .form-container h2, .modal-content h2 {
+            .modal-content h2, .results-container h2 {
                 font-size: 24px;
             }
-            .form-container input, .form-container button, .modal-content input, .modal-content button {
+            .modal-content input, .modal-content select, .modal-content button {
                 font-size: 15px;
                 padding: 12px;
             }
-            .welcome {
-                font-size: 18px;
+            .results-container {
+                width: 90%;
+                padding: 20px;
+            }
+            .result-item {
+                font-size: 13px;
+            }
+            .absence-item {
+                font-size: 12px;
             }
             .toast {
                 font-size: 13px;
                 padding: 10px 20px;
-            }
-            .result-item {
-                font-size: 13px;
             }
         }
     </style>
@@ -436,28 +415,43 @@
     </header>
     <nav>
         <button class="nav-btn" id="home-btn"><span>🏠</span><span>Home</span></button>
-        <button class="nav-btn" id="search-btn"><span>🔍</span><span>Search</span></button>
         <button class="nav-btn" id="logout-btn"><span>🚪</span><span>Logout</span></button>
+        <button class="nav-btn" id="search-btn"><span>🔍</span><span>Search</span></button>
+        <button class="nav-btn" id="add-student-btn"><span>➕</span><span>Add Student</span></button>
         <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
     <main>
-        <div class="welcome" id="welcome-message">Loading...</div>
-        <div class="form-container">
-            <h2>Add New Student</h2>
-            <input type="text" id="cin-input" placeholder="Enter 8-digit CIN" maxlength="8" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-            <input type="text" id="first-name-input" placeholder="First Name" pattern="[a-zA-Z\s]*" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
-            <input type="text" id="last-name-input" placeholder="Last Name" pattern="[a-zA-Z\s]*" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
-            <input type="text" id="class-input" placeholder="Class (e.g., CS101)">
-            <button id="add-student-submit">Add Student</button>
-        </div>
         <!-- Search Modal -->
-        <div id="search-modal" class="modal hidden">
+        <div id="search-modal" class="modal">
             <div class="modal-content">
-                <h2>Search Students</h2>
-                <input type="text" id="search-input" placeholder="Enter CIN, First Name, or Last Name">
-                <div id="search-results" class="results-container"></div>
-                <button id="close-search-btn">Close</button>
+                <span class="close-btn" id="close-search">&times;</span>
+                <h2>Search Student</h2>
+                <input type="text" id="search-input" placeholder="Enter CIN or Name">
+                <button id="search-submit">Search</button>
             </div>
+        </div>
+
+        <!-- Add Student Modal -->
+        <div id="add-student-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="close-add-student">&times;</span>
+                <h2>Add Student</h2>
+                <input type="text" id="full-name-input" placeholder="Enter Full Name (e.g., Ali Ben)">
+                <input type="text" id="cin-input" placeholder="Enter 8-digit CIN" maxlength="8" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <select id="class-select">
+                    <option value="IT">IT</option>
+                    <option value="RSI">RSI</option>
+                    <option value="DSI">DSI</option>
+                </select>
+                <input type="text" id="class-number-input" placeholder="Optional: Add number (e.g., 101)" maxlength="3" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                <button id="add-student-submit">Add Student</button>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div id="results-container" class="results-container">
+            <h2>Search Results</h2>
+            <div id="results-list"></div>
         </div>
     </main>
     <div id="toast" class="toast hidden"></div>
@@ -495,56 +489,167 @@
                 // Check authentication
                 auth.onAuthStateChanged((user) => {
                     console.log('Auth state changed:', user ? `User UID: ${user.uid}` : 'No user');
-                    if (user) {
-                        db.ref('users/' + user.uid).once('value').then((snapshot) => {
-                            const adminName = snapshot.exists() && snapshot.val().name ? snapshot.val().name : 'Admin';
-                            document.getElementById('welcome-message').textContent = `Welcome, ${adminName}`;
-                            console.log(`Welcome message set to: Welcome, ${adminName}`);
-                        }).catch(error => {
-                            console.error('Error fetching user data:', error.message);
-                            document.getElementById('welcome-message').textContent = 'Welcome, Admin';
-                        });
-                    } else {
+                    if (!user) {
                         console.log('No authenticated user, redirecting to index.html');
                         showToast('Please log in');
                         window.location.href = 'index.html';
                     }
                 });
 
-                // Modal show function
-                function showModal(modalId) {
-                    console.log(`Attempting to show modal: ${modalId}`);
-                    const modal = document.getElementById(modalId);
-                    if (modal) {
-                        modal.classList.remove('hidden');
-                        setTimeout(() => {
-                            modal.classList.add('show');
-                            console.log(`Modal ${modalId} is now visible`);
-                            if (modalId === 'search-modal') {
-                                document.getElementById('search-input').focus();
-                            }
-                        }, 10);
-                    } else {
-                        console.error(`Modal with ID ${modalId} not found`);
-                        showToast(`Error: Modal ${modalId} not found`);
-                    }
-                }
+                // Search Modal
+                const searchModal = document.getElementById('search-modal');
+                const searchBtn = document.getElementById('search-btn');
+                const closeSearch = document.getElementById('close-search');
+                const searchSubmit = document.getElementById('search-submit');
+                const searchInput = document.getElementById('search-input');
+                const resultsContainer = document.getElementById('results-container');
+                const resultsList = document.getElementById('results-list');
 
-                // Close modals when clicking outside
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.addEventListener('click', (e) => {
-                        if (e.target === modal) {
-                            console.log(`Closing modal: ${modal.id}`);
-                            modal.classList.remove('show');
-                            setTimeout(() => {
-                                modal.classList.add('hidden');
-                                if (modal.id === 'search-modal') {
-                                    document.getElementById('search-input').value = '';
-                                    document.getElementById('search-results').innerHTML = '';
+                searchBtn.addEventListener('click', () => {
+                    console.log('Search button clicked');
+                    searchModal.style.display = 'block';
+                });
+
+                closeSearch.addEventListener('click', () => {
+                    console.log('Close search modal clicked');
+                    searchModal.style.display = 'none';
+                    searchInput.value = '';
+                    resultsContainer.style.display = 'none';
+                });
+
+                searchSubmit.addEventListener('click', () => {
+                    console.log('Search submit clicked');
+                    const query = searchInput.value.trim().toLowerCase();
+                    if (!query) {
+                        showToast('Please enter a CIN or name to search');
+                        return;
+                    }
+
+                    db.ref('students').once('value').then((snapshot) => {
+                        resultsList.innerHTML = '';
+                        let found = false;
+                        snapshot.forEach((childSnapshot) => {
+                            const cin = childSnapshot.key;
+                            const student = childSnapshot.val();
+                            const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+                            if (cin.includes(query) || fullName.includes(query)) {
+                                found = true;
+                                const resultItem = document.createElement('div');
+                                resultItem.className = 'result-item';
+                                resultItem.innerHTML = `CIN: ${cin.slice(0, 4)}<br>Name: ${student.firstName} ${student.lastName}<br>Class: ${student.class || 'Not specified'}`;
+                                const absences = student.absences || [];
+                                if (absences.length > 0) {
+                                    const absenceList = document.createElement('div');
+                                    absenceList.className = 'absence-list';
+                                    absences.forEach((absence) => {
+                                        const absenceItem = document.createElement('div');
+                                        absenceItem.className = 'absence-item';
+                                        absenceItem.textContent = `Date: ${absence.date}, Class: ${absence.class}`;
+                                        absenceList.appendChild(absenceItem);
+                                    });
+                                    resultItem.appendChild(absenceList);
+                                } else {
+                                    const noAbsences = document.createElement('div');
+                                    noAbsences.className = 'no-absences';
+                                    noAbsences.textContent = 'No absences recorded';
+                                    resultItem.appendChild(noAbsences);
                                 }
-                                console.log(`Modal ${modal.id} is now hidden`);
-                            }, 300);
+                                resultsList.appendChild(resultItem);
+                            }
+                        });
+
+                        if (!found) {
+                            resultsList.innerHTML = '<div class="no-results">No students found</div>';
                         }
+                        resultsContainer.style.display = 'block';
+                        searchModal.style.display = 'none';
+                        searchInput.value = '';
+                    }).catch(error => {
+                        console.error('Error searching students:', error.message);
+                        showToast('Error searching students');
+                    });
+                });
+
+                // Add Student Modal
+                const addStudentModal = document.getElementById('add-student-modal');
+                const addStudentBtn = document.getElementById('add-student-btn');
+                const closeAddStudent = document.getElementById('close-add-student');
+                const addStudentSubmit = document.getElementById('add-student-submit');
+                const fullNameInput = document.getElementById('full-name-input');
+                const cinInput = document.getElementById('cin-input');
+                const classSelect = document.getElementById('class-select');
+                const classNumberInput = document.getElementById('class-number-input');
+
+                addStudentBtn.addEventListener('click', () => {
+                    console.log('Add student button clicked');
+                    addStudentModal.style.display = 'block';
+                });
+
+                closeAddStudent.addEventListener('click', () => {
+                    console.log('Close add student modal clicked');
+                    addStudentModal.style.display = 'none';
+                    fullNameInput.value = '';
+                    cinInput.value = '';
+                    classSelect.value = 'IT';
+                    classNumberInput.value = '';
+                });
+
+                addStudentSubmit.addEventListener('click', () => {
+                    console.log('Add student submit clicked');
+                    const fullName = fullNameInput.value.trim();
+                    const cin = cinInput.value.trim();
+                    const classBase = classSelect.value;
+                    const classNumber = classNumberInput.value.trim();
+
+                    // Validate full name
+                    const nameParts = fullName.split(' ');
+                    if (nameParts.length < 2) {
+                        showToast('Please enter both first and last name (e.g., Ali Ben)');
+                        return;
+                    }
+                    const firstName = nameParts[0];
+                    const lastName = nameParts.slice(1).join(' ');
+
+                    // Validate CIN
+                    if (!/^\d{8}$/.test(cin)) {
+                        showToast('Please enter a valid 8-digit CIN');
+                        return;
+                    }
+
+                    // Validate class number (optional, up to 3 digits)
+                    if (classNumber && !/^\d{1,3}$/.test(classNumber)) {
+                        showToast('Class number must be 1 to 3 digits');
+                        return;
+                    }
+
+                    // Combine class
+                    const classValue = classNumber ? `${classBase}${classNumber}` : classBase;
+
+                    // Check if CIN already exists
+                    db.ref('students/' + cin).once('value').then((snapshot) => {
+                        if (snapshot.exists()) {
+                            showToast('Student with this CIN already exists');
+                        } else {
+                            db.ref('students/' + cin).set({
+                                firstName: firstName,
+                                lastName: lastName,
+                                class: classValue,
+                                absences: []
+                            }).then(() => {
+                                showToast('Student added successfully');
+                                addStudentModal.style.display = 'none';
+                                fullNameInput.value = '';
+                                cinInput.value = '';
+                                classSelect.value = 'IT';
+                                classNumberInput.value = '';
+                            }).catch(error => {
+                                console.error('Error adding student:', error.message);
+                                showToast('Error adding student');
+                            });
+                        }
+                    }).catch(error => {
+                        console.error('Error checking CIN:', error.message);
+                        showToast('Error checking CIN');
                     });
                 });
 
@@ -552,115 +657,6 @@
                 document.getElementById('home-btn').addEventListener('click', () => {
                     console.log('Home button clicked');
                     window.location.href = 'index.html';
-                });
-
-                // Search button
-                document.getElementById('search-btn').addEventListener('click', () => {
-                    console.log('Search button clicked');
-                    showModal('search-modal');
-                });
-
-                // Close search modal
-                document.getElementById('close-search-btn').addEventListener('click', () => {
-                    console.log('Close search button clicked');
-                    const modal = document.getElementById('search-modal');
-                    modal.classList.remove('show');
-                    setTimeout(() => {
-                        modal.classList.add('hidden');
-                        document.getElementById('search-input').value = '';
-                        document.getElementById('search-results').innerHTML = '';
-                        console.log('Search modal closed');
-                    }, 300);
-                });
-
-                // Add student submission
-                document.getElementById('add-student-submit').addEventListener('click', () => {
-                    console.log('Add student button clicked');
-                    const cin = document.getElementById('cin-input').value;
-                    const firstName = document.getElementById('first-name-input').value.trim();
-                    const lastName = document.getElementById('last-name-input').value.trim();
-                    const classId = document.getElementById('class-input').value.trim();
-
-                    if (!/^\d{8}$/.test(cin)) {
-                        showToast('Please enter a valid 8-digit CIN (numbers only)');
-                        return;
-                    }
-                    if (!/^[a-zA-Z\s]+$/.test(firstName)) {
-                        showToast('First Name must contain letters only');
-                        return;
-                    }
-                    if (!/^[a-zA-Z\s]+$/.test(lastName)) {
-                        showToast('Last Name must contain letters only');
-                        return;
-                    }
-                    if (!classId) {
-                        showToast('Class is required');
-                        return;
-                    }
-
-                    db.ref('students/' + cin).once('value').then((snapshot) => {
-                        if (snapshot.exists()) {
-                            showToast('CIN already exists');
-                        } else {
-                            db.ref('students/' + cin).set({
-                                firstName: firstName,
-                                lastName: lastName,
-                                class: classId,
-                                absences: []
-                            }).then(() => {
-                                showToast('Student added successfully');
-                                document.getElementById('cin-input').value = '';
-                                document.getElementById('first-name-input').value = '';
-                                document.getElementById('last-name-input').value = '';
-                                document.getElementById('class-input').value = '';
-                            }).catch(error => {
-                                showToast('Error adding student: ' + error.message);
-                            });
-                        }
-                    }).catch(error => {
-                        showToast('Error checking CIN: ' + error.message);
-                    });
-                });
-
-                // Search functionality
-                document.getElementById('search-input').addEventListener('input', (e) => {
-                    console.log('Search input changed:', e.target.value);
-                    const query = e.target.value.trim().toLowerCase();
-                    const resultsContainer = document.getElementById('search-results');
-                    resultsContainer.innerHTML = '';
-
-                    if (!query) {
-                        resultsContainer.innerHTML = '<div class="no-results">Enter a CIN, First Name, or Last Name</div>';
-                        return;
-                    }
-
-                    db.ref('students').once('value').then((snapshot) => {
-                        const students = [];
-                        snapshot.forEach((childSnapshot) => {
-                            const student = childSnapshot.val();
-                            const cin = childSnapshot.key;
-                            if (
-                                cin.startsWith(query) ||
-                                student.firstName.toLowerCase().startsWith(query) ||
-                                student.lastName.toLowerCase().startsWith(query)
-                            ) {
-                                students.push({ cin, ...student });
-                            }
-                        });
-
-                        if (students.length === 0) {
-                            resultsContainer.innerHTML = '<div class="no-results">No students found</div>';
-                        } else {
-                            students.forEach(student => {
-                                const resultItem = document.createElement('div');
-                                resultItem.className = 'result-item';
-                                resultItem.textContent = `CIN: ${student.cin}, Name: ${student.firstName} ${student.lastName}, Class: ${student.class}`;
-                                resultsContainer.appendChild(resultItem);
-                            });
-                        }
-                    }).catch(error => {
-                        showToast('Error searching students: ' + error.message);
-                    });
                 });
 
                 // Logout
