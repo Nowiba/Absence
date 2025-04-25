@@ -435,43 +435,43 @@
             document.getElementById('professor-login').addEventListener('click', () => {
                 const email = document.getElementById('professor-email').value;
                 const password = document.getElementById('professor-password').value;
-                auth.signInWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        const uid = userCredential.user.uid;
-                        db.ref('users/' + uid).once('value').then((snapshot) => {
-                            if (snapshot.exists() && snapshot.val().role === 'professor') {
-                                document.getElementById('professor-modal').classList.remove('show');
-                                setTimeout(() => {
-                                    document.getElementById('professor-modal').classList.add('hidden');
-                                    window.location.href = `professor.html?uid=${uid}`;
-                                }, 300);
-                                showToast('Login successful');
-                            } else {
-                                showToast('Not authorized as professor');
-                                auth.signOut();
-                            }
-                        }).catch(error => {
-                            showToast('Error checking role: ' + error.message);
-                        });
-                    })
-                    .catch(error => showToast('Login failed: ' + error.message));
+                auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).then(() => {
+                    return auth.signInWithEmailAndPassword(email, password);
+                }).then((userCredential) => {
+                    const uid = userCredential.user.uid;
+                    db.ref('users/' + uid).once('value').then((snapshot) => {
+                        if (snapshot.exists() && snapshot.val().role === 'professor') {
+                            document.getElementById('professor-modal').classList.remove('show');
+                            setTimeout(() => {
+                                document.getElementById('professor-modal').classList.add('hidden');
+                                window.location.href = `professor.html?uid=${uid}`;
+                            }, 300);
+                            showToast('Login successful');
+                        } else {
+                            showToast('Not authorized as professor');
+                            auth.signOut();
+                        }
+                    }).catch(error => {
+                        showToast('Error checking role: ' + error.message);
+                    });
+                }).catch(error => showToast('Login failed: ' + error.message));
             });
 
             // Admin login
             document.getElementById('admin-login').addEventListener('click', () => {
                 const email = document.getElementById('admin-email').value;
                 const password = document.getElementById('admin-password').value;
-                auth.signInWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        const uid = userCredential.user.uid;
-                        document.getElementById('admin-modal').classList.remove('show');
-                        setTimeout(() => {
-                            document.getElementById('admin-modal').classList.add('hidden');
-                            window.location.href = `admin.html?uid=${uid}`;
-                        }, 300);
-                        showToast('Login successful');
-                    })
-                    .catch(error => showToast('Login failed: ' + error.message));
+                auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).then(() => {
+                    return auth.signInWithEmailAndPassword(email, password);
+                }).then((userCredential) => {
+                    const uid = userCredential.user.uid;
+                    document.getElementById('admin-modal').classList.remove('show');
+                    setTimeout(() => {
+                        document.getElementById('admin-modal').classList.add('hidden');
+                        window.location.href = `admin.html?uid=${uid}`;
+                    }, 300);
+                    showToast('Login successful');
+                }).catch(error => showToast('Login failed: ' + error.message));
             });
 
             // Dark mode toggle
