@@ -77,38 +77,6 @@
             transition: transform 0.2s ease;
         }
 
-        .search-input-container {
-            display: none;
-            position: fixed;
-            bottom: 60px;
-            width: 100%;
-            background-color: #2c3e50;
-            padding: 10px;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
-            z-index: 999;
-            transition: background-color 0.3s ease;
-        }
-
-        .search-input {
-            width: 90%;
-            max-width: 360px;
-            margin: 0 auto;
-            display: block;
-            padding: 10px;
-            border: 1px solid #d1d8e0;
-            border-radius: 8px;
-            font-size: 14px;
-            background-color: #ffffff;
-            color: #333;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .search-input:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
-            outline: none;
-        }
-
         main {
             padding: 20px;
             animation: fadeIn 0.5s ease-in;
@@ -194,83 +162,6 @@
             box-shadow: 0 3px 12px rgba(52, 152, 219, 0.3);
         }
 
-        .results-container {
-            background-color: #ffffff;
-            padding: 24px;
-            border-radius: 12px;
-            border: 2px solid #3498db;
-            width: 90%;
-            max-width: 360px;
-            margin: 20px auto;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            animation: slideUp 0.4s ease;
-            display: none;
-        }
-
-        .results-container h2 {
-            margin-bottom: 24px;
-            color: #2c3e50;
-            font-size: 26px;
-            font-weight: 700;
-            position: relative;
-            transition: color 0.3s ease;
-        }
-
-        .results-container h2::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(90deg, #3498db, #5dade2);
-            transition: background 0.3s ease;
-        }
-
-        .result-item {
-            padding: 10px;
-            border-bottom: 1px solid #d1d8e0;
-            font-size: 14px;
-            opacity: 0;
-            animation: inputFadeIn 0.3s ease forwards;
-            transition: border-color 0.3s ease;
-        }
-
-        .result-item:nth-child(2) { animation-delay: 0.1s; }
-        .result-item:nth-child(3) { animation-delay: 0.2s; }
-        .result-item:nth-child(4) { animation-delay: 0.3s; }
-
-        .result-item:last-child {
-            border-bottom: none;
-        }
-
-        .absence-list {
-            margin-top: 10px;
-            padding-left: 20px;
-            font-size: 13px;
-            color: #555;
-            transition: color 0.3s ease;
-        }
-
-        .absence-item {
-            padding: 5px 0;
-            border-bottom: 1px solid #e0e0e0;
-            transition: border-color 0.3s ease;
-        }
-
-        .absence-item:last-child {
-            border-bottom: none;
-        }
-
-        .no-results, .no-absences {
-            color: #e74c3c;
-            font-size: 14px;
-            text-align: center;
-            padding: 10px;
-            transition: color 0.3s ease;
-        }
-
         .toast {
             position: fixed;
             bottom: 80px; /* Above navbar */
@@ -320,32 +211,17 @@
             background-color: rgba(93, 173, 226, 0.1);
         }
 
-        body.dark-mode .search-input-container {
-            background-color: #1f2a44;
-        }
-
-        body.dark-mode .search-input {
-            background-color: #34495e;
-            color: #e0e0e0;
-            border-color: #5dade2;
-        }
-
-        body.dark-mode .search-input:focus {
-            border-color: #5dade2;
-            box-shadow: 0 0 6px rgba(93, 173, 226, 0.4);
-        }
-
-        body.dark-mode .add-student-form, body.dark-mode .results-container {
+        body.dark-mode .add-student-form {
             background-color: #2c3e50;
             color: #e0e0e0;
             border-color: #5dade2;
         }
 
-        body.dark-mode .add-student-form h2, body.dark-mode .results-container h2 {
+        body.dark-mode .add-student-form h2 {
             color: #e0e0e0;
         }
 
-        body.dark-mode .add-student-form h2::after, body.dark-mode .results-container h2::after {
+        body.dark-mode .add-student-form h2::after {
             background: linear-gradient(90deg, #5dade2, #7fbfff);
         }
 
@@ -367,28 +243,6 @@
         body.dark-mode .add-student-form button:hover {
             background-color: #5dade2;
             box-shadow: 0 3px 12px rgba(93, 173, 226, 0.3);
-        }
-
-        body.dark-mode .results-container {
-            background-color: #2c3e50;
-            color: #e0e0e0;
-            border-color: #5dade2;
-        }
-
-        body.dark-mode .result-item {
-            border-bottom: 1px solid #5dade2;
-        }
-
-        body.dark-mode .absence-list {
-            color: #b0b0b0;
-        }
-
-        body.dark-mode .absence-item {
-            border-bottom: 1px solid #5dade2;
-        }
-
-        body.dark-mode .no-results, body.dark-mode .no-absences {
-            color: #ff6b6b;
         }
 
         body.dark-mode .toast {
@@ -426,26 +280,16 @@
                 font-size: 10px;
                 padding: 3px;
             }
-            .search-input {
-                font-size: 13px;
-                padding: 8px;
-            }
-            .add-student-form, .results-container {
+            .add-student-form {
                 width: 90%;
                 padding: 20px;
             }
-            .add-student-form h2, .results-container h2 {
+            .add-student-form h2 {
                 font-size: 24px;
             }
             .add-student-form input, .add-student-form select, .add-student-form button {
                 font-size: 15px;
                 padding: 12px;
-            }
-            .result-item {
-                font-size: 13px;
-            }
-            .absence-item {
-                font-size: 12px;
             }
             .toast {
                 font-size: 13px;
@@ -460,13 +304,8 @@
     </header>
     <nav>
         <button class="nav-btn" id="home-btn"><span>🏠</span><span>Home</span></button>
-        <button class="nav-btn" id="logout-btn"><span>🚪</span><span>Logout</span></button>
-        <button class="nav-btn" id="search-btn"><span>🔍</span><span>Search</span></button>
         <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
-    <div id="search-input-container" class="search-input-container">
-        <input type="text" id="search-input" class="search-input" placeholder="Search by name">
-    </div>
     <main>
         <!-- Add Student Form -->
         <div class="add-student-form">
@@ -479,13 +318,8 @@
                 <option value="DSI">DSI</option>
             </select>
             <input type="text" id="class-number-input" placeholder="Optional: Add number (e.g., 101)" maxlength="3" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+a>
             <button id="add-student-submit">Add Student</button>
-        </div>
-
-        <!-- Search Results -->
-        <div id="results-container" class="results-container">
-            <h2>Search Results</h2>
-            <div id="results-list"></div>
         </div>
     </main>
     <div id="toast" class="toast hidden"></div>
@@ -528,85 +362,6 @@
                         showToast('Please log in');
                         window.location.href = 'index.html';
                     }
-                });
-
-                // Search Functionality
-                const searchBtn = document.getElementById('search-btn');
-                const searchInputContainer = document.getElementById('search-input-container');
-                const searchInput = document.getElementById('search-input');
-                const resultsContainer = document.getElementById('results-container');
-                const resultsList = document.getElementById('results-list');
-
-                let studentsData = []; // Cache students data for live search
-
-                // Fetch all students once for live search
-                db.ref('students').once('value').then((snapshot) => {
-                    snapshot.forEach((childSnapshot) => {
-                        const cin = childSnapshot.key;
-                        const student = childSnapshot.val();
-                        studentsData.push({ cin, ...student });
-                    });
-                    console.log('Students data loaded:', studentsData.length, 'students');
-                }).catch(error => {
-                    console.error('Error loading students data:', error.message);
-                    showToast('Error loading students data');
-                });
-
-                searchBtn.addEventListener('click', () => {
-                    console.log('Search button clicked');
-                    const isVisible = searchInputContainer.style.display === 'block';
-                    searchInputContainer.style.display = isVisible ? 'none' : 'block';
-                    if (!isVisible) {
-                        searchInput.focus();
-                    } else {
-                        searchInput.value = '';
-                        resultsContainer.style.display = 'none';
-                    }
-                });
-
-                searchInput.addEventListener('input', () => {
-                    const query = searchInput.value.trim().toLowerCase();
-                    console.log('Search input:', query);
-                    resultsList.innerHTML = '';
-                    let found = false;
-
-                    if (!query) {
-                        resultsContainer.style.display = 'none';
-                        return;
-                    }
-
-                    studentsData.forEach((student) => {
-                        const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
-                        if (fullName.includes(query)) {
-                            found = true;
-                            const resultItem = document.createElement('div');
-                            resultItem.className = 'result-item';
-                            resultItem.innerHTML = `CIN: ${student.cin.slice(0, 4)}****<br>Name: ${student.firstName} ${student.lastName}<br>Class: ${student.class || 'Not specified'}`;
-                            const absences = student.absences || [];
-                            if (absences.length > 0) {
-                                const absenceList = document.createElement('div');
-                                absenceList.className = 'absence-list';
-                                absences.forEach((absence) => {
-                                    const absenceItem = document.createElement('div');
-                                    absenceItem.className = 'absence-item';
-                                    absenceItem.textContent = `Date: ${absence.date}, Class: ${absence.class}`;
-                                    absenceList.appendChild(absenceItem);
-                                });
-                                resultItem.appendChild(absenceList);
-                            } else {
-                                const noAbsences = document.createElement('div');
-                                noAbsences.className = 'no-absences';
-                                noAbsences.textContent = 'No absences recorded';
-                                resultItem.appendChild(noAbsences);
-                            }
-                            resultsList.appendChild(resultItem);
-                        }
-                    });
-
-                    if (!found) {
-                        resultsList.innerHTML = '<div class="no-results">No students found</div>';
-                    }
-                    resultsContainer.style.display = 'block';
                 });
 
                 // Add Student Form
@@ -663,8 +418,6 @@
                                 cinInput.value = '';
                                 classSelect.value = 'IT';
                                 classNumberInput.value = '';
-                                // Update studentsData for live search
-                                studentsData.push({ cin, firstName, lastName, class: classValue, absences: [] });
                             }).catch(error => {
                                 console.error('Error adding student:', error.message);
                                 showToast('Error adding student');
@@ -680,17 +433,6 @@
                 document.getElementById('home-btn').addEventListener('click', () => {
                     console.log('Home button clicked');
                     window.location.href = 'index.html';
-                });
-
-                // Logout
-                document.getElementById('logout-btn').addEventListener('click', () => {
-                    console.log('Logout button clicked');
-                    auth.signOut().then(() => {
-                        showToast('Logged out successfully');
-                        window.location.href = 'index.html';
-                    }).catch(error => {
-                        showToast('Error logging out: ' + error.message);
-                    });
                 });
 
                 // Dark mode toggle
