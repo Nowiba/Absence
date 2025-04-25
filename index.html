@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ISET Siliana Attendance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
             padding-bottom: 60px; /* Space for navbar */
@@ -25,11 +26,17 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            animation: headerFadeIn 0.5s ease-in;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        header img {
-            height: 50px;
-            animation: fadeIn 0.5s ease-in;
+        header h1 {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            transform: scale(1);
+            transition: transform 0.3s ease;
         }
 
         nav {
@@ -42,6 +49,7 @@
             padding: 10px 0;
             box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
             z-index: 1000;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .nav-btn {
@@ -54,16 +62,19 @@
             font-size: 12px;
             padding: 5px;
             cursor: pointer;
-            transition: transform 0.2s ease, color 0.2s ease;
+            transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+            border-radius: 6px;
         }
 
         .nav-btn:hover, .nav-btn:active {
-            transform: scale(1.1);
+            transform: scale(1.1) rotate(2deg);
             color: #3498db;
+            background-color: rgba(52, 152, 219, 0.1);
         }
 
         .nav-btn span {
             margin-top: 2px;
+            transition: transform 0.2s ease;
         }
 
         .modal {
@@ -72,13 +83,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.6);
+            background-color: rgba(0,0,0,0.75);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 2000;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.4s ease;
         }
 
         .modal.show {
@@ -86,64 +97,84 @@
         }
 
         .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 2px solid #3498db;
             width: 90%;
-            max-width: 400px;
+            max-width: 360px;
             text-align: center;
-            transform: scale(0.7);
-            transition: transform 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transform: translateY(30px) scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.4s ease;
+            opacity: 0;
         }
 
         .modal.show .modal-content {
-            transform: scale(1);
+            transform: translateY(0) scale(1);
+            opacity: 1;
         }
 
         .modal-content h2 {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             color: #2c3e50;
+            font-size: 26px;
+            font-weight: 700;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #3498db, #5dade2);
         }
 
         .modal-content input {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            padding: 14px;
+            margin: 12px 0;
+            border: 1px solid #d1d8e0;
+            border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.2s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+            box-sizing: border-box;
+            opacity: 0;
+            animation: inputFadeIn 0.3s ease forwards;
+            animation-delay: 0.1s;
         }
 
         .modal-content input:focus {
             border-color: #3498db;
+            box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
             outline: none;
         }
 
         .modal-content button {
-            padding: 10px 20px;
-            background-color: #27ae60;
-            color: white;
+            width: 100%;
+            padding: 14px;
+            background-color: #3498db;
+            color: #ffffff;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.2s ease, transform 0.2s ease;
+            font-weight: 700;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0;
+            animation: inputFadeIn 0.3s ease forwards;
+            animation-delay: 0.2s;
         }
 
         .modal-content button:hover {
-            background-color: #219653;
-            transform: scale(1.05);
-        }
-
-        .dashboard {
-            padding: 20px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .dashboard.show {
-            opacity: 1;
+            background-color: #5dade2;
+            transform: scale(1.03);
+            box-shadow: 0 3px 12px rgba(52, 152, 219, 0.3);
         }
 
         .hidden {
@@ -154,13 +185,16 @@
             position: fixed;
             bottom: 80px; /* Above navbar */
             left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
+            transform: translateX(-50%) translateY(50px);
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 400;
             opacity: 0;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             z-index: 3000;
         }
 
@@ -186,15 +220,35 @@
         body.dark-mode .modal-content {
             background-color: #2c3e50;
             color: #e0e0e0;
+            border-color: #5dade2;
+        }
+
+        body.dark-mode .modal-content h2 {
+            color: #e0e0e0;
         }
 
         body.dark-mode .modal-content input {
             background-color: #34495e;
-            color: #fff;
-            border-color: #4a6781;
+            color: #e0e0e0;
+            border-color: #5dade2;
         }
 
-        body.dark-mode .dashboard {
+        body.dark-mode .modal-content input:focus {
+            border-color: #5dade2;
+            box-shadow: 0 0 6px rgba(93, 173, 226, 0.4);
+        }
+
+        body.dark-mode .modal-content button {
+            background-color: #3498db;
+        }
+
+        body.dark-mode .modal-content button:hover {
+            background-color: #5dade2;
+            box-shadow: 0 3px 12px rgba(93, 173, 226, 0.3);
+        }
+
+        body.dark-mode .toast {
+            background: linear-gradient(90deg, #34495e, #2c3e50);
             color: #e0e0e0;
         }
 
@@ -205,42 +259,64 @@
         }
 
         @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
+            from { transform: translateY(30px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes inputFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes headerFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         /* Responsive Design */
         @media (max-width: 600px) {
-            header img {
-                height: 40px;
+            header h1 {
+                font-size: 20px;
             }
             .nav-btn {
                 font-size: 10px;
                 padding: 3px;
             }
             .modal-content {
-                width: 85%;
+                width: 90%;
+                padding: 20px;
+            }
+            .modal-content h2 {
+                font-size: 24px;
+            }
+            .modal-content input, .modal-content button {
+                font-size: 15px;
+                padding: 12px;
+            }
+            .toast {
+                font-size: 13px;
+                padding: 10px 20px;
             }
         }
     </style>
 </head>
 <body>
     <header>
-        <img src="https://via.placeholder.com/100x50?text=ISET+Siliana" alt="ISET Siliana Logo">
+        <h1>ISET Siliana Attendance</h1>
     </header>
     <nav>
-        <button class="nav-btn" id="student-btn"><span>🎓</span><span>Student</span></button>
-        <button class="nav-btn" id="professor-btn"><span>👨‍🏫</span><span>Professor</span></button>
-        <button class="nav-btn" id="admin-btn"><span>🔒</span><span>Admin</span></button>
+        <button class="nav-btn" id="student-btn" onclick="showModal('student-modal')"><span>🎓</span><span>Student</span></button>
+        <button class="nav-btn" id="professor-btn" onclick="showModal('professor-modal')"><span>👨‍🏫</span><span>Professor</span></button>
+        <button class="nav-btn" id="admin-btn" onclick="showModal('admin-modal')"><span>🔒</span><span>Admin</span></button>
         <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
-    <main class="hidden">
+    <main>
         <!-- Student Modal -->
         <div id="student-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Student Access</h2>
                 <input type="text" id="cin-input" placeholder="Enter 8-digit CIN" maxlength="8">
-                <button id="student-submit">Submit</button>
+                <button id="student-submit">Validate</button>
             </div>
         </div>
         <!-- Professor Modal -->
@@ -261,230 +337,179 @@
                 <button id="admin-login">Login</button>
             </div>
         </div>
-        <!-- Dashboards -->
-        <div id="student-dashboard" class="dashboard hidden">
-            <h2>Welcome, <span id="student-name"></span></h2>
-            <p>Class: <span id="student-class"></span></p>
-            <h3>Absences</h3>
-            <ul id="absences-list"></ul>
-            <h3>Study Schedule (Emploi)</h3>
-            <div id="schedule"></div>
-            <button id="student-logout">Logout</button>
-        </div>
-        <div id="professor-dashboard" class="dashboard hidden">
-            <h2>Professor Dashboard</h2>
-            <p>Welcome, <span id="professor-name"></span></p>
-            <button id="professor-logout">Logout</button>
-            <!-- Professor features to be added -->
-        </div>
-        <div id="admin-dashboard" class="dashboard hidden">
-            <h2>Admin Dashboard</h2>
-            <p>Welcome, <span id="admin-name"></span></p>
-            <button id="admin-logout">Logout</button>
-            <!-- Admin features to be added -->
-        </div>
     </main>
     <div id="toast" class="toast hidden"></div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        // Firebase Configuration (Replace with your own config)
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAoXhEeGA22chByuIyxjWzmsFsQJSjqZJY",
-  authDomain: "absence-iset-siliana.firebaseapp.com",
-  databaseURL: "https://absence-iset-siliana-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "absence-iset-siliana",
-  storageBucket: "absence-iset-siliana.firebasestorage.app",
-  messagingSenderId: "519382535146",
-  appId: "1:519382535146:web:94629d286b19b8c103c093",
-  measurementId: "G-3Q9F4KP217"
-};
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        try {
+            // Firebase Configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyAoXhEeGA22chByuIyxjWzmsFsQJSjqZJY",
+                authDomain: "absence-iset-siliana.firebaseapp.com",
+                databaseURL: "https://absence-iset-siliana-default-rtdb.europe-west1.firebasedatabase.app",
+                projectId: "absence-iset-siliana",
+                storageBucket: "absence-iset-siliana.firebasestorage.app",
+                messagingSenderId: "519382535146",
+                appId: "1:519382535146:web:94629d286b19b8c103c093",
+                measurementId: "G-3Q9F4KP217"
+            };
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            const db = firebase.database();
 
-        // Show modals
-        document.getElementById('student-btn').addEventListener('click', () => {
-            showModal('student-modal');
-        });
-
-        document.getElementById('professor-btn').addEventListener('click', () => {
-            showModal('professor-modal');
-        });
-
-        document.getElementById('admin-btn').addEventListener('click', () => {
-            showModal('admin-modal');
-        });
-
-        // Modal show function
-        function showModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.remove('hidden');
-            setTimeout(() => modal.classList.add('show'), 10); // Delay for transition
-        }
-
-        // Close modals when clicking outside
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('show');
-                    setTimeout(() => modal.classList.add('hidden'), 300);
-                }
-            });
-        });
-
-        // Student CIN submission
-        document.getElementById('student-submit').addEventListener('click', async () => {
-            const cin = document.getElementById('cin-input').value;
-            if (!/^\d{8}$/.test(cin)) {
-                showToast('Please enter a valid 8-digit CIN');
-                return;
-            }
-            try {
-                const studentDoc = await db.collection('students').doc(cin).get();
-                if (studentDoc.exists) {
-                    const studentData = studentDoc.data();
-                    document.getElementById('student-name').textContent = studentData.name;
-                    document.getElementById('student-class').textContent = studentData.class;
-                    const absencesList = document.getElementById('absences-list');
-                    absencesList.innerHTML = studentData.absences.length ? '' : '<li>No absences recorded</li>';
-                    studentData.absences.forEach(date => {
-                        const li = document.createElement('li');
-                        li.textContent = date;
-                        absencesList.appendChild(li);
-                    });
-                    const classDoc = await db.collection('classes').doc(studentData.class).get();
-                    const schedule = classDoc.data().schedule;
-                    const scheduleDiv = document.getElementById('schedule');
-                    scheduleDiv.innerHTML = '';
-                    schedule.forEach(slot => {
-                        const p = document.createElement('p');
-                        p.textContent = `${slot.day} ${slot.time}: ${slot.subject}`;
-                        scheduleDiv.appendChild(p);
-                    });
-                    document.getElementById('student-modal').classList.remove('show');
+            // Modal show function
+            function showModal(modalId) {
+                console.log(`Attempting to show modal: ${modalId}`);
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('hidden');
                     setTimeout(() => {
-                        document.getElementById('student-modal').classList.add('hidden');
-                        document.getElementById('student-dashboard').classList.remove('hidden');
-                        document.getElementById('student-dashboard').classList.add('show');
-                        document.querySelector('main').classList.remove('hidden');
-                    }, 300);
-                    showToast('Access granted');
+                        modal.classList.add('show');
+                        console.log(`Modal ${modalId} is now visible`);
+                    }, 10);
                 } else {
-                    showToast('Student not found');
+                    console.error(`Modal with ID ${modalId} not found`);
+                    alert(`Error: Modal ${modalId} not found.`);
                 }
-            } catch (error) {
-                showToast('Error: ' + error.message);
             }
-        });
 
-        // Professor login
-        document.getElementById('professor-login').addEventListener('click', () => {
-            const email = document.getElementById('professor-email').value;
-            const password = document.getElementById('professor-password').value;
-            auth.signInWithEmailAndPassword(email, password)
-                .then(async (userCredential) => {
-                    const userDoc = await db.collection('users').doc(userCredential.user.uid).get();
-                    if (userDoc.exists && userDoc.data().role === 'professor') {
-                        document.getElementById('professor-name').textContent = userDoc.data().name || 'Professor';
-                        document.getElementById('professor-modal').classList.remove('show');
+            // Close modals when clicking outside
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        console.log(`Closing modal: ${modal.id}`);
+                        modal.classList.remove('show');
                         setTimeout(() => {
-                            document.getElementById('professor-modal').classList.add('hidden');
-                            document.getElementById('professor-dashboard').classList.remove('hidden');
-                            document.getElementById('professor-dashboard').classList.add('show');
-                            document.querySelector('main').classList.remove('hidden');
+                            modal.classList.add('hidden');
+                            console.log(`Modal ${modal.id} is now hidden`);
                         }, 300);
-                        showToast('Login successful');
-                    } else {
-                        showToast('Not authorized as professor');
-                        auth.signOut();
                     }
-                })
-                .catch(error => showToast('Login failed: ' + error.message));
-        });
+                });
+            });
 
-        // Admin login
-        document.getElementById('admin-login').addEventListener('click', () => {
-            const email = document.getElementById('admin-email').value;
-            const password = document.getElementById('admin-password').value;
-            auth.signInWithEmailAndPassword(email, password)
-                .then(async (userCredential) => {
-                    const userDoc = await db.collection('users').doc(userCredential.user.uid).get();
-                    if (userDoc.exists && userDoc.data().role === 'admin') {
-                        document.getElementById('admin-name').textContent = userDoc.data().name || 'Admin';
-                        document.getElementById('admin-modal').classList.remove('show');
-                        setTimeout(() => {
-                            document.getElementById('admin-modal').classList.add('hidden');
-                            document.getElementById('admin-dashboard').classList.remove('hidden');
-                            document.getElementById('admin-dashboard').classList.add('show');
-                            document.querySelector('main').classList.remove('hidden');
-                        }, 300);
-                        showToast('Login successful');
+            // Student CIN submission
+            document.getElementById('student-submit').addEventListener('click', () => {
+                const cin = document.getElementById('cin-input').value;
+                if (!/^\d{8}$/.test(cin)) {
+                    showToast('Please enter a valid 8-digit CIN');
+                    return;
+                }
+                db.ref('students/' + cin).once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const studentData = snapshot.val();
+                        db.ref('classes/' + studentData.class).once('value').then((classSnapshot) => {
+                            const userData = {
+                                name: studentData.name,
+                                class: studentData.class,
+                                absences: studentData.absences || [],
+                                schedule: classSnapshot.val().schedule || []
+                            };
+                            localStorage.setItem('userData', JSON.stringify(userData));
+                            document.getElementById('student-modal').classList.remove('show');
+                            setTimeout(() => {
+                                document.getElementById('student-modal').classList.add('hidden');
+                                window.location.href = 'student.html';
+                            }, 300);
+                            showToast('Access granted');
+                        }).catch(error => {
+                            showToast('Error fetching schedule: ' + error.message);
+                        });
                     } else {
-                        showToast('Not authorized as admin');
-                        auth.signOut();
+                        showToast('Student not found');
                     }
-                })
-                .catch(error => showToast('Login failed: ' + error.message));
-        });
+                }).catch(error => {
+                    showToast('Error: ' + error.message);
+                });
+            });
 
-        // Logout handlers
-        document.getElementById('student-logout').addEventListener('click', () => {
-            document.getElementById('student-dashboard').classList.remove('show');
-            setTimeout(() => {
-                document.getElementById('student-dashboard').classList.add('hidden');
-                document.querySelector('main').classList.add('hidden');
-                document.getElementById('cin-input').value = '';
-            }, 500);
-            showToast('Logged out');
-        });
+            // Professor login
+            document.getElementById('professor-login').addEventListener('click', () => {
+                const email = document.getElementById('professor-email').value;
+                const password = document.getElementById('professor-password').value;
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        db.ref('users/' + userCredential.user.uid).once('value').then((snapshot) => {
+                            if (snapshot.exists() && snapshot.val().role === 'professor') {
+                                const userData = {
+                                    name: snapshot.val().name || 'Professor',
+                                    role: 'professor'
+                                };
+                                localStorage.setItem('userData', JSON.stringify(userData));
+                                document.getElementById('professor-modal').classList.remove('show');
+                                setTimeout(() => {
+                                    document.getElementById('professor-modal').classList.add('hidden');
+                                    window.location.href = 'professor.html';
+                                }, 300);
+                                showToast('Login successful');
+                            } else {
+                                showToast('Not authorized as professor');
+                                auth.signOut();
+                            }
+                        }).catch(error => {
+                            showToast('Error checking role: كردرة التحقق من الدور: ' + error.message);
+                        });
+                    })
+                    .catch(error => showToast('Login failed: فشل تسجيل الدخول: ' + error.message));
+            });
 
-        document.getElementById('professor-logout').addEventListener('click', () => {
-            auth.signOut();
-            document.getElementById('professor-dashboard').classList.remove('show');
-            setTimeout(() => {
-                document.getElementById('professor-dashboard').classList.add('hidden');
-                document.querySelector('main').classList.add('hidden');
-                document.getElementById('professor-email').value = '';
-                document.getElementById('professor-password').value = '';
-            }, 500);
-            showToast('Logged out');
-        });
+            // Admin login
+            document.getElementById('admin-login').addEventListener('click', () => {
+                const email = document.getElementById('admin-email').value;
+                const password = document.getElementById('admin-password').value;
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        db.ref('users/' + userCredential.user.uid).once('value').then((snapshot) => {
+                            if (snapshot.exists() && snapshot.val().role === 'admin') {
+                                const userData = {
+                                    name: snapshot.val().name || 'Admin',
+                                    role: 'admin'
+                                };
+                                localStorage.setItem('userData', JSON.stringify(userData));
+                                document.getElementById('admin-modal').classList.remove('show');
+                                setTimeout(() => {
+                                    document.getElementById('admin-modal').classList.add('hidden');
+                                    window.location.href = 'admin.html';
+                                }, 300);
+                                showToast('Login successful');
+                            } else {
+                                showToast('Not authorized as admin');
+                                auth.signOut();
+                            }
+                        }).catch(error => {
+                            showToast('Error checking role: ' + error.message);
+                        });
+                    })
+                    .catch(error => showToast('Login failed: ' + error.message));
+            });
 
-        document.getElementById('admin-logout').addEventListener('click', () => {
-            auth.signOut();
-            document.getElementById('admin-dashboard').classList.remove('show');
-            setTimeout(() => {
-                document.getElementById('admin-dashboard').classList.add('hidden');
-                document.querySelector('main').classList.add('hidden');
-                document.getElementById('admin-email').value = '';
-                document.getElementById('admin-password').value = '';
-            }, 500);
-            showToast('Logged out');
-        });
+            // Dark mode toggle
+            document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                const toggleButton = document.getElementById('dark-mode-toggle');
+                toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
+                toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+                showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
+            });
 
-        // Dark mode toggle
-        document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
-
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            showToast(document.body.classList.contains('dark-mode') ? 'Dark mode enabled' : 'Light mode enabled');
-        }
-
-        // Toast notification function
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.remove('hidden');
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.classList.add('hidden');
-            }, 3000);
+            // Toast notification function
+            function showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.remove('hidden');
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toast.classList.add('hidden');
+                }, 3000);
+            }
+        } catch (error) {
+            console.error('Initialization error:', error);
+            alert('Error initializing page: ' + error.message);
         }
     </script>
 </body>
