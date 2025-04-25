@@ -149,6 +149,10 @@
             animation-delay: 0.1s;
         }
 
+        .modal-content input:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
         .modal-content input:focus {
             border-color: #3498db;
             box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
@@ -168,7 +172,7 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.2s;
+            animation-delay: 0.3s;
         }
 
         .modal-content button:hover {
@@ -361,6 +365,14 @@
             const auth = firebase.auth();
             const db = firebase.database();
 
+            // Load dark mode preference from localStorage
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                const toggleButton = document.getElementById('dark-mode-toggle');
+                toggleButton.querySelector('span:first-child').textContent = '🌞';
+                toggleButton.querySelector('span:last-child').textContent = 'Light Mode';
+            }
+
             // Modal show function
             function showModal(modalId) {
                 console.log(`Attempting to show modal: ${modalId}`);
@@ -403,16 +415,17 @@
                         const studentData = snapshot.val();
                         db.ref('classes/' + studentData.class).once('value').then((classSnapshot) => {
                             const userData = {
-                                name: studentData.name,
+                                firstName: studentData.firstName,
+                                lastName: studentData.lastName,
                                 class: studentData.class,
                                 absences: studentData.absences || [],
-                                schedule: classSnapshot.val().schedule || []
+                                schedule: classSnapshot.val()?.schedule || []
                             };
-                            localStorage.setItem('userData', JSON.stringify(userData));
+                            // Redirect without storing in localStorage
                             document.getElementById('student-modal').classList.remove('show');
                             setTimeout(() => {
                                 document.getElementById('student-modal').classList.add('hidden');
-                                window.location.href = 'student.html';
+                                window.location.href = `student.html?cin=${cin}`;
                             }, 300);
                             showToast('Access granted');
                         }).catch(error => {
@@ -432,17 +445,13 @@
                 const password = document.getElementById('professor-password').value;
                 auth.signInWithEmailAndPassword(email, password)
                     .then((userCredential) => {
-                        db.ref('users/' + userCredential.user.uid).once('value').then((snapshot) => {
+                        const uid = userCredential.user.uid;
+                        db.ref('users/' + uid).once('value').then((snapshot) => {
                             if (snapshot.exists() && snapshot.val().role === 'professor') {
-                                const userData = {
-                                    name: snapshot.val().name || 'Professor',
-                                    role: 'professor'
-                                };
-                                localStorage.setItem('userData', JSON.stringify(userData));
                                 document.getElementById('professor-modal').classList.remove('show');
                                 setTimeout(() => {
                                     document.getElementById('professor-modal').classList.add('hidden');
-                                    window.location.href = 'professor.html';
+                                    window.location.href = `professor.html?uid=${uid}`;
                                 }, 300);
                                 showToast('Login successful');
                             } else {
@@ -450,10 +459,10 @@
                                 auth.signOut();
                             }
                         }).catch(error => {
-                            showToast('Error checking role: كردرة التحقق من الدور: ' + error.message);
+                            showToast('Error checking role: ' + error.message);
                         });
                     })
-                    .catch(error => showToast('Login failed: فشل تسجيل الدخول: ' + error.message));
+                    .catch(error => showToast('Login failed: ' + error.message));
             });
 
             // Admin login
@@ -462,17 +471,13 @@
                 const password = document.getElementById('admin-password').value;
                 auth.signInWithEmailAndPassword(email, password)
                     .then((userCredential) => {
-                        db.ref('users/' + userCredential.user.uid).once('value').then((snapshot) => {
+                        const uid = userCredential.user.uid;
+                        db.ref('users/' + uid).once('value').then((snapshot) => {
                             if (snapshot.exists() && snapshot.val().role === 'admin') {
-                                const userData = {
-                                    name: snapshot.val().name || 'Admin',
-                                    role: 'admin'
-                                };
-                                localStorage.setItem('userData', JSON.stringify(userData));
                                 document.getElementById('admin-modal').classList.remove('show');
                                 setTimeout(() => {
                                     document.getElementById('admin-modal').classList.add('hidden');
-                                    window.location.href = 'admin.html';
+                                    window.location.href = `admin.html?uid=${uid}`;
                                 }, 300);
                                 showToast('Login successful');
                             } else {
@@ -493,6 +498,7 @@
                 const toggleButton = document.getElementById('dark-mode-toggle');
                 toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
                 toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+                localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
                 showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
             });
 
