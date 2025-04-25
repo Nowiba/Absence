@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISET Siliana Student</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 60px; /* Space for navbar */
+            background-color: #f5f5f5;
+            color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background-color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: headerFadeIn 0.5s ease-in;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        header h1 {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+
+        nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #2c3e50;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 12px;
+            padding: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+            border-radius: 6px;
+        }
+
+        .nav-btn:hover, .nav-btn:active {
+            transform: scale(1.1) rotate(2deg);
+            color: #3498db;
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .nav-btn span {
+            margin-top: 2px;
+            transition: transform 0.2s ease;
+        }
+
+        main {
+            padding: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .welcome {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .details-container {
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 2px solid #3498db;
+            width: 90%;
+            max-width: 360px;
+            margin: 20px auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        .details-container h2 {
+            margin-bottom: 24px;
+            color: #2c3e50;
+            font-size: 26px;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .details-container h2::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #3498db, #5dade2);
+        }
+
+        .details-container p {
+            margin: 10px 0;
+            font-size: 16px;
+            opacity: 0;
+            animation: inputFadeIn 0.3s ease forwards;
+        }
+
+        .details-container p:nth-child(2) { animation-delay: 0.1s; }
+        .details-container p:nth-child(3) { animation-delay: 0.2s; }
+
+        .classmates-list, .absence-list {
+            margin-top: 20px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            opacity: 0;
+            animation: inputFadeIn 0.3s ease forwards;
+            animation-delay: 0.3s;
+        }
+
+        .classmate-item, .absence-item {
+            padding: 10px;
+            border-bottom: 1px solid #d1d8e0;
+            font-size: 14px;
+        }
+
+        .classmate-item:last-child, .absence-item:last-child {
+            border-bottom: none;
+        }
+
+        .no-classmates, .no-absences {
+            color: #e74c3c;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .absence-container {
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 2px solid #3498db;
+            width: 90%;
+            max-width: 360px;
+            margin: 20px auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        .absence-container h2 {
+            margin-bottom: 24px;
+            color: #2c3e50;
+            font-size: 26px;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .absence-container h2::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #3498db, #5dade2);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px; /* Above navbar */
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 3000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode header {
+            background-color: #1f2a44;
+        }
+
+        body.dark-mode nav {
+            background-color: #1f2a44;
+        }
+
+        body.dark-mode .welcome {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .details-container, body.dark-mode .absence-container {
+            background-color: #2c3e50;
+            color: #e0e0e0;
+            border-color: #5dade2;
+        }
+
+        body.dark-mode .details-container h2, body.dark-mode .absence-container h2 {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .classmate-item, body.dark-mode .absence-item {
+            border-bottom: 1px solid #5dade2;
+        }
+
+        body.dark-mode .toast {
+            background: linear-gradient(90deg, #34495e, #2c3e50);
+            color: #e0e0e0;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes inputFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes headerFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 20px;
+            }
+            .nav-btn {
+                font-size: 10px;
+                padding: 3px;
+            }
+            .details-container, .absence-container {
+                width: 90%;
+                padding: 20px;
+            }
+            .details-container h2, .absence-container h2 {
+                font-size: 24px;
+            }
+            .details-container p {
+                font-size: 15px;
+            }
+            .welcome {
+                font-size: 18px;
+            }
+            .toast {
+                font-size: 13px;
+                padding: 10px 20px;
+            }
+            .classmate-item, .absence-item {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ISET Siliana Student</h1>
+    </header>
+    <nav>
+        <button class="nav-btn" id="home-btn"><span>🏠</span><span>Home</span></button>
+        <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
+    </nav>
+    <main>
+        <div class="welcome" id="welcome-message">Loading...</div>
+        <div class="details-container" id="details-container">
+            <h2>Your Details</h2>
+            <p id="class-info">Class: Loading...</p>
+            <p id="current-class">Now: Loading...</p>
+            <h2>Classmates</h2>
+            <div id="classmates-list" class="classmates-list"></div>
+        </div>
+        <div class="absence-container">
+            <h2>Your Absences</h2>
+            <div id="absence-list" class="absence-list"></div>
+        </div>
+    </main>
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Firebase Configuration
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAoXhEeGA22chByuIyxjWzmsFsQJSjqZJY",
+                    authDomain: "absence-iset-siliana.firebaseapp.com",
+                    databaseURL: "https://absence-iset-siliana-default-rtdb.europe-west1.firebasedatabase.app",
+                    projectId: "absence-iset-siliana",
+                    storageBucket: "absence-iset-siliana.firebasestorage.app",
+                    messagingSenderId: "519382535146",
+                    appId: "1:519382535146:web:94629d286b19b8c103c093",
+                    measurementId: "G-3Q9F4KP217"
+                };
+                firebase.initializeApp(firebaseConfig);
+                const db = firebase.database();
+
+                // Load dark mode preference from localStorage
+                if (localStorage.getItem('darkMode') === 'enabled') {
+                    document.body.classList.add('dark-mode');
+                    const toggleButton = document.getElementById('dark-mode-toggle');
+                    toggleButton.querySelector('span:first-child').textContent = '🌞';
+                    toggleButton.querySelector('span:last-child').textContent = 'Light Mode';
+                }
+
+                // Extract CIN from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const cin = urlParams.get('cin');
+                console.log('CIN from URL:', cin);
+
+                if (!cin || !/^\d{8}$/.test(cin)) {
+                    showToast('Invalid or missing CIN. Please log in again.');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
+                    return;
+                }
+
+                // Timetable for TI11
+                const timetable = {
+                    'Monday': [
+                        { start: '08:30', end: '10:00', class: 'Dev. Web et Multimédias 2', teacher: 'Mme. Wafa REJBI', room: 'T103' },
+                        { start: '10:10', end: '11:40', class: 'Technique d’expression 2', teacher: 'Imen Bouraoui', room: 'T108' },
+                        { start: '11:50', end: '13:20', class: 'UVT3 (2CN)', teacher: 'Mme. Hela DJEBALI', room: '' },
+                        { start: '13:20', end: '14:50', class: 'Algo & Programmation', teacher: 'Mme. Hela DJEBALI', room: 'T103' },
+                        { start: '14:50', end: '16:20', class: 'Algo & Programmation', teacher: 'Emna Mehrez', room: 'T103' },
+                        { start: '16:30', end: '18:00', class: 'Algo & Programmation', teacher: 'Emna Mehrez', room: '' }
+                    ],
+                    'Tuesday': [
+                        { start: '08:30', end: '10:00', class: 'A. Dev. Web et Multimédias 2 (Groupe 2)', teacher: 'Mme. Wafa REJBI', room: 'LT16' },
+                        { start: '10:10', end: '11:40', class: 'Option 2: Atelier Linux', teacher: 'Mme. Sana ZAKRAOUI', room: 'LT12' },
+                        { start: '11:50', end: '13:20', class: 'Sys. Exploitation', teacher: 'Mme. Hajer BACCOUCH', room: 'T102' },
+                        { start: '13:20', end: '14:50', class: 'Sys. Exploitation', teacher: 'Mme. Hajer BACCOUCH', room: 'T102' }
+                    ],
+                    'Wednesday': [
+                        { start: '08:30', end: '10:00', class: 'Fond Réseaux', teacher: 'Ouni Rahma', room: 'T105' },
+                        { start: '10:10', end: '11:40', class: 'Option 2: Atelier Linux (Groupe 1)', teacher: 'Zeineb Belakhdhar', room: 'LT13' },
+                        { start: '11:50', end: '13:20', class: 'A. Dev. Web et Multimédias 2', teacher: 'Mme. Wafa REJBI', room: '' }
+                    ],
+                    'Thursday': [
+                        { start: '08:30', end: '10:00', class: 'Fond Réseaux', teacher: 'Ouni Rahma', room: 'T103' },
+                        { start: '10:10', end: '11:40', class: 'English for Computing 2', teacher: 'Fadhel Fellah', room: 'T103' },
+                        { start: '13:20', end: '14:50', class: 'A. Système 1', teacher: 'Sondes Guirat', room: 'LT10' }
+                    ],
+                    'Friday': [
+                        { start: '08:30', end: '10:00', class: 'Préparation aux métiers', teacher: 'Kemla Naoui', room: '' },
+                        { start: '10:10', end: '11:40', class: 'Stat & Proba', teacher: 'Arwa Selmi', room: 'T103' },
+                        { start: '11:50', end: '13:20', class: 'Recherche Opérationnelle', teacher: 'Arwa Selmi', room: '' },
+                        { start: '13:20', end: '14:50', class: 'A. Programmation (Groupe 1)', teacher: 'Ksibi Jihen', room: 'LT10' },
+                        { start: '14:50', end: '16:20', class: 'A. Programmation (Groupe 2)', teacher: 'Ksibi Jihen', room: '' }
+                    ]
+                };
+
+                // Function to get current class based on time
+                function getCurrentClass() {
+                    const now = new Date();
+                    const day = now.toLocaleString('en-US', { weekday: 'long' });
+                    const hours = now.getHours().toString().padStart(2, '0');
+                    const minutes = now.getMinutes().toString().padStart(2, '0');
+                    const currentTime = `${hours}:${minutes}`;
+                    console.log(`Current day: ${day}, time: ${currentTime}`);
+
+                    if (!timetable[day]) {
+                        return 'No class scheduled right now';
+                    }
+
+                    const todaySchedule = timetable[day];
+                    for (const slot of todaySchedule) {
+                        if (currentTime >= slot.start && currentTime <= slot.end) {
+                            return `Now: ${slot.class} with ${slot.teacher}${slot.room ? ` in ${slot.room}` : ''}`;
+                        }
+                    }
+                    return 'No class scheduled right now';
+                }
+
+                // Fetch student details
+                db.ref('students/' + cin).once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const student = snapshot.val();
+                        const fullName = `${student.firstName} ${student.lastName}`;
+                        document.getElementById('welcome-message').textContent = `Welcome, ${fullName}`;
+                        document.getElementById('class-info').textContent = `Class: ${student.class || 'Not specified'}`;
+                        console.log(`Welcome message set to: Welcome, ${fullName}`);
+
+                        // Load current class
+                        document.getElementById('current-class').textContent = getCurrentClass();
+
+                        // Load absences
+                        const absenceList = document.getElementById('absence-list');
+                        const absences = student.absences || [];
+                        if (absences.length === 0) {
+                            absenceList.innerHTML = '<div class="no-absences">No absences found</div>';
+                        } else {
+                            absences.forEach((absence) => {
+                                const absenceItem = document.createElement('div');
+                                absenceItem.className = 'absence-item';
+                                absenceItem.textContent = `Date: ${absence.date}, Class: ${absence.class}`;
+                                absenceList.appendChild(absenceItem);
+                            });
+                        }
+
+                        // Fetch classmates
+                        db.ref('students').once('value').then((studentsSnapshot) => {
+                            const classmatesList = document.getElementById('classmates-list');
+                            const classmates = [];
+                            studentsSnapshot.forEach((childSnapshot) => {
+                                const otherStudent = childSnapshot.val();
+                                const otherCin = childSnapshot.key;
+                                if (otherCin !== cin && otherStudent.class === student.class) {
+                                    classmates.push(`${otherStudent.firstName} ${otherStudent.lastName}`);
+                                }
+                            });
+
+                            if (classmates.length === 0) {
+                                classmatesList.innerHTML = '<div class="no-classmates">No classmates found</div>';
+                            } else {
+                                classmates.forEach((name) => {
+                                    const classmateItem = document.createElement('div');
+                                    classmateItem.className = 'classmate-item';
+                                    classmateItem.textContent = name;
+                                    classmatesList.appendChild(classmateItem);
+                                });
+                            }
+                        }).catch(error => {
+                            console.error('Error fetching classmates:', error.message);
+                            showToast('Error loading classmates');
+                        });
+                    } else {
+                        showToast('Student not found');
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 3000);
+                    }
+                }).catch(error => {
+                    console.error('Error fetching student data:', error.message);
+                    showToast('Error loading student data');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
+                });
+
+                // Home button
+                document.getElementById('home-btn').addEventListener('click', () => {
+                    console.log('Home button clicked');
+                    window.location.href = 'index.html';
+                });
+
+                // Dark mode toggle
+                document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+                    console.log('Dark mode button clicked');
+                    document.body.classList.toggle('dark-mode');
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    const toggleButton = document.getElementById('dark-mode-toggle');
+                    toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
+                    toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+                    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+                    showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
+                });
+
+                // Toast notification function
+                function showToast(message) {
+                    const toast = document.getElementById('toast');
+                    toast.textContent = message;
+                    toast.classList.remove('hidden');
+                    toast.classList.add('show');
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                        toast.classList.add('hidden');
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Initialization error:', error);
+                alert('Error initializing page: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
