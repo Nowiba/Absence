@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ISET Siliana Student</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -205,6 +206,15 @@
             font-size: 20px;
             cursor: pointer;
             color: #e74c3c;
+            padding: 5px 10px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .sidebar .close-sidebar:hover {
+            background-color: #e74c3c;
+            color: white;
+            transform: rotate(90deg);
         }
 
         .modal {
@@ -269,22 +279,70 @@
             background-color: #5dade2;
         }
 
-        .schedule-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+        .schedule-day {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #d1d8e0;
         }
 
-        .schedule-table th, .schedule-table td {
-            border: 1px solid #d1d8e0;
-            padding: 6px;
-            text-align: center;
-            font-size: 12px;
+        .schedule-day:last-child {
+            border-bottom: none;
         }
 
-        .schedule-table th {
+        .schedule-day-header {
             background-color: #3498db;
             color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .schedule-day-header:hover {
+            background-color: #5dade2;
+        }
+
+        .schedule-day-header.active {
+            background-color: #5dade2;
+        }
+
+        .schedule-day-header .arrow {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .schedule-day-header.active .arrow {
+            transform: rotate(180deg);
+        }
+
+        .schedule-day-details {
+            display: none;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .schedule-day-details.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .schedule-slot {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+
+        .schedule-slot:last-child {
+            border-bottom: none;
+        }
+
+        .schedule-slot span {
+            font-weight: 700;
+            color: #2c3e50;
         }
 
         .classmate-item {
@@ -457,16 +515,24 @@
             border-color: #5dade2;
         }
 
-        body.dark-mode .classmate-item, body.dark-mode .absence-item {
+        body.dark-mode .classmate-item, body.dark-mode .absence-item, body.dark-mode .schedule-day, body.dark-mode .schedule-slot {
             border-bottom: 1px solid #5dade2;
         }
 
-        body.dark-mode .schedule-table th {
+        body.dark-mode .schedule-day-header {
             background-color: #5dade2;
         }
 
-        body.dark-mode .schedule-table td {
-            border-color: #5dade2;
+        body.dark-mode .schedule-day-header:hover, body.dark-mode .schedule-day-header.active {
+            background-color: #7fbfff;
+        }
+
+        body.dark-mode .schedule-day-details {
+            background-color: #34495e;
+        }
+
+        body.dark-mode .schedule-slot span {
+            color: #e0e0e0;
         }
 
         body.dark-mode .subject-details {
@@ -538,6 +604,13 @@
                 font-size: 11px;
                 padding: 5px 10px;
             }
+            .schedule-day-header {
+                padding: 8px;
+                font-size: 14px;
+            }
+            .schedule-slot {
+                font-size: 12px;
+            }
             .sidebar {
                 width: 220px;
             }
@@ -581,18 +654,7 @@
     <div id="schedule-modal" class="modal">
         <div class="modal-content">
             <h2>Schedule (IT11)</h2>
-            <table class="schedule-table">
-                <thead>
-                    <tr>
-                        <th>Day</th>
-                        <th>Time</th>
-                        <th>Subject</th>
-                        <th>Teacher</th>
-                        <th>Room</th>
-                    </tr>
-                </thead>
-                <tbody id="schedule-table-body"></tbody>
-            </table>
+            <div id="schedule-days"></div>
             <button id="close-schedule-btn">Close</button>
         </div>
     </div>
@@ -608,7 +670,7 @@
 
     <!-- Email Update Sidebar -->
     <div id="email-sidebar" class="sidebar">
-        <button class="close-sidebar" id="close-email-sidebar">✕</button>
+        <button class="close-sidebar" id="close-email-sidebar"><i class="fas fa-times"></i></button>
         <h2>Update Email</h2>
         <div class="email-update">
             <input type="email" id="email-input" placeholder="Enter your email">
@@ -734,19 +796,56 @@
                     return 'No class scheduled right now';
                 }
 
-                // Populate schedule modal
-                const scheduleTableBody = document.getElementById('schedule-table-body');
+                // Populate schedule modal with collapsible days
+                const scheduleDays = document.getElementById('schedule-days');
+                const currentDay = new Date().toLocaleString('en-US', { weekday: 'long' });
+
                 Object.keys(timetable).forEach(day => {
-                    timetable[day].forEach(slot => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${day}</td>
-                            <td>${slot.start}-${slot.end}</td>
-                            <td>${slot.class}</td>
-                            <td>${slot.teacher}</td>
-                            <td>${slot.room || '-'}</td>
-                        `;
-                        scheduleTableBody.appendChild(row);
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'schedule-day';
+                    dayDiv.innerHTML = `
+                        <div class="schedule-day-header" data-day="${day}">
+                            <span>${day}</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="schedule-day-details" id="details-${day}">
+                            ${timetable[day].map(slot => `
+                                <div class="schedule-slot">
+                                    <span>${slot.start} - ${slot.end}</span><br>
+                                    ${slot.class}<br>
+                                    Teacher: ${slot.teacher}<br>
+                                    Room: ${slot.room || 'N/A'}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    scheduleDays.appendChild(dayDiv);
+
+                    // Automatically expand the current day
+                    if (day === currentDay) {
+                        const header = dayDiv.querySelector('.schedule-day-header');
+                        const details = dayDiv.querySelector('.schedule-day-details');
+                        header.classList.add('active');
+                        details.classList.add('show');
+                    }
+                });
+
+                // Add click event to toggle schedule days
+                document.querySelectorAll('.schedule-day-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const day = header.dataset.day;
+                        const details = document.getElementById(`details-${day}`);
+                        const isVisible = details.classList.contains('show');
+
+                        // Collapse all other days
+                        document.querySelectorAll('.schedule-day-details').forEach(d => d.classList.remove('show'));
+                        document.querySelectorAll('.schedule-day-header').forEach(h => h.classList.remove('active'));
+
+                        // Toggle the clicked day
+                        if (!isVisible) {
+                            details.classList.add('show');
+                            header.classList.add('active');
+                        }
                     });
                 });
 
@@ -886,12 +985,20 @@
                 });
 
                 // Email sidebar toggle
+                const emailSidebar = document.getElementById('email-sidebar');
                 document.getElementById('email-btn').addEventListener('click', () => {
-                    document.getElementById('email-sidebar').classList.add('open');
+                    emailSidebar.classList.add('open');
                 });
 
                 document.getElementById('close-email-sidebar').addEventListener('click', () => {
-                    document.getElementById('email-sidebar').classList.remove('open');
+                    emailSidebar.classList.remove('open');
+                });
+
+                // Close sidebar when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!emailSidebar.contains(e.target) && !e.target.closest('#email-btn') && emailSidebar.classList.contains('open')) {
+                        emailSidebar.classList.remove('open');
+                    }
                 });
 
                 // Schedule modal toggle
