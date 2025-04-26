@@ -190,11 +190,49 @@
             background: linear-gradient(90deg, #3498db, #5dade2);
         }
 
+        .subject-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .subject-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .subject-btn:hover, .subject-btn.active {
+            background-color: #5dade2;
+            transform: scale(1.05);
+        }
+
+        .subject-details {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #d1d8e0;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .subject-details.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
         .toast {
             position: fixed;
-            bottom: 80px; /* Above navbar */
+            top: 80px; /* Below header */
             left: 50%;
-            transform: translateX(-50%) translateY(50px);
+            transform: translateX(-50%) translateY(-50px);
             background: linear-gradient(90deg, #2c3e50, #34495e);
             color: #ffffff;
             padding: 12px 24px;
@@ -237,11 +275,13 @@
         }
 
         body.dark-mode .details-container h2, body.dark-mode .absence-container h2 {
-            color: #e0e0e0;
+ aging: 10px;
+            border-bottom: 1px solid #5dade2;
         }
 
-        body.dark-mode .classmate-item, body.dark-mode .absence-item {
-            border-bottom: 1px solid #5dade2;
+        body.dark-mode .subject-details {
+            border-color: #5dade2;
+            background-color: #34495e;
         }
 
         body.dark-mode .toast {
@@ -257,6 +297,11 @@
 
         @keyframes slideUp {
             from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-10px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
 
@@ -299,6 +344,10 @@
             .classmate-item, .absence-item {
                 font-size: 13px;
             }
+            .subject-btn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
         }
     </style>
 </head>
@@ -321,7 +370,8 @@
         </div>
         <div class="absence-container">
             <h2>Your Absences</h2>
-            <div id="absence-list" class="absence-list"></div>
+            <div id="subject-filter" class="subject-filter"></div>
+            <div id="absence-details"></div>
         </div>
     </main>
     <div id="toast" class="toast hidden"></div>
@@ -402,6 +452,24 @@
                     ]
                 };
 
+                // List of subjects for mapping absences (based on timetable)
+                const subjects = [
+                    'Dev. Web et Multimédias 2',
+                    'A. Dev. Web et Multimédias 2',
+                    'Technique d’expression 2',
+                    'UVT3 (2CN)',
+                    'Algo & Programmation',
+                    'Option 2: Atelier Linux',
+                    'Sys. Exploitation',
+                    'Fond Réseaux',
+                    'English for Computing 2',
+                    'A. Système 1',
+                    'Préparation aux métiers',
+                    'Stat & Proba',
+                    'Recherche Opérationnelle',
+                    'A. Programmation'
+                ];
+
                 // Function to get current class based on time
                 function getCurrentClass() {
                     const now = new Date();
@@ -436,19 +504,59 @@
                         // Load current class
                         document.getElementById('current-class').textContent = getCurrentClass();
 
-                        // Load absences
-                        const absenceList = document.getElementById('absence-list');
+                        // Load absences and populate subject filter
+                        const subjectFilter = document.getElementById('subject-filter');
+                        const absenceDetails = document.getElementById('absence-details');
                         const absences = student.absences || [];
-                        if (absences.length === 0) {
-                            absenceList.innerHTML = '<div class="no-absences">No absences found</div>';
-                        } else {
-                            absences.forEach((absence) => {
-                                const absenceItem = document.createElement('div');
-                                absenceItem.className = 'absence-item';
-                                absenceItem.textContent = `Date: ${absence.date}, Class: ${absence.class}`;
-                                absenceList.appendChild(absenceItem);
+
+                        // Map absences to subjects
+                        const absenceBySubject = {};
+                        subjects.forEach(subject => absenceBySubject[subject] = []);
+
+                        absences.forEach(absence => {
+                            const subject = absence.subject || 'Unknown Subject'; // Fallback if subject not recorded
+                            if (subjects.includes(subject) && absence.status === 'absent') {
+                                absenceBySubject[subject].push(absence);
+                            }
+                        });
+
+                        // Create subject buttons
+                        subjects.forEach(subject => {
+                            const button = document.createElement('button');
+                            button.className = 'subject-btn';
+                            button.textContent = subject;
+                            button.dataset.subject = subject;
+                            subjectFilter.appendChild(button);
+
+                            const detailsDiv = document.createElement('div');
+                            detailsDiv.className = 'subject-details';
+                            detailsDiv.id = `details-${subject.replace(/\s+/g, '-')}`;
+                            const absenceList = absenceBySubject[subject];
+                            if (absenceList.length === 0) {
+                                detailsDiv.innerHTML = `<div class="no-absences">No absences for ${subject}</div>`;
+                            } else {
+                                detailsDiv.innerHTML = `<div>Total Absences: ${absenceList.length}</div>`;
+                                absenceList.forEach(absence => {
+                                    const absenceItem = document.createElement('div');
+                                    absenceItem.className = 'absence-item';
+                                    absenceItem.textContent = `Date: ${absence.date}`;
+                                    detailsDiv.appendChild(absenceItem);
+                                });
+                            }
+                            absenceDetails.appendChild(detailsDiv);
+
+                            // Toggle details on click
+                            button.addEventListener('click', () => {
+                                const details = document.getElementById(`details-${subject.replace(/\s+/g, '-')}`);
+                                const isVisible = details.classList.contains('show');
+                                document.querySelectorAll('.subject-details').forEach(d => d.classList.remove('show'));
+                                document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+                                if (!isVisible) {
+                                    details.classList.add('show');
+                                    button.classList.add('active');
+                                }
                             });
-                        }
+                        });
 
                         // Fetch classmates
                         db.ref('students').once('value').then((studentsSnapshot) => {
