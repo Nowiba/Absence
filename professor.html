@@ -162,6 +162,11 @@
             background-color: #c0392b;
         }
 
+        .action-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
         .collective-btn {
             background-color: #e74c3c;
             display: block;
@@ -565,11 +570,17 @@
                         return;
                     }
 
+                    // Debug: Log the UID to ensure it matches the database
+                    console.log('Logged-in User UID:', user.uid);
+                    console.log('User Email:', user.email);
+
                     // Load professor data using UID
                     db.ref('professors/' + user.uid).once('value').then((snapshot) => {
                         professorData = snapshot.val();
+                        console.log('Professor Data:', professorData); // Debug: Log the fetched data
+
                         if (!professorData || !professorData.schedule || !professorData.classes) {
-                            showToast('Professor data not found');
+                            showToast('Professor data not found. Please check your UID in the database.');
                             return;
                         }
 
@@ -631,11 +642,11 @@
                                 showToast('No students found for IT11');
                             }
                         }).catch(error => {
-                            showToast('Error loading students');
+                            showToast('Error loading students: ' + error.message);
                             console.error(error);
                         });
                     }).catch(error => {
-                        showToast('Error loading professor data');
+                        showToast('Error loading professor data: ' + error.message);
                         console.error(error);
                     });
                 });
@@ -684,8 +695,12 @@
                         studentItem.className = 'student-item';
                         studentItem.dataset.cin = student.cin;
 
-                        // Format CIN: First 5 digits, last 3 as ***
-                        const formattedCIN = student.cin.substring(0, 5) + '***';
+                        // Format CIN: Ensure it's at least 8 characters, pad with leading zeros if needed
+                        let cin = student.cin;
+                        while (cin.length < 8) {
+                            cin = '0' + cin;
+                        }
+                        const formattedCIN = cin.substring(0, 5) + '***';
 
                         // Determine current status
                         const today = new Date().toISOString().split('T')[0];
@@ -741,9 +756,12 @@
                             studentItem.classList.remove('present', 'absent', 'not-marked');
                             studentItem.classList.add(status);
                         }).catch(error => {
-                            showToast('Error marking student');
+                            showToast('Error marking student: ' + error.message);
                             console.error(error);
                         });
+                    }).catch(error => {
+                        showToast('Error fetching student data: ' + error.message);
+                        console.error(error);
                     });
                 }
 
@@ -781,7 +799,7 @@
                             item.classList.add('absent');
                         });
                     }).catch(error => {
-                        showToast('Error marking collective absent');
+                        showToast('Error marking collective absent: ' + error.message);
                         console.error(error);
                     });
                 });
@@ -804,7 +822,7 @@
                             student.absences = previousAbsences;
                             renderStudents();
                         }).catch(error => {
-                            showToast('Error undoing action');
+                            showToast('Error undoing action: ' + error.message);
                             console.error(error);
                         });
                     } else if (lastAction.type === 'collective') {
@@ -820,7 +838,7 @@
                             undoBtn.style.display = 'none';
                             renderStudents();
                         }).catch(error => {
-                            showToast('Error undoing action');
+                            showToast('Error undoing action: ' + error.message);
                             console.error(error);
                         });
                     }
@@ -839,7 +857,7 @@
                         }
                     });
                     db.ref().update(updates).catch(error => {
-                        showToast('Error marking unmarked students');
+                        showToast('Error marking unmarked students: ' + error.message);
                         console.error(error);
                     });
                 }
@@ -889,7 +907,7 @@
                 }
             } catch (error) {
                 console.error('Initialization error:', error);
-                alert('Error initializing page: ' + error.message);
+                showToast('Error initializing page: ' + error.message);
             }
         });
     </script>
