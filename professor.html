@@ -127,7 +127,7 @@
             transition: background 0.3s ease;
         }
 
-        .modal-content button, .action-btn, .collective-btn, .undo-btn {
+        .modal-content button, .action-btn, .collective-btn, .undo-btn, .upload-btn {
             padding: 14px 24px;
             margin: 10px 5px;
             background-color: #3498db;
@@ -140,10 +140,16 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .modal-content button:hover, .action-btn:hover, .collective-btn:hover, .undo-btn:hover {
+        .modal-content button:hover, .action-btn:hover, .collective-btn:hover, .undo-btn:hover, .upload-btn:hover {
             background-color: #5dade2;
             transform: scale(1.03);
             box-shadow: 0 3px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .modal-content input[type="file"] {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #333;
         }
 
         .action-btn.present {
@@ -383,6 +389,10 @@
             background: linear-gradient(90deg, #5dade2, #7fbfff);
         }
 
+        body.dark-mode .modal-content input[type="file"] {
+            color: #e0e0e0;
+        }
+
         body.dark-mode .student-item {
             border-bottom: 1px solid #5dade2;
         }
@@ -449,7 +459,7 @@
             .modal-content h2, .student-list h2, .schedule-table h2 {
                 font-size: 24px;
             }
-            .modal-content select, .modal-content button, .action-btn, .collective-btn, .undo-btn {
+            .modal-content select, .modal-content button, .action-btn, .collective-btn, .undo-btn, .upload-btn {
                 font-size: 15px;
                 padding: 12px;
             }
@@ -473,6 +483,7 @@
     </header>
     <nav>
         <button class="nav-btn" id="home-btn"><span>🏠</span><span>Home</span></button>
+        <button class="nav-btn" id="share-files-btn"><span>📤</span><span>Share Files</span></button>
         <button class="nav-btn" id="logout-btn"><span>🚪</span><span>Logout</span></button>
         <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
@@ -483,6 +494,16 @@
                 <h2>Are you sure?</h2>
                 <button id="confirm-yes">Yes</button>
                 <button id="confirm-no">No</button>
+            </div>
+        </div>
+
+        <!-- File Upload Modal -->
+        <div id="file-upload-modal" class="modal">
+            <div class="modal-content">
+                <h2>Share a File</h2>
+                <input type="file" id="file-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt">
+                <button class="upload-btn" id="upload-file-btn">Upload</button>
+                <button id="close-file-modal">Close</button>
             </div>
         </div>
 
@@ -546,6 +567,10 @@
                 const undoBtn = document.getElementById('undo-btn');
                 const markingTimer = document.getElementById('marking-timer');
                 const scheduleBody = document.getElementById('schedule-body');
+                const fileUploadModal = document.getElementById('file-upload-modal');
+                const fileInput = document.getElementById('file-input');
+                const uploadFileBtn = document.getElementById('upload-file-btn');
+                const closeFileModalBtn = document.getElementById('close-file-modal');
 
                 let studentsData = [];
                 let selectedStudents = [];
@@ -570,7 +595,6 @@
                         return;
                     }
 
-                    // Debug: Log the email
                     console.log('Logged-in User Email:', user.email);
                     showToast('Logged-in Email: ' + user.email);
 
@@ -580,7 +604,6 @@
                         let professorKey = null;
                         let databaseEmails = [];
 
-                        // Collect all emails in the database for debugging
                         snapshot.forEach((childSnapshot) => {
                             const professor = childSnapshot.val();
                             databaseEmails.push(professor.email);
@@ -591,7 +614,6 @@
                             }
                         });
 
-                        // Debug: Show all emails in the database
                         console.log('Database Emails:', databaseEmails);
                         showToast('Database Emails: ' + databaseEmails.join(', '));
 
@@ -600,7 +622,7 @@
                             return;
                         }
 
-                        console.log('Professor Data:', professorData); // Debug: Log the fetched data
+                        console.log('Professor Data:', professorData);
 
                         // Display the professor's schedule
                         displayProfessorSchedule(professorData.schedule);
@@ -622,9 +644,8 @@
                             const [endHour, endMinute] = schedule.end.split(':').map(Number);
                             const startTime = startHour * 60 + startMinute;
                             const endTime = endHour * 60 + endMinute;
-                            const endTimePlus30 = endTime + 30; // 30 minutes after end
+                            const endTimePlus30 = endTime + 30;
 
-                            // Set marking end time for timer
                             const endDateTime = new Date(today);
                             endDateTime.setHours(endHour, endMinute + 30, 0, 0);
                             markingEndTime = endDateTime.getTime();
@@ -713,14 +734,12 @@
                         studentItem.className = 'student-item';
                         studentItem.dataset.cin = student.cin;
 
-                        // Format CIN: Ensure it's at least 8 characters, pad with leading zeros if needed
                         let cin = student.cin;
                         while (cin.length < 8) {
                             cin = '0' + cin;
                         }
                         const formattedCIN = cin.substring(0, 5) + '***';
 
-                        // Determine current status
                         const today = new Date().toISOString().split('T')[0];
                         const absences = student.absences || [];
                         const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
@@ -740,7 +759,6 @@
                         studentsDiv.appendChild(studentItem);
                     });
 
-                    // Add event listeners to buttons
                     document.querySelectorAll('.action-btn').forEach(btn => {
                         btn.addEventListener('click', (e) => {
                             if (!canMark) {
@@ -762,7 +780,6 @@
                         const student = snapshot.val();
                         const absences = student.absences || [];
 
-                        // Store previous state for undo
                         lastAction = { type: 'single', cin, previousAbsences: [...absences] };
                         undoBtn.style.display = 'block';
 
@@ -824,6 +841,68 @@
 
                 confirmNo.addEventListener('click', () => {
                     confirmModal.style.display = 'none';
+                });
+
+                // File Upload Modal Toggle
+                document.getElementById('share-files-btn').addEventListener('click', () => {
+                    fileUploadModal.style.display = 'flex';
+                });
+
+                closeFileModalBtn.addEventListener('click', () => {
+                    fileUploadModal.style.display = 'none';
+                    fileInput.value = ''; // Reset file input
+                });
+
+                // Close file upload modal when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!fileUploadModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#share-files-btn') && fileUploadModal.style.display === 'flex') {
+                        fileUploadModal.style.display = 'none';
+                        fileInput.value = '';
+                    }
+                });
+
+                // Handle File Upload
+                uploadFileBtn.addEventListener('click', () => {
+                    const file = fileInput.files[0];
+                    if (!file) {
+                        showToast('Please select a file');
+                        return;
+                    }
+
+                    // Check file size (limit to 5 MB to stay safe under 10 MB Base64 limit)
+                    const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
+                    if (file.size > maxSize) {
+                        showToast('File too large. Please upload a file smaller than 5 MB.');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const base64String = e.target.result; // Base64 string
+                        const fileName = file.name;
+                        const fileType = file.type || 'application/octet-stream';
+                        const uploadDate = new Date().toISOString();
+
+                        // Store in Firebase Realtime Database
+                        const newFileRef = db.ref('sharedFiles').push();
+                        newFileRef.set({
+                            fileName: fileName,
+                            fileType: fileType,
+                            base64: base64String,
+                            uploadDate: uploadDate
+                        }).then(() => {
+                            showToast('File uploaded successfully');
+                            fileUploadModal.style.display = 'none';
+                            fileInput.value = '';
+                        }).catch(error => {
+                            showToast('Error uploading file: ' + error.message);
+                            console.error(error);
+                        });
+                    };
+                    reader.onerror = () => {
+                        showToast('Error reading file');
+                    };
+                    reader.readAsDataURL(file); // Convert file to Base64
                 });
 
                 // Undo
