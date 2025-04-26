@@ -243,7 +243,19 @@
             align-items: center;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .student-item.present {
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+
+        .student-item.absent {
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+
+        .student-item.not-marked {
+            background-color: rgba(149, 165, 166, 0.1);
         }
 
         .student-item:nth-child(2) { animation-delay: 0.1s; }
@@ -263,11 +275,71 @@
             gap: 10px;
         }
 
+        .timer {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 16px;
+            color: #e74c3c;
+            font-weight: 700;
+        }
+
+        .schedule-table {
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 2px solid #3498db;
+            width: 90%;
+            max-width: 360px;
+            margin: 20px auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease;
+            display: none;
+        }
+
+        .schedule-table h2 {
+            margin-bottom: 24px;
+            color: #2c3e50;
+            font-size: 26px;
+            font-weight: 700;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .schedule-table h2::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #3498db, #5dade2);
+            transition: background 0.3s ease;
+        }
+
+        .schedule-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #d1d8e0;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .schedule-table th {
+            background-color: #3498db;
+            color: #ffffff;
+        }
+
         .toast {
             position: fixed;
-            bottom: 80px;
+            top: 80px;
+            bottom: unset;
             left: 50%;
-            transform: translateX(-50%) translateY(50px);
+            transform: translateX(-50%) translateY(-50px);
             background: linear-gradient(90deg, #2c3e50, #34495e);
             color: #ffffff;
             padding: 12px 24px;
@@ -312,17 +384,17 @@
             background-color: rgba(93, 173, 226, 0.1);
         }
 
-        body.dark-mode .modal-content, body.dark-mode .student-list {
+        body.dark-mode .modal-content, body.dark-mode .student-list, body.dark-mode .schedule-table {
             background-color: #2c3e50;
             color: #e0e0e0;
             border-color: #5dade2;
         }
 
-        body.dark-mode .modal-content h2, body.dark-mode .student-list h2 {
+        body.dark-mode .modal-content h2, body.dark-mode .student-list h2, body.dark-mode .schedule-table h2 {
             color: #e0e0e0;
         }
 
-        body.dark-mode .modal-content h2::after, body.dark-mode .student-list h2::after {
+        body.dark-mode .modal-content h2::after, body.dark-mode .student-list h2::after, body.dark-mode .schedule-table h2::after {
             background: linear-gradient(90deg, #5dade2, #7fbfff);
         }
 
@@ -339,6 +411,26 @@
 
         body.dark-mode .student-item {
             border-bottom: 1px solid #5dade2;
+        }
+
+        body.dark-mode .student-item.present {
+            background-color: rgba(46, 204, 113, 0.2);
+        }
+
+        body.dark-mode .student-item.absent {
+            background-color: rgba(231, 76, 60, 0.2);
+        }
+
+        body.dark-mode .student-item.not-marked {
+            background-color: rgba(149, 165, 166, 0.2);
+        }
+
+        body.dark-mode .schedule-table th {
+            background-color: #5dade2;
+        }
+
+        body.dark-mode .schedule-table td {
+            border-color: #5dade2;
         }
 
         body.dark-mode .toast {
@@ -376,11 +468,11 @@
                 font-size: 10px;
                 padding: 3px;
             }
-            .modal-content, .student-list {
+            .modal-content, .student-list, .schedule-table {
                 width: 90%;
                 padding: 20px;
             }
-            .modal-content h2, .student-list h2 {
+            .modal-content h2, .student-list h2, .schedule-table h2 {
                 font-size: 24px;
             }
             .modal-content select, .modal-content button, .action-btn, .collective-btn, .undo-btn {
@@ -389,6 +481,10 @@
             }
             .student-item {
                 font-size: 13px;
+            }
+            .schedule-table th, .schedule-table td {
+                font-size: 12px;
+                padding: 6px;
             }
             .toast {
                 font-size: 13px;
@@ -403,6 +499,7 @@
     </header>
     <nav>
         <button class="nav-btn" id="home-btn"><span>🏠</span><span>Home</span></button>
+        <button class="nav-btn" id="logout-btn"><span>🚪</span><span>Logout</span></button>
         <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
     <main>
@@ -428,12 +525,113 @@
         <div id="student-list" class="student-list">
             <h2>Students in <span id="selected-class"></span></h2>
             <div>Total Students: <span id="total-students">0</span></div>
+            <div class="timer" id="marking-timer">Marking Window: Loading...</div>
             <div id="students"></div>
         </div>
 
         <!-- Collective Absent and Undo Buttons -->
         <button id="collective-absent" class="collective-btn">Collective Absent</button>
-        <button id="undo-btn" class="undo-btn">Undo</button>
+        <button id="undo-btn" class="undo-btn">Undo Last Action</button>
+
+        <!-- Schedule Table for IT11 -->
+        <div id="schedule-table" class="schedule-table">
+            <h2>Class Schedule (IT11)</h2>
+            <table>
+                <tr>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Subject</th>
+                    <th>Teacher</th>
+                </tr>
+                <!-- Monday -->
+                <tr>
+                    <td rowspan="2">Monday</td>
+                    <td>08:30-10:00</td>
+                    <td>Dev. Web et Multimédias 2</td>
+                    <td>Mme. Wafa REJBI</td>
+                </tr>
+                <tr>
+                    <td>10:10-11:40</td>
+                    <td>Technique d'expression 2</td>
+                    <td>Imen Bouraoui</td>
+                </tr>
+                <!-- Tuesday -->
+                <tr>
+                    <td rowspan="3">Tuesday</td>
+                    <td>08:30-10:00</td>
+                    <td>Dev. Web et Multimédias 2</td>
+                    <td>Mme. Wafa REJBI</td>
+                </tr>
+                <tr>
+                    <td>11:50-13:20</td>
+                    <td>Sys. Exploitation</td>
+                    <td>Mme. Hajer BACCOUCH</td>
+                </tr>
+                <tr>
+                    <td>13:20-14:50</td>
+                    <td>Sys. Exploitation</td>
+                    <td>Mme. Hajer BACCOUCH</td>
+                </tr>
+                <!-- Wednesday -->
+                <tr>
+                    <td rowspan="2">Wednesday</td>
+                    <td>08:30-10:00</td>
+                    <td>Fond Réseaux</td>
+                    <td>Ouni Rahma</td>
+                </tr>
+                <tr>
+                    <td>10:10-11:40</td>
+                    <td>Dev. Web et Multimédias 2</td>
+                    <td>Mme. Wafa REJBI</td>
+                </tr>
+                <!-- Thursday -->
+                <tr>
+                    <td rowspan="2">Thursday</td>
+                    <td>08:30-10:00</td>
+                    <td>Fond Réseaux</td>
+                    <td>Ouni Rahma</td>
+                </tr>
+                <tr>
+                    <td>10:10-11:40</td>
+                    <td>English for computing 2</td>
+                    <td>Fadhel Ferjani</td>
+                </tr>
+                <!-- Friday -->
+                <tr>
+                    <td rowspan="4">Friday</td>
+                    <td>08:30-10:00</td>
+                    <td>Préparation aux métiers</td>
+                    <td>Kemla Naoui</td>
+                </tr>
+                <tr>
+                    <td>10:10-11:40</td>
+                    <td>Stat & Proba</td>
+                    <td>Arwa Selmi</td>
+                </tr>
+                <tr>
+                    <td>11:50-13:20</td>
+                    <td>Rech. Opérationnelle</td>
+                    <td>Arwa Selmi</td>
+                </tr>
+                <tr>
+                    <td>13:20-14:50</td>
+                    <td>Système 1</td>
+                    <td>Sondes Guirat</td>
+                </tr>
+                <!-- Saturday -->
+                <tr>
+                    <td rowspan="2">Saturday</td>
+                    <td>13:20-14:50</td>
+                    <td>Algo & Programmation</td>
+                    <td>Emma Mehrez</td>
+                </tr>
+                <tr>
+                    <td>14:50-16:20</td>
+                    <td>Algo & Programmation</td>
+                    <td>Emma Mehrez</td>
+                </tr>
+            </table>
+        </div>
     </main>
     <div id="toast" class="toast hidden"></div>
 
@@ -472,11 +670,14 @@
                 const confirmYes = document.getElementById('confirm-yes');
                 const confirmNo = document.getElementById('confirm-no');
                 const undoBtn = document.getElementById('undo-btn');
+                const markingTimer = document.getElementById('marking-timer');
+                const scheduleTable = document.getElementById('schedule-table');
 
                 let studentsData = [];
                 let selectedStudents = [];
                 let lastAction = null;
                 let canMark = false;
+                let markingEndTime = null;
 
                 // Load dark mode preference
                 if (localStorage.getItem('darkMode') === 'enabled') {
@@ -518,10 +719,17 @@
                         const endTime = endHour * 60 + endMinute;
                         const endTimePlus30 = endTime + 30; // 30 minutes after end
 
+                        // Set marking end time for timer
+                        const endDateTime = new Date(today);
+                        endDateTime.setHours(endHour, endMinute + 30, 0, 0);
+                        markingEndTime = endDateTime.getTime();
+
                         if (currentTime >= startTime && currentTime <= endTimePlus30) {
                             canMark = true;
+                            startMarkingTimer();
                         } else {
                             showToast('Marking window closed');
+                            markingTimer.textContent = 'Marking Window: Closed';
                             markUnmarkedStudents(schedule.class);
                         }
                     }).catch(error => {
@@ -553,6 +761,28 @@
                     });
                 });
 
+                // Start marking timer
+                function startMarkingTimer() {
+                    const updateTimer = () => {
+                        const now = new Date().getTime();
+                        const timeLeft = markingEndTime - now;
+
+                        if (timeLeft <= 0) {
+                            canMark = false;
+                            markingTimer.textContent = 'Marking Window: Closed';
+                            collectiveAbsentBtn.style.display = 'none';
+                            markUnmarkedStudents(selectedClassSpan.textContent);
+                            return;
+                        }
+
+                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                        markingTimer.textContent = `Marking Window: ${minutes}m ${seconds}s`;
+                        setTimeout(updateTimer, 1000);
+                    };
+                    updateTimer();
+                }
+
                 // Class selection
                 classSubmit.addEventListener('click', () => {
                     const selectedClass = classSelect.value;
@@ -568,6 +798,13 @@
                     classModal.style.display = 'none';
                     studentList.style.display = 'block';
                     collectiveAbsentBtn.style.display = canMark ? 'block' : 'none';
+
+                    // Show schedule table if IT11 is selected
+                    if (selectedClass === 'IT11') {
+                        scheduleTable.style.display = 'block';
+                    } else {
+                        scheduleTable.style.display = 'none';
+                    }
                 });
 
                 // Render students
@@ -576,6 +813,15 @@
                     selectedStudents.forEach(student => {
                         const studentItem = document.createElement('div');
                         studentItem.className = 'student-item';
+                        studentItem.dataset.cin = student.cin;
+
+                        // Determine current status
+                        const today = new Date('2025-04-26').toISOString().split('T')[0];
+                        const absences = student.absences || [];
+                        const todayAbsence = absences.find(a => a.date === today && a.class === selectedClassSpan.textContent);
+                        const statusClass = todayAbsence ? (todayAbsence.status === 'present' ? 'present' : todayAbsence.status === 'absent' ? 'absent' : 'not-marked') : 'not-marked';
+                        studentItem.classList.add(statusClass);
+
                         studentItem.innerHTML = `
                             <div class="student-info">
                                 CIN: ${student.cin.slice(0, 5)}****<br>
@@ -619,6 +865,10 @@
                         absences.push({ date: today, class: selectedClassSpan.textContent, status, weight });
                         studentRef.update({ absences }).then(() => {
                             showToast(`Marked as ${status}`);
+                            // Update student item status
+                            const studentItem = document.querySelector(`.student-item[data-cin="${cin}"]`);
+                            studentItem.classList.remove('present', 'absent', 'not-marked');
+                            studentItem.classList.add(status);
                         }).catch(error => {
                             showToast('Error marking student');
                             console.error(error);
@@ -656,6 +906,11 @@
                     db.ref().update(updates).then(() => {
                         showToast('All students marked as absent (*2)');
                         confirmModal.style.display = 'none';
+                        // Update all student items
+                        document.querySelectorAll('.student-item').forEach(item => {
+                            item.classList.remove('present', 'absent', 'not-marked');
+                            item.classList.add('absent');
+                        });
                     }).catch(error => {
                         showToast('Error marking collective absent');
                         console.error(error);
@@ -676,6 +931,10 @@
                             showToast('Undo successful');
                             lastAction = null;
                             undoBtn.style.display = 'none';
+                            // Re-render students to reflect the change
+                            const student = selectedStudents.find(s => s.cin === cin);
+                            student.absences = previousAbsences;
+                            renderStudents();
                         }).catch(error => {
                             showToast('Error undoing action');
                             console.error(error);
@@ -684,11 +943,14 @@
                         const updates = {};
                         for (const cin in lastAction.previousStates) {
                             updates['students/' + cin + '/absences'] = lastAction.previousStates[cin];
+                            const student = selectedStudents.find(s => s.cin === cin);
+                            if (student) student.absences = lastAction.previousStates[cin];
                         }
                         db.ref().update(updates).then(() => {
                             showToast('Undo successful');
                             lastAction = null;
                             undoBtn.style.display = 'none';
+                            renderStudents();
                         }).catch(error => {
                             showToast('Error undoing action');
                             console.error(error);
@@ -717,6 +979,17 @@
                 // Home button
                 document.getElementById('home-btn').addEventListener('click', () => {
                     window.location.href = 'index.html';
+                });
+
+                // Logout button
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    auth.signOut().then(() => {
+                        showToast('Logged out successfully');
+                        window.location.href = 'index.html';
+                    }).catch(error => {
+                        showToast('Error logging out: ' + error.message);
+                        console.error(error);
+                    });
                 });
 
                 // Dark mode toggle
