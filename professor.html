@@ -978,7 +978,12 @@
 
                 // Home button
                 document.getElementById('home-btn').addEventListener('click', () => {
-                    window.location.href = 'index.html';
+                    auth.signOut().then(() => {
+                        window.location.href = 'index.html';
+                    }).catch(error => {
+                        showToast('Error logging out: ' + error.message);
+                        console.error(error);
+                    });
                 });
 
                 // Logout button
