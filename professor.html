@@ -570,19 +570,28 @@
                         return;
                     }
 
-                    // Debug: Log the UID to ensure it matches the database
-                    console.log('Logged-in User UID:', user.uid);
-                    console.log('User Email:', user.email);
+                    // Debug: Log the email
+                    console.log('Logged-in User Email:', user.email);
 
-                    // Load professor data using UID
-                    db.ref('professors/' + user.uid).once('value').then((snapshot) => {
-                        professorData = snapshot.val();
-                        console.log('Professor Data:', professorData); // Debug: Log the fetched data
+                    // Load professor data using email
+                    db.ref('professors').once('value').then((snapshot) => {
+                        let professorFound = false;
+                        let professorKey = null;
+                        snapshot.forEach((childSnapshot) => {
+                            const professor = childSnapshot.val();
+                            if (professor.email === user.email) {
+                                professorData = professor;
+                                professorKey = childSnapshot.key;
+                                professorFound = true;
+                            }
+                        });
 
-                        if (!professorData || !professorData.schedule || !professorData.classes) {
-                            showToast('Professor data not found. Please check your UID in the database.');
+                        if (!professorFound || !professorData || !professorData.schedule || !professorData.classes) {
+                            showToast('Professor data not found. Please check your email in the database.');
                             return;
                         }
+
+                        console.log('Professor Data:', professorData); // Debug: Log the fetched data
 
                         // Display the professor's schedule
                         displayProfessorSchedule(professorData.schedule);
