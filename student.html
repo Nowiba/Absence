@@ -455,6 +455,67 @@
             padding: 10px;
         }
 
+        .shared-files {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #3498db;
+            width: 90%;
+            max-width: 340px;
+            margin: 15px auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        .shared-files h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 22px;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .shared-files h2::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, #3498db, #5dade2);
+        }
+
+        .file-item {
+            padding: 8px;
+            border-bottom: 1px solid #d1d8e0;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item a {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .file-item a:hover {
+            color: #5dade2;
+        }
+
+        .no-files {
+            color: #e74c3c;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+        }
+
         .toast {
             position: fixed;
             top: 60px;
@@ -495,17 +556,17 @@
             color: #e0e0e0;
         }
 
-        body.dark-mode .details-container, body.dark-mode .absence-container, body.dark-mode .modal-content, body.dark-mode .sidebar {
+        body.dark-mode .details-container, body.dark-mode .absence-container, body.dark-mode .modal-content, body.dark-mode .sidebar, body.dark-mode .shared-files {
             background-color: #2c3e50;
             color: #e0e0e0;
             border-color: #5dade2;
         }
 
-        body.dark-mode .details-container h2, body.dark-mode .absence-container h2, body.dark-mode .modal-content h2, body.dark-mode .sidebar h2 {
+        body.dark-mode .details-container h2, body.dark-mode .absence-container h2, body.dark-mode .modal-content h2, body.dark-mode .sidebar h2, body.dark-mode .shared-files h2 {
             color: #e0e0e0;
         }
 
-        body.dark-mode .details-container h2::after, body.dark-mode .absence-container h2::after, body.dark-mode .modal-content h2::after, body.dark-mode .sidebar h2::after {
+        body.dark-mode .details-container h2::after, body.dark-mode .absence-container h2::after, body.dark-mode .modal-content h2::after, body.dark-mode .sidebar h2::after, body.dark-mode .shared-files h2::after {
             background: linear-gradient(90deg, #5dade2, #7fbfff);
         }
 
@@ -515,7 +576,7 @@
             border-color: #5dade2;
         }
 
-        body.dark-mode .classmate-item, body.dark-mode .absence-item, body.dark-mode .schedule-day, body.dark-mode .schedule-slot {
+        body.dark-mode .classmate-item, body.dark-mode .absence-item, body.dark-mode .schedule-day, body.dark-mode .schedule-slot, body.dark-mode .file-item {
             border-bottom: 1px solid #5dade2;
         }
 
@@ -538,6 +599,14 @@
         body.dark-mode .subject-details {
             border-color: #5dade2;
             background-color: #34495e;
+        }
+
+        body.dark-mode .file-item a {
+            color: #5dade2;
+        }
+
+        body.dark-mode .file-item a:hover {
+            color: #7fbfff;
         }
 
         body.dark-mode .toast {
@@ -580,11 +649,11 @@
                 font-size: 9px;
                 padding: 3px;
             }
-            .details-container, .absence-container, .modal-content {
+            .details-container, .absence-container, .modal-content, .shared-files {
                 width: 90%;
                 padding: 12px;
             }
-            .details-container h2, .absence-container h2, .modal-content h2 {
+            .details-container h2, .absence-container h2, .modal-content h2, .shared-files h2 {
                 font-size: 20px;
             }
             .details-container p, .modal-content p {
@@ -597,7 +666,7 @@
                 font-size: 12px;
                 padding: 8px 16px;
             }
-            .classmate-item, .absence-item {
+            .classmate-item, .absence-item, .file-item {
                 font-size: 12px;
             }
             .subject-btn {
@@ -647,6 +716,10 @@
             <div class="total-absences" id="total-absences">Total Absences: 0</div>
             <div id="subject-filter" class="subject-filter"></div>
             <div id="absence-details"></div>
+        </div>
+        <div class="shared-files">
+            <h2>Shared Files</h2>
+            <div id="shared-files-list"></div>
         </div>
     </main>
 
@@ -724,7 +797,7 @@
                 // Timetable for IT11
                 const timetable = {
                     'Monday': [
-                        { start: '08:30', end: '10:00', class: 'Dev. Web et Multimédias 2', teacher: 'Mme. Wafa REJBI', room: 'T103' },
+                        { start: '08:30', end: '10:00', class: 'Dev. Web et Multimédias 2', teacher: 'Mme. Wafa REJBI', room: 'T mágico103' },
                         { start: '10:10', end: '11:40', class: 'Technique d’expression 2', teacher: 'Imen Bouraoui', room: 'T108' },
                         { start: '11:50', end: '13:20', class: 'UVT3 (2CN)', teacher: 'Mme. Hela DJEBALI', room: '' },
                         { start: '13:20', end: '14:50', class: 'Algo & Programmation', teacher: 'Mme. Hela DJEBALI', room: 'T103' },
@@ -821,7 +894,6 @@
                     `;
                     scheduleDays.appendChild(dayDiv);
 
-                    // Automatically expand the current day
                     if (day === currentDay) {
                         const header = dayDiv.querySelector('.schedule-day-header');
                         const details = dayDiv.querySelector('.schedule-day-details');
@@ -830,18 +902,15 @@
                     }
                 });
 
-                // Add click event to toggle schedule days
                 document.querySelectorAll('.schedule-day-header').forEach(header => {
                     header.addEventListener('click', () => {
                         const day = header.dataset.day;
                         const details = document.getElementById(`details-${day}`);
                         const isVisible = details.classList.contains('show');
 
-                        // Collapse all other days
                         document.querySelectorAll('.schedule-day-details').forEach(d => d.classList.remove('show'));
                         document.querySelectorAll('.schedule-day-header').forEach(h => h.classList.remove('active'));
 
-                        // Toggle the clicked day
                         if (!isVisible) {
                             details.classList.add('show');
                             header.classList.add('active');
@@ -861,131 +930,175 @@
                         document.getElementById('class-info').textContent = `Class: ${studentClass}`;
                         console.log(`Welcome message set to: Welcome, ${fullName}`);
 
-                        // Load current class
                         document.getElementById('current-class').textContent = getCurrentClass();
 
-                        // Load email into sidebar input if exists
                         const emailInput = document.getElementById('email-input');
                         if (student.email) {
                             emailInput.value = student.email;
                         }
 
-                        // Update email functionality
-                        document.getElementById('update-email-btn').addEventListener('click', () => {
-                            const email = emailInput.value.trim();
-                            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                                showToast('Please enter a valid email');
-                                return;
-                            }
-                            db.ref('students/' + cin).update({ email }).then(() => {
-                                showToast('Email updated successfully');
-                                document.getElementById('email-sidebar').classList.remove('open');
-                            }).catch(error => {
-                                showToast('Error updating email: ' + error.message);
+                        // Load classmates
+                        db.ref('students').once('value').then((snapshot) => {
+                            classmates = [];
+                            snapshot.forEach(childSnapshot => {
+                                const s = childSnapshot.val();
+                                const sCin = childSnapshot.key;
+                                if (s.class === studentClass && sCin !== cin) {
+                                    classmates.push({ cin: sCin, firstName: s.firstName, lastName: s.lastName });
+                                }
                             });
+                            renderClassmates();
+                        }).catch(error => {
+                            showToast('Error loading classmates: ' + error.message);
+                            console.error(error);
                         });
 
-                        // Load absences and populate subject filter
-                        const subjectFilter = document.getElementById('subject-filter');
-                        const absenceDetails = document.getElementById('absence-details');
-                        const totalAbsences = document.getElementById('total-absences');
+                        // Load absences
                         const absences = student.absences || [];
-
-                        // Map absences to subjects
+                        let totalAbsencePoints = 0;
                         const absenceBySubject = {};
-                        subjects.forEach(subject => absenceBySubject[subject] = []);
-                        let totalAbsenceCount = 0;
 
                         absences.forEach(absence => {
-                            const subject = absence.subject || 'Unknown Subject';
-                            if (subjects.includes(subject) && absence.status === 'absent') {
-                                absenceBySubject[subject].push(absence);
-                                totalAbsenceCount++;
+                            if (absence.class === studentClass && absence.status === 'absent') {
+                                totalAbsencePoints += absence.weight;
                             }
                         });
 
-                        totalAbsences.textContent = `Total Absences: ${totalAbsenceCount}`;
+                        document.getElementById('total-absences').textContent = `Total Absences: ${totalAbsencePoints}`;
 
-                        // Create subject buttons
                         subjects.forEach(subject => {
-                            const button = document.createElement('button');
-                            button.className = 'subject-btn';
-                            button.textContent = subject;
-                            button.dataset.subject = subject;
-                            subjectFilter.appendChild(button);
+                            absenceBySubject[subject] = absences.filter(a => a.class === studentClass && a.subject === subject && a.status === 'absent');
+                        });
+
+                        const subjectFilter = document.getElementById('subject-filter');
+                        const absenceDetails = document.getElementById('absence-details');
+
+                        subjects.forEach(subject => {
+                            const btn = document.createElement('button');
+                            btn.className = 'subject-btn';
+                            btn.textContent = subject;
+                            btn.dataset.subject = subject;
+                            subjectFilter.appendChild(btn);
 
                             const detailsDiv = document.createElement('div');
                             detailsDiv.className = 'subject-details';
                             detailsDiv.id = `details-${subject.replace(/\s+/g, '-')}`;
-                            const absenceList = absenceBySubject[subject];
-                            if (absenceList.length === 0) {
-                                detailsDiv.innerHTML = `<div class="no-absences">No absences for ${subject}</div>`;
+                            const absencesForSubject = absenceBySubject[subject] || [];
+                            if (absencesForSubject.length === 0) {
+                                detailsDiv.innerHTML = `<div class="no-absences">No absences recorded for ${subject}</div>`;
                             } else {
-                                detailsDiv.innerHTML = `<div>Total Absences: ${absenceList.length}</div>`;
-                                absenceList.forEach(absence => {
-                                    const absenceItem = document.createElement('div');
-                                    absenceItem.className = 'absence-item';
-                                    absenceItem.textContent = `Date: ${absence.date}`;
-                                    detailsDiv.appendChild(absenceItem);
-                                });
+                                detailsDiv.innerHTML = absencesForSubject.map(a => `
+                                    <div class="absence-item">
+                                        Date: ${a.date} | Weight: ${a.weight}
+                                    </div>
+                                `).join('');
                             }
                             absenceDetails.appendChild(detailsDiv);
+                        });
 
-                            button.addEventListener('click', () => {
+                        document.querySelectorAll('.subject-btn').forEach(btn => {
+                            btn.addEventListener('click', () => {
+                                const subject = btn.dataset.subject;
                                 const details = document.getElementById(`details-${subject.replace(/\s+/g, '-')}`);
                                 const isVisible = details.classList.contains('show');
+
                                 document.querySelectorAll('.subject-details').forEach(d => d.classList.remove('show'));
                                 document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+
                                 if (!isVisible) {
                                     details.classList.add('show');
-                                    button.classList.add('active');
+                                    btn.classList.add('active');
                                 }
                             });
-                        });
-
-                        // Fetch classmates
-                        db.ref('students').once('value').then((studentsSnapshot) => {
-                            classmates = [];
-                            studentsSnapshot.forEach((childSnapshot) => {
-                                const otherStudent = childSnapshot.val();
-                                const otherCin = childSnapshot.key;
-                                if (otherCin !== cin && otherStudent.class === studentClass) {
-                                    classmates.push(`${otherStudent.firstName} ${otherStudent.lastName}`);
-                                }
-                            });
-
-                            // Populate classmates modal
-                            const modalClassmatesList = document.getElementById('modal-classmates-list');
-                            if (classmates.length === 0) {
-                                modalClassmatesList.innerHTML = '<div class="no-classmates">No classmates found</div>';
-                            } else {
-                                classmates.forEach((name) => {
-                                    const classmateItem = document.createElement('div');
-                                    classmateItem.className = 'classmate-item';
-                                    classmateItem.textContent = name;
-                                    modalClassmatesList.appendChild(classmateItem);
-                                });
-                            }
-                        }).catch(error => {
-                            console.error('Error fetching classmates:', error.message);
-                            showToast('Error loading classmates');
                         });
                     } else {
-                        showToast('Student not found');
+                        showToast('Student not found. Please log in again.');
                         setTimeout(() => {
                             window.location.href = 'index.html';
                         }, 3000);
                     }
                 }).catch(error => {
-                    console.error('Error fetching student data:', error.message);
-                    showToast('Error loading student data');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 3000);
+                    showToast('Error loading student data: ' + error.message);
+                    console.error(error);
                 });
 
-                // Email sidebar toggle
+                // Load shared files
+                const sharedFilesList = document.getElementById('shared-files-list');
+                db.ref('sharedFiles').on('value', (snapshot) => {
+                    sharedFilesList.innerHTML = '';
+                    const files = [];
+                    snapshot.forEach(childSnapshot => {
+                        const fileData = childSnapshot.val();
+                        files.push({ id: childSnapshot.key, ...fileData });
+                    });
+
+                    if (files.length === 0) {
+                        sharedFilesList.innerHTML = `<div class="no-files">No files shared yet</div>`;
+                    } else {
+                        files.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate)); // Sort by upload date (newest first)
+                        files.forEach(file => {
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'file-item';
+                            const uploadDate = new Date(file.uploadDate).toLocaleDateString();
+                            fileItem.innerHTML = `
+                                <span>${file.fileName} (${uploadDate})</span>
+                                <a href="${file.base64}" download="${file.fileName}">Download</a>
+                            `;
+                            sharedFilesList.appendChild(fileItem);
+                        });
+                    }
+                }, (error) => {
+                    showToast('Error loading shared files: ' + error.message);
+                    console.error(error);
+                });
+
+                // Render classmates in modal
+                function renderClassmates() {
+                    const modalClassmatesList = document.getElementById('modal-classmates-list');
+                    modalClassmatesList.innerHTML = '';
+                    if (classmates.length === 0) {
+                        modalClassmatesList.innerHTML = `<div class="no-classmates">No classmates found</div>`;
+                    } else {
+                        classmates.forEach(classmate => {
+                            const cin = classmate.cin;
+                            let formattedCIN = cin;
+                            while (formattedCIN.length < 8) {
+                                formattedCIN = '0' + formattedCIN;
+                            }
+                            formattedCIN = formattedCIN.substring(0, 5) + '***';
+
+                            const item = document.createElement('div');
+                            item.className = 'classmate-item';
+                            item.innerHTML = `
+                                CIN: ${formattedCIN}<br>
+                                Name: ${classmate.firstName} ${classmate.lastName}
+                            `;
+                            modalClassmatesList.appendChild(item);
+                        });
+                    }
+                }
+
+                // Modal and Sidebar Event Listeners
+                const scheduleModal = document.getElementById('schedule-modal');
+                const classmatesModal = document.getElementById('classmates-modal');
                 const emailSidebar = document.getElementById('email-sidebar');
+
+                document.getElementById('schedule-btn').addEventListener('click', () => {
+                    scheduleModal.style.display = 'flex';
+                });
+
+                document.getElementById('close-schedule-btn').addEventListener('click', () => {
+                    scheduleModal.style.display = 'none';
+                });
+
+                document.getElementById('classmates-btn').addEventListener('click', () => {
+                    classmatesModal.style.display = 'flex';
+                });
+
+                document.getElementById('close-classmates-btn').addEventListener('click', () => {
+                    classmatesModal.style.display = 'none';
+                });
+
                 document.getElementById('email-btn').addEventListener('click', () => {
                     emailSidebar.classList.add('open');
                 });
@@ -994,40 +1107,42 @@
                     emailSidebar.classList.remove('open');
                 });
 
-                // Close sidebar when clicking outside
+                document.getElementById('update-email-btn').addEventListener('click', () => {
+                    const emailInput = document.getElementById('email-input');
+                    const email = emailInput.value.trim();
+                    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        showToast('Please enter a valid email');
+                        return;
+                    }
+                    db.ref('students/' + cin).update({ email }).then(() => {
+                        showToast('Email updated successfully');
+                        emailSidebar.classList.remove('open');
+                    }).catch(error => {
+                        showToast('Error updating email: ' + error.message);
+                        console.error(error);
+                    });
+                });
+
+                // Close modals and sidebar when clicking outside
                 document.addEventListener('click', (e) => {
+                    if (!scheduleModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#schedule-btn') && scheduleModal.style.display === 'flex') {
+                        scheduleModal.style.display = 'none';
+                    }
+                    if (!classmatesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#classmates-btn') && classmatesModal.style.display === 'flex') {
+                        classmatesModal.style.display = 'none';
+                    }
                     if (!emailSidebar.contains(e.target) && !e.target.closest('#email-btn') && emailSidebar.classList.contains('open')) {
                         emailSidebar.classList.remove('open');
                     }
                 });
 
-                // Schedule modal toggle
-                document.getElementById('schedule-btn').addEventListener('click', () => {
-                    document.getElementById('schedule-modal').style.display = 'flex';
-                });
-
-                document.getElementById('close-schedule-btn').addEventListener('click', () => {
-                    document.getElementById('schedule-modal').style.display = 'none';
-                });
-
-                // Classmates modal toggle
-                document.getElementById('classmates-btn').addEventListener('click', () => {
-                    document.getElementById('classmates-modal').style.display = 'flex';
-                });
-
-                document.getElementById('close-classmates-btn').addEventListener('click', () => {
-                    document.getElementById('classmates-modal').style.display = 'none';
-                });
-
                 // Home button
                 document.getElementById('home-btn').addEventListener('click', () => {
-                    console.log('Home button clicked');
                     window.location.href = 'index.html';
                 });
 
                 // Dark mode toggle
                 document.getElementById('dark-mode-toggle').addEventListener('click', () => {
-                    console.log('Dark mode button clicked');
                     document.body.classList.toggle('dark-mode');
                     const isDarkMode = document.body.classList.contains('dark-mode');
                     const toggleButton = document.getElementById('dark-mode-toggle');
@@ -1037,7 +1152,7 @@
                     showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
                 });
 
-                // Toast notification function
+                // Toast notification
                 function showToast(message) {
                     const toast = document.getElementById('toast');
                     toast.textContent = message;
@@ -1050,7 +1165,7 @@
                 }
             } catch (error) {
                 console.error('Initialization error:', error);
-                alert('Error initializing page: ' + error.message);
+                showToast('Error initializing page: ' + error.message);
             }
         });
     </script>
