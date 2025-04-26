@@ -572,19 +572,28 @@
 
                     // Debug: Log the email
                     console.log('Logged-in User Email:', user.email);
+                    showToast('Logged-in Email: ' + user.email);
 
                     // Load professor data using email
                     db.ref('professors').once('value').then((snapshot) => {
                         let professorFound = false;
                         let professorKey = null;
+                        let databaseEmails = [];
+
+                        // Collect all emails in the database for debugging
                         snapshot.forEach((childSnapshot) => {
                             const professor = childSnapshot.val();
+                            databaseEmails.push(professor.email);
                             if (professor.email === user.email) {
                                 professorData = professor;
                                 professorKey = childSnapshot.key;
                                 professorFound = true;
                             }
                         });
+
+                        // Debug: Show all emails in the database
+                        console.log('Database Emails:', databaseEmails);
+                        showToast('Database Emails: ' + databaseEmails.join(', '));
 
                         if (!professorFound || !professorData || !professorData.schedule || !professorData.classes) {
                             showToast('Professor data not found. Please check your email in the database.');
