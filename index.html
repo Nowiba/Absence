@@ -373,7 +373,7 @@
                 toggleButton.querySelector('span:last-child').textContent = 'Light Mode';
             }
 
-            // Modal show function
+            // Modal show function (moved to global scope)
             function showModal(modalId) {
                 console.log(`Attempting to show modal: ${modalId}`);
                 const modal = document.getElementById(modalId);
@@ -388,6 +388,19 @@
                     alert(`Error: Modal ${modalId} not found.`);
                 }
             }
+
+            // Check authentication state
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // User is already logged in, redirect based on email
+                    console.log('User already logged in:', user.email);
+                    if (user.email === 'admin@example.com') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'professor.html';
+                    }
+                }
+            });
 
             // Close modals when clicking outside
             document.querySelectorAll('.modal').forEach(modal => {
@@ -433,45 +446,52 @@
 
             // Professor login
             document.getElementById('professor-login').addEventListener('click', () => {
-                const email = document.getElementById('professor-email').value;
-                const password = document.getElementById('professor-password').value;
-                auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).then(() => {
-                    return auth.signInWithEmailAndPassword(email, password);
-                }).then((userCredential) => {
-                    const uid = userCredential.user.uid;
-                    db.ref('users/' + uid).once('value').then((snapshot) => {
-                        if (snapshot.exists() && snapshot.val().role === 'professor') {
-                            document.getElementById('professor-modal').classList.remove('show');
-                            setTimeout(() => {
-                                document.getElementById('professor-modal').classList.add('hidden');
-                                window.location.href = `professor.html?uid=${uid}`;
-                            }, 300);
-                            showToast('Login successful');
-                        } else {
-                            showToast('Not authorized as professor');
-                            auth.signOut();
-                        }
-                    }).catch(error => {
-                        showToast('Error checking role: ' + error.message);
+                const email = document.getElementById('professor-email').value.trim();
+                const password = document.getElementById('professor-password').value.trim();
+
+                if (!email || !password) {
+                    showToast('Please enter email and password');
+                    return;
+                }
+
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        showToast('Login successful');
+                        document.getElementById('professor-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('professor-modal').classList.add('hidden');
+                            // Redirect will be handled by onAuthStateChanged
+                        }, 300);
+                    })
+                    .catch((error) => {
+                        showToast('Invalid credentials: ' + error.message);
+                        console.error('Professor login error:', error);
                     });
-                }).catch(error => showToast('Login failed: ' + error.message));
             });
 
             // Admin login
             document.getElementById('admin-login').addEventListener('click', () => {
-                const email = document.getElementById('admin-email').value;
-                const password = document.getElementById('admin-password').value;
-                auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).then(() => {
-                    return auth.signInWithEmailAndPassword(email, password);
-                }).then((userCredential) => {
-                    const uid = userCredential.user.uid;
-                    document.getElementById('admin-modal').classList.remove('show');
-                    setTimeout(() => {
-                        document.getElementById('admin-modal').classList.add('hidden');
-                        window.location.href = `admin.html?uid=${uid}`;
-                    }, 300);
-                    showToast('Login successful');
-                }).catch(error => showToast('Login failed: ' + error.message));
+                const email = document.getElementById('admin-email').value.trim();
+                const password = document.getElementById('admin-password').value.trim();
+
+                if (!email || !password) {
+                    showToast('Please enter email and password');
+                    return;
+                }
+
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        showToast('Login successful');
+                        document.getElementById('admin-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('admin-modal').classList.add('hidden');
+                            // Redirect will be handled by onAuthStateChanged
+                        }, 300);
+                    })
+                    .catch((error) => {
+                        showToast('Invalid credentials: ' + error.message);
+                        console.error('Admin login error:', error);
+                    });
             });
 
             // Dark mode toggle
