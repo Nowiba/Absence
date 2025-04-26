@@ -547,8 +547,8 @@
                 <tr>
                     <td rowspan="2">Monday</td>
                     <td>08:30-10:00</td>
-                    <td>Dev. Web et Multimédias 2</td>
-                    <td>Mme. Wafa REJBI</td>
+                    <td>A. Dev Web</td>
+                    <td>Mme. Wafa Rejbi</td>
                 </tr>
                 <tr>
                     <td>10:10-11:40</td>
@@ -559,18 +559,18 @@
                 <tr>
                     <td rowspan="3">Tuesday</td>
                     <td>08:30-10:00</td>
-                    <td>Dev. Web et Multimédias 2</td>
-                    <td>Mme. Wafa REJBI</td>
+                    <td>A. Dev Web</td>
+                    <td>Mme. Wafa Rejbi</td>
                 </tr>
                 <tr>
                     <td>11:50-13:20</td>
                     <td>Sys. Exploitation</td>
-                    <td>Mme. Hajer BACCOUCH</td>
+                    <td>Mme. Hajer Baccouch</td>
                 </tr>
                 <tr>
                     <td>13:20-14:50</td>
                     <td>Sys. Exploitation</td>
-                    <td>Mme. Hajer BACCOUCH</td>
+                    <td>Mme. Hajer Baccouch</td>
                 </tr>
                 <!-- Wednesday -->
                 <tr>
@@ -580,13 +580,13 @@
                     <td>Ouni Rahma</td>
                 </tr>
                 <tr>
-                    <td>10:10-11:40</td>
-                    <td>Dev. Web et Multimédias 2</td>
-                    <td>Mme. Wafa REJBI</td>
+                    <td>10:10-13:20</td>
+                    <td>A. Dev Web</td>
+                    <td>Mme. Wafa Rejbi</td>
                 </tr>
                 <!-- Thursday -->
                 <tr>
-                    <td rowspan="2">Thursday</td>
+                    <td rowspan="4">Thursday</td>
                     <td>08:30-10:00</td>
                     <td>Fond Réseaux</td>
                     <td>Ouni Rahma</td>
@@ -595,6 +595,16 @@
                     <td>10:10-11:40</td>
                     <td>English for computing 2</td>
                     <td>Fadhel Ferjani</td>
+                </tr>
+                <tr>
+                    <td>13:20-14:50</td>
+                    <td>A. Système</td>
+                    <td>Sondes Guirat</td>
+                </tr>
+                <tr>
+                    <td>14:50-18:00</td>
+                    <td>A. Programmation</td>
+                    <td>Ksibi Jinen</td>
                 </tr>
                 <!-- Friday -->
                 <tr>
@@ -614,21 +624,9 @@
                     <td>Arwa Selmi</td>
                 </tr>
                 <tr>
-                    <td>13:20-14:50</td>
-                    <td>Système 1</td>
-                    <td>Sondes Guirat</td>
-                </tr>
-                <!-- Saturday -->
-                <tr>
-                    <td rowspan="2">Saturday</td>
-                    <td>13:20-14:50</td>
-                    <td>Algo & Programmation</td>
-                    <td>Emma Mehrez</td>
-                </tr>
-                <tr>
-                    <td>14:50-16:20</td>
-                    <td>Algo & Programmation</td>
-                    <td>Emma Mehrez</td>
+                    <td>14:50-18:00</td>
+                    <td>A. Programmation</td>
+                    "td"Ksibi Jinen</td>
                 </tr>
             </table>
         </div>
@@ -704,12 +702,14 @@
                             return;
                         }
 
-                        // Load professor's schedule and check marking window
-                        const today = new Date('2025-04-26');
-                        const currentDate = today.toISOString().split('T')[0];
+                        // Determine the current day of the week
+                        const today = new Date();
+                        const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                        const currentDay = daysOfWeek[today.getDay()];
                         const currentTime = today.getHours() * 60 + today.getMinutes();
 
-                        const schedule = professorData.schedule.find(s => s.day === currentDate);
+                        // Find today's schedule for the professor
+                        const schedule = professorData.schedule.find(s => s.day === currentDay);
                         if (!schedule) {
                             showToast('No schedule for today');
                             return;
@@ -845,7 +845,7 @@
                         studentItem.dataset.cin = student.cin;
 
                         // Determine current status
-                        const today = new Date('2025-04-26').toISOString().split('T')[0];
+                        const today = new Date().toISOString().split('T')[0]; // Use current date
                         const absences = student.absences || [];
                         const todayAbsence = absences.find(a => a.date === today && a.class === selectedClassSpan.textContent);
                         const statusClass = todayAbsence ? (todayAbsence.status === 'present' ? 'present' : todayAbsence.status === 'absent' ? 'absent' : 'not-marked') : 'not-marked';
@@ -890,7 +890,7 @@
                         lastAction = { type: 'single', cin, previousAbsences: [...absences] };
                         undoBtn.style.display = 'block';
 
-                        const today = new Date('2025-04-26').toISOString().split('T')[0];
+                        const today = new Date().toISOString().split('T')[0]; // Use current date
                         absences.push({ date: today, class: selectedClassSpan.textContent, status, weight });
                         studentRef.update({ absences }).then(() => {
                             showToast(`Marked as ${status}`);
@@ -924,7 +924,7 @@
                     lastAction = { type: 'collective', previousStates };
                     undoBtn.style.display = 'block';
 
-                    const today = new Date('2025-04-26').toISOString().split('T')[0];
+                    const today = new Date().toISOString().split('T')[0]; // Use current date
                     const updates = {};
                     selectedStudents.forEach(student => {
                         const absences = student.absences || [];
@@ -989,7 +989,7 @@
 
                 // Mark unmarked students after window closes
                 function markUnmarkedStudents(className) {
-                    const today = new Date('2025-04-26').toISOString().split('T')[0];
+                    const today = new Date().toISOString().split('T')[0]; // Use current date
                     const updates = {};
                     selectedStudents.forEach(student => {
                         const absences = student.absences || [];
