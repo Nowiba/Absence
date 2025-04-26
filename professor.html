@@ -127,24 +127,6 @@
             transition: background 0.3s ease;
         }
 
-        .modal-content select {
-            width: 100%;
-            padding: 14px;
-            margin: 12px 0;
-            border: 1px solid #d1d8e0;
-            border-radius: 8px;
-            font-size: 16px;
-            background-color: #ffffff;
-            color: #333;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .modal-content select:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
-            outline: none;
-        }
-
         .modal-content button, .action-btn, .collective-btn, .undo-btn {
             padding: 14px 24px;
             margin: 10px 5px;
@@ -210,7 +192,6 @@
             margin: 20px auto;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             animation: slideUp 0.4s ease;
-            display: none;
         }
 
         .student-list h2 {
@@ -293,7 +274,6 @@
             margin: 20px auto;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             animation: slideUp 0.4s ease;
-            display: none;
         }
 
         .schedule-table h2 {
@@ -398,17 +378,6 @@
             background: linear-gradient(90deg, #5dade2, #7fbfff);
         }
 
-        body.dark-mode .modal-content select {
-            background-color: #34495e;
-            color: #e0e0e0;
-            border-color: #5dade2;
-        }
-
-        body.dark-mode .modal-content select:focus {
-            border-color: #5dade2;
-            box-shadow: 0 0 6px rgba(93, 173, 226, 0.4);
-        }
-
         body.dark-mode .student-item {
             border-bottom: 1px solid #5dade2;
         }
@@ -503,15 +472,6 @@
         <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
     <main>
-        <!-- Class Selection Modal -->
-        <div id="class-modal" class="modal">
-            <div class="modal-content">
-                <h2>Select Class</h2>
-                <select id="class-select"></select>
-                <button id="class-submit">Select</button>
-            </div>
-        </div>
-
         <!-- Confirmation Modal for Collective Absent -->
         <div id="confirm-modal" class="modal">
             <div class="modal-content">
@@ -521,9 +481,22 @@
             </div>
         </div>
 
+        <!-- Professor's Schedule -->
+        <div id="professor-schedule" class="schedule-table">
+            <h2>My Schedule (IT11)</h2>
+            <table>
+                <tr>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Subject</th>
+                </tr>
+                <tbody id="schedule-body"></tbody>
+            </table>
+        </div>
+
         <!-- Student List -->
         <div id="student-list" class="student-list">
-            <h2>Students in <span id="selected-class"></span></h2>
+            <h2>Students in IT11</h2>
             <div>Total Students: <span id="total-students">0</span></div>
             <div class="timer" id="marking-timer">Marking Window: Loading...</div>
             <div id="students"></div>
@@ -532,104 +505,6 @@
         <!-- Collective Absent and Undo Buttons -->
         <button id="collective-absent" class="collective-btn">Collective Absent</button>
         <button id="undo-btn" class="undo-btn">Undo Last Action</button>
-
-        <!-- Schedule Table for IT11 -->
-        <div id="schedule-table" class="schedule-table">
-            <h2>Class Schedule (IT11)</h2>
-            <table>
-                <tr>
-                    <th>Day</th>
-                    <th>Time</th>
-                    <th>Subject</th>
-                    <th>Teacher</th>
-                </tr>
-                <!-- Monday -->
-                <tr>
-                    <td rowspan="2">Monday</td>
-                    <td>08:30-10:00</td>
-                    <td>A. Dev Web</td>
-                    <td>Mme. Wafa Rejbi</td>
-                </tr>
-                <tr>
-                    <td>10:10-11:40</td>
-                    <td>Technique d'expression 2</td>
-                    <td>Imen Bouraoui</td>
-                </tr>
-                <!-- Tuesday -->
-                <tr>
-                    <td rowspan="3">Tuesday</td>
-                    <td>08:30-10:00</td>
-                    <td>A. Dev Web</td>
-                    <td>Mme. Wafa Rejbi</td>
-                </tr>
-                <tr>
-                    <td>11:50-13:20</td>
-                    <td>Sys. Exploitation</td>
-                    <td>Mme. Hajer Baccouch</td>
-                </tr>
-                <tr>
-                    <td>13:20-14:50</td>
-                    <td>Sys. Exploitation</td>
-                    <td>Mme. Hajer Baccouch</td>
-                </tr>
-                <!-- Wednesday -->
-                <tr>
-                    <td rowspan="2">Wednesday</td>
-                    <td>08:30-10:00</td>
-                    <td>Fond Réseaux</td>
-                    <td>Ouni Rahma</td>
-                </tr>
-                <tr>
-                    <td>10:10-13:20</td>
-                    <td>A. Dev Web</td>
-                    <td>Mme. Wafa Rejbi</td>
-                </tr>
-                <!-- Thursday -->
-                <tr>
-                    <td rowspan="4">Thursday</td>
-                    <td>08:30-10:00</td>
-                    <td>Fond Réseaux</td>
-                    <td>Ouni Rahma</td>
-                </tr>
-                <tr>
-                    <td>10:10-11:40</td>
-                    <td>English for computing 2</td>
-                    <td>Fadhel Ferjani</td>
-                </tr>
-                <tr>
-                    <td>13:20-14:50</td>
-                    <td>A. Système</td>
-                    <td>Sondes Guirat</td>
-                </tr>
-                <tr>
-                    <td>14:50-18:00</td>
-                    <td>A. Programmation</td>
-                    <td>Ksibi Jinen</td>
-                </tr>
-                <!-- Friday -->
-                <tr>
-                    <td rowspan="4">Friday</td>
-                    <td>08:30-10:00</td>
-                    <td>Préparation aux métiers</td>
-                    <td>Kemla Naoui</td>
-                </tr>
-                <tr>
-                    <td>10:10-11:40</td>
-                    <td>Stat & Proba</td>
-                    <td>Arwa Selmi</td>
-                </tr>
-                <tr>
-                    <td>11:50-13:20</td>
-                    <td>Rech. Opérationnelle</td>
-                    <td>Arwa Selmi</td>
-                </tr>
-                <tr>
-                    <td>14:50-18:00</td>
-                    <td>A. Programmation</td>
-                    "td"Ksibi Jinen</td>
-                </tr>
-            </table>
-        </div>
     </main>
     <div id="toast" class="toast hidden"></div>
 
@@ -656,11 +531,7 @@
                 const db = firebase.database();
 
                 // Elements
-                const classModal = document.getElementById('class-modal');
-                const classSelect = document.getElementById('class-select');
-                const classSubmit = document.getElementById('class-submit');
                 const studentList = document.getElementById('student-list');
-                const selectedClassSpan = document.getElementById('selected-class');
                 const totalStudentsSpan = document.getElementById('total-students');
                 const studentsDiv = document.getElementById('students');
                 const collectiveAbsentBtn = document.getElementById('collective-absent');
@@ -669,7 +540,7 @@
                 const confirmNo = document.getElementById('confirm-no');
                 const undoBtn = document.getElementById('undo-btn');
                 const markingTimer = document.getElementById('marking-timer');
-                const scheduleTable = document.getElementById('schedule-table');
+                const scheduleBody = document.getElementById('schedule-body');
 
                 let studentsData = [];
                 let selectedStudents = [];
@@ -702,6 +573,9 @@
                             return;
                         }
 
+                        // Display the professor's schedule
+                        displayProfessorSchedule(professorData.schedule);
+
                         // Determine the current day of the week
                         const today = new Date();
                         const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -712,75 +586,71 @@
                         const schedule = professorData.schedule.find(s => s.day === currentDay);
                         if (!schedule) {
                             showToast('No schedule for today');
-                            return;
-                        }
-
-                        const [startHour, startMinute] = schedule.start.split(':').map(Number);
-                        const [endHour, endMinute] = schedule.end.split(':').map(Number);
-                        const startTime = startHour * 60 + startMinute;
-                        const endTime = endHour * 60 + endMinute;
-                        const endTimePlus30 = endTime + 30; // 30 minutes after end
-
-                        // Set marking end time for timer
-                        const endDateTime = new Date(today);
-                        endDateTime.setHours(endHour, endMinute + 30, 0, 0);
-                        markingEndTime = endDateTime.getTime();
-
-                        if (currentTime >= startTime && currentTime <= endTimePlus30) {
-                            canMark = true;
-                            startMarkingTimer();
+                            markingTimer.textContent = 'Marking Window: No session today';
+                            collectiveAbsentBtn.style.display = 'none';
                         } else {
-                            showToast('Marking window closed');
-                            markingTimer.textContent = 'Marking Window: Closed';
-                            markUnmarkedStudents(schedule.class);
+                            const [startHour, startMinute] = schedule.start.split(':').map(Number);
+                            const [endHour, endMinute] = schedule.end.split(':').map(Number);
+                            const startTime = startHour * 60 + startMinute;
+                            const endTime = endHour * 60 + endMinute;
+                            const endTimePlus30 = endTime + 30; // 30 minutes after end
+
+                            // Set marking end time for timer
+                            const endDateTime = new Date(today);
+                            endDateTime.setHours(endHour, endMinute + 30, 0, 0);
+                            markingEndTime = endDateTime.getTime();
+
+                            if (currentTime >= startTime && currentTime <= endTimePlus30) {
+                                canMark = true;
+                                startMarkingTimer();
+                            } else {
+                                showToast('Marking window closed');
+                                markingTimer.textContent = 'Marking Window: Closed';
+                                collectiveAbsentBtn.style.display = 'none';
+                                markUnmarkedStudents(schedule.class);
+                            }
                         }
 
-                        // Load classes assigned to this professor
-                        const classes = professorData.classes || [];
-                        classes.forEach(cls => {
-                            const option = document.createElement('option');
-                            option.value = cls;
-                            option.textContent = cls;
-                            classSelect.appendChild(option);
-                        });
-
-                        // Load students for the professor's classes
+                        // Load students for the professor's class (IT11)
                         db.ref('students').once('value').then((snapshot) => {
                             snapshot.forEach((childSnapshot) => {
                                 const student = childSnapshot.val();
                                 const cin = childSnapshot.key;
-                                if (classes.includes(student.class)) {
+                                if (student.class === 'IT11') {
                                     studentsData.push({ cin, ...student });
                                 }
                             });
 
-                            if (classes.length > 0) {
-                                classModal.style.display = 'flex';
+                            if (studentsData.length > 0) {
+                                selectedStudents = studentsData;
+                                totalStudentsSpan.textContent = selectedStudents.length;
+                                renderStudents();
+                                studentList.style.display = 'block';
+                                collectiveAbsentBtn.style.display = canMark ? 'block' : 'none';
                             } else {
-                                showToast('No classes assigned to you');
+                                showToast('No students found for IT11');
                             }
                         }).catch(error => {
                             showToast('Error loading students');
                             console.error(error);
                         });
-
-                        // Filter schedule table to show only this professor's lessons
-                        filterScheduleTable(professorData.name);
                     }).catch(error => {
                         showToast('Error loading professor data');
                         console.error(error);
                     });
                 });
 
-                // Filter the schedule table to show only the logged-in professor's lessons
-                function filterScheduleTable(professorName) {
-                    const rows = document.querySelectorAll('#schedule-table tr');
-                    rows.forEach((row, index) => {
-                        if (index === 0) return; // Skip header row
-                        const teacherCell = row.cells[3]; // Teacher column
-                        if (teacherCell && teacherCell.textContent !== professorName) {
-                            row.style.display = 'none';
-                        }
+                // Display the professor's schedule
+                function displayProfessorSchedule(schedule) {
+                    scheduleBody.innerHTML = '';
+                    schedule.forEach(session => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${session.day}</td>
+                            <td>${session.start}-${session.end}</td>
+                            <td>${session.subject}</td>
+                        `;
+                        scheduleBody.appendChild(row);
                     });
                 }
 
@@ -794,7 +664,7 @@
                             canMark = false;
                             markingTimer.textContent = 'Marking Window: Closed';
                             collectiveAbsentBtn.style.display = 'none';
-                            markUnmarkedStudents(selectedClassSpan.textContent);
+                            markUnmarkedStudents('IT11');
                             return;
                         }
 
@@ -806,36 +676,6 @@
                     updateTimer();
                 }
 
-                // Class selection
-                classSubmit.addEventListener('click', () => {
-                    const selectedClass = classSelect.value;
-                    if (!selectedClass) {
-                        showToast('Please select a class');
-                        return;
-                    }
-
-                    // Verify the selected class belongs to this professor
-                    if (!professorData.classes.includes(selectedClass)) {
-                        showToast('You are not authorized to manage this class');
-                        return;
-                    }
-
-                    selectedStudents = studentsData.filter(student => student.class === selectedClass);
-                    selectedClassSpan.textContent = selectedClass;
-                    totalStudentsSpan.textContent = selectedStudents.length;
-                    renderStudents();
-                    classModal.style.display = 'none';
-                    studentList.style.display = 'block';
-                    collectiveAbsentBtn.style.display = canMark ? 'block' : 'none';
-
-                    // Show schedule table if IT11 is selected
-                    if (selectedClass === 'IT11') {
-                        scheduleTable.style.display = 'block';
-                    } else {
-                        scheduleTable.style.display = 'none';
-                    }
-                });
-
                 // Render students
                 function renderStudents() {
                     studentsDiv.innerHTML = '';
@@ -844,21 +684,24 @@
                         studentItem.className = 'student-item';
                         studentItem.dataset.cin = student.cin;
 
+                        // Format CIN: First 5 digits, last 3 as ***
+                        const formattedCIN = student.cin.substring(0, 5) + '***';
+
                         // Determine current status
-                        const today = new Date().toISOString().split('T')[0]; // Use current date
+                        const today = new Date().toISOString().split('T')[0];
                         const absences = student.absences || [];
-                        const todayAbsence = absences.find(a => a.date === today && a.class === selectedClassSpan.textContent);
+                        const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
                         const statusClass = todayAbsence ? (todayAbsence.status === 'present' ? 'present' : todayAbsence.status === 'absent' ? 'absent' : 'not-marked') : 'not-marked';
                         studentItem.classList.add(statusClass);
 
                         studentItem.innerHTML = `
                             <div class="student-info">
-                                CIN: ${student.cin.slice(0, 5)}****<br>
+                                CIN: ${formattedCIN}<br>
                                 Name: ${student.firstName} ${student.lastName}
                             </div>
                             <div class="student-actions">
-                                <button class="action-btn present" data-cin="${student.cin}">Present</button>
-                                <button class="action-btn absent" data-cin="${student.cin}">Absent</button>
+                                <button class="action-btn present" data-cin="${student.cin}" ${!canMark ? 'disabled' : ''}>Present</button>
+                                <button class="action-btn absent" data-cin="${student.cin}" ${!canMark ? 'disabled' : ''}>Absent</button>
                             </div>
                         `;
                         studentsDiv.appendChild(studentItem);
@@ -890,11 +733,10 @@
                         lastAction = { type: 'single', cin, previousAbsences: [...absences] };
                         undoBtn.style.display = 'block';
 
-                        const today = new Date().toISOString().split('T')[0]; // Use current date
-                        absences.push({ date: today, class: selectedClassSpan.textContent, status, weight });
+                        const today = new Date().toISOString().split('T')[0];
+                        absences.push({ date: today, class: 'IT11', status, weight });
                         studentRef.update({ absences }).then(() => {
                             showToast(`Marked as ${status}`);
-                            // Update student item status
                             const studentItem = document.querySelector(`.student-item[data-cin="${cin}"]`);
                             studentItem.classList.remove('present', 'absent', 'not-marked');
                             studentItem.classList.add(status);
@@ -915,7 +757,6 @@
                 });
 
                 confirmYes.addEventListener('click', () => {
-                    // Store previous states for all students
                     const previousStates = {};
                     selectedStudents.forEach(student => {
                         previousStates[student.cin] = [...(student.absences || [])];
@@ -924,18 +765,17 @@
                     lastAction = { type: 'collective', previousStates };
                     undoBtn.style.display = 'block';
 
-                    const today = new Date().toISOString().split('T')[0]; // Use current date
+                    const today = new Date().toISOString().split('T')[0];
                     const updates = {};
                     selectedStudents.forEach(student => {
                         const absences = student.absences || [];
-                        absences.push({ date: today, class: selectedClassSpan.textContent, status: 'absent', weight: 2 });
+                        absences.push({ date: today, class: 'IT11', status: 'absent', weight: 2 });
                         updates['students/' + student.cin + '/absences'] = absences;
                     });
 
                     db.ref().update(updates).then(() => {
                         showToast('All students marked as absent (*2)');
                         confirmModal.style.display = 'none';
-                        // Update all student items
                         document.querySelectorAll('.student-item').forEach(item => {
                             item.classList.remove('present', 'absent', 'not-marked');
                             item.classList.add('absent');
@@ -960,7 +800,6 @@
                             showToast('Undo successful');
                             lastAction = null;
                             undoBtn.style.display = 'none';
-                            // Re-render students to reflect the change
                             const student = selectedStudents.find(s => s.cin === cin);
                             student.absences = previousAbsences;
                             renderStudents();
@@ -989,7 +828,7 @@
 
                 // Mark unmarked students after window closes
                 function markUnmarkedStudents(className) {
-                    const today = new Date().toISOString().split('T')[0]; // Use current date
+                    const today = new Date().toISOString().split('T')[0];
                     const updates = {};
                     selectedStudents.forEach(student => {
                         const absences = student.absences || [];
