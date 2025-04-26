@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ISET Siliana Professor</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -127,7 +128,7 @@
             transition: background 0.3s ease;
         }
 
-        .modal-content button, .action-btn, .collective-btn, .undo-btn, .upload-btn {
+        .modal-content button, .action-btn, .collective-btn, .undo-btn, .upload-btn, .undo-file-btn {
             padding: 14px 24px;
             margin: 10px 5px;
             background-color: #3498db;
@@ -140,7 +141,7 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .modal-content button:hover, .action-btn:hover, .collective-btn:hover, .undo-btn:hover, .upload-btn:hover {
+        .modal-content button:hover, .action-btn:hover, .collective-btn:hover, .undo-btn:hover, .upload-btn:hover, .undo-file-btn:hover {
             background-color: #5dade2;
             transform: scale(1.03);
             box-shadow: 0 3px 12px rgba(52, 152, 219, 0.3);
@@ -183,13 +184,13 @@
             background-color: #c0392b;
         }
 
-        .undo-btn {
+        .undo-btn, .undo-file-btn {
             background-color: #f39c12;
             display: none;
             margin: 20px auto;
         }
 
-        .undo-btn:hover {
+        .undo-btn:hover, .undo-file-btn:hover {
             background-color: #e67e22;
         }
 
@@ -459,7 +460,7 @@
             .modal-content h2, .student-list h2, .schedule-table h2 {
                 font-size: 24px;
             }
-            .modal-content select, .modal-content button, .action-btn, .collective-btn, .undo-btn, .upload-btn {
+            .modal-content select, .modal-content button, .action-btn, .collective-btn, .undo-btn, .upload-btn, .undo-file-btn {
                 font-size: 15px;
                 padding: 12px;
             }
@@ -531,6 +532,7 @@
         <!-- Collective Absent and Undo Buttons -->
         <button id="collective-absent" class="collective-btn">Collective Absent</button>
         <button id="undo-btn" class="undo-btn">Undo Last Action</button>
+        <button id="undo-file-btn" class="undo-file-btn">Undo Last Upload</button>
     </main>
     <div id="toast" class="toast hidden"></div>
 
@@ -565,6 +567,7 @@
                 const confirmYes = document.getElementById('confirm-yes');
                 const confirmNo = document.getElementById('confirm-no');
                 const undoBtn = document.getElementById('undo-btn');
+                const undoFileBtn = document.getElementById('undo-file-btn');
                 const markingTimer = document.getElementById('marking-timer');
                 const scheduleBody = document.getElementById('schedule-body');
                 const fileUploadModal = document.getElementById('file-upload-modal');
@@ -575,9 +578,14 @@
                 let studentsData = [];
                 let selectedStudents = [];
                 let lastAction = null;
+                let lastFileUpload = null;
                 let canMark = false;
                 let markingEndTime = null;
                 let professorData = null;
+                let professorName = '';
+
+                // Encryption key (in production, this should be securely shared, not hardcoded)
+                const ENCRYPTION_KEY = 'my-secret-key-123'; // Replace with a secure key
 
                 // Load dark mode preference
                 if (localStorage.getItem('darkMode') === 'enabled') {
@@ -611,6 +619,7 @@
                                 professorData = professor;
                                 professorKey = childSnapshot.key;
                                 professorFound = true;
+                                professorName = `${professor.firstName} ${professor.lastName}`;
                             }
                         });
 
@@ -850,7 +859,7 @@
 
                 closeFileModalBtn.addEventListener('click', () => {
                     fileUploadModal.style.display = 'none';
-                    fileInput.value = ''; // Reset file input
+                    fileInput.value = '';
                 });
 
                 // Close file upload modal when clicking outside
@@ -861,7 +870,7 @@
                     }
                 });
 
-                // Handle File Upload
+                // Handle File Upload with Encryption
                 uploadFileBtn.addEventListener('click', () => {
                     const file = fileInput.files[0];
                     if (!file) {
@@ -869,31 +878,46 @@
                         return;
                     }
 
-                    // Check file size (limit to 5 MB to stay safe under 10 MB Base64 limit)
-                    const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
+                    // Check file size (limit to 10 MB before encryption)
+                    const maxSize = 10 * 1024 * 1024; // 10 MB in bytes
                     if (file.size > maxSize) {
-                        showToast('File too large. Please upload a file smaller than 5 MB.');
+                        showToast('File too large. Please upload a file smaller than 10 MB.');
                         return;
                     }
 
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        const base64String = e.target.result; // Base64 string
+                        const fileData = e.target.result; // Data URL format: "data:[type];base64,[base64data]"
+                        const base64String = fileData.split(',')[1]; // Extract Base64 part
+
+                        // Encrypt the Base64 string
+                        const encryptedData = CryptoJS.AES.encrypt(base64String, ENCRYPTION_KEY).toString();
                         const fileName = file.name;
                         const fileType = file.type || 'application/octet-stream';
                         const uploadDate = new Date().toISOString();
 
+                        // Check size after encryption (Base64 of encrypted data)
+                        const encryptedSize = (encryptedData.length * 3) / 4 / 1024 / 1024; // Approximate size in MB
+                        if (encryptedSize > 10) {
+                            showToast('Encrypted file exceeds database size limit. Try a smaller file.');
+                            return;
+                        }
+
                         // Store in Firebase Realtime Database
                         const newFileRef = db.ref('sharedFiles').push();
+                        const fileId = newFileRef.key;
                         newFileRef.set({
                             fileName: fileName,
                             fileType: fileType,
-                            base64: base64String,
-                            uploadDate: uploadDate
+                            base64: encryptedData,
+                            uploadDate: uploadDate,
+                            professorName: professorName
                         }).then(() => {
                             showToast('File uploaded successfully');
                             fileUploadModal.style.display = 'none';
                             fileInput.value = '';
+                            lastFileUpload = { fileId };
+                            undoFileBtn.style.display = 'block';
                         }).catch(error => {
                             showToast('Error uploading file: ' + error.message);
                             console.error(error);
@@ -902,10 +926,28 @@
                     reader.onerror = () => {
                         showToast('Error reading file');
                     };
-                    reader.readAsDataURL(file); // Convert file to Base64
+                    reader.readAsDataURL(file);
                 });
 
-                // Undo
+                // Undo File Upload
+                undoFileBtn.addEventListener('click', () => {
+                    if (!lastFileUpload) {
+                        showToast('No file upload to undo');
+                        return;
+                    }
+
+                    const { fileId } = lastFileUpload;
+                    db.ref('sharedFiles/' + fileId).remove().then(() => {
+                        showToast('File removed successfully');
+                        lastFileUpload = null;
+                        undoFileBtn.style.display = 'none';
+                    }).catch(error => {
+                        showToast('Error removing file: ' + error.message);
+                        console.error(error);
+                    });
+                });
+
+                // Undo Attendance
                 undoBtn.addEventListener('click', () => {
                     if (!lastAction) return;
 
