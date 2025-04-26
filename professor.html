@@ -678,6 +678,7 @@
                 let lastAction = null;
                 let canMark = false;
                 let markingEndTime = null;
+                let professorData = null;
 
                 // Load dark mode preference
                 if (localStorage.getItem('darkMode') === 'enabled') {
@@ -695,19 +696,20 @@
                         return;
                     }
 
-                    // Load professor schedule and check marking window
+                    // Load professor data using UID
                     db.ref('professors/' + user.uid).once('value').then((snapshot) => {
-                        const professor = snapshot.val();
-                        if (!professor || !professor.schedule) {
-                            showToast('Professor schedule not found');
+                        professorData = snapshot.val();
+                        if (!professorData || !professorData.schedule || !professorData.classes) {
+                            showToast('Professor data not found');
                             return;
                         }
 
+                        // Load professor's schedule and check marking window
                         const today = new Date('2025-04-26');
                         const currentDate = today.toISOString().split('T')[0];
                         const currentTime = today.getHours() * 60 + today.getMinutes();
 
-                        const schedule = professor.schedule.find(s => s.day === currentDate);
+                        const schedule = professorData.schedule.find(s => s.day === currentDate);
                         if (!schedule) {
                             showToast('No schedule for today');
                             return;
@@ -732,21 +734,9 @@
                             markingTimer.textContent = 'Marking Window: Closed';
                             markUnmarkedStudents(schedule.class);
                         }
-                    }).catch(error => {
-                        showToast('Error loading schedule');
-                        console.error(error);
-                    });
 
-                    // Load classes
-                    db.ref('students').once('value').then((snapshot) => {
-                        const classes = new Set();
-                        snapshot.forEach((childSnapshot) => {
-                            const student = childSnapshot.val();
-                            const cin = childSnapshot.key;
-                            studentsData.push({ cin, ...student });
-                            if (student.class) classes.add(student.class);
-                        });
-
+                        // Load classes assigned to this professor
+                        const classes = professorData.classes || [];
                         classes.forEach(cls => {
                             const option = document.createElement('option');
                             option.value = cls;
@@ -754,12 +744,45 @@
                             classSelect.appendChild(option);
                         });
 
-                        classModal.style.display = 'flex';
+                        // Load students for the professor's classes
+                        db.ref('students').once('value').then((snapshot) => {
+                            snapshot.forEach((childSnapshot) => {
+                                const student = childSnapshot.val();
+                                const cin = childSnapshot.key;
+                                if (classes.includes(student.class)) {
+                                    studentsData.push({ cin, ...student });
+                                }
+                            });
+
+                            if (classes.length > 0) {
+                                classModal.style.display = 'flex';
+                            } else {
+                                showToast('No classes assigned to you');
+                            }
+                        }).catch(error => {
+                            showToast('Error loading students');
+                            console.error(error);
+                        });
+
+                        // Filter schedule table to show only this professor's lessons
+                        filterScheduleTable(professorData.name);
                     }).catch(error => {
-                        showToast('Error loading classes');
+                        showToast('Error loading professor data');
                         console.error(error);
                     });
                 });
+
+                // Filter the schedule table to show only the logged-in professor's lessons
+                function filterScheduleTable(professorName) {
+                    const rows = document.querySelectorAll('#schedule-table tr');
+                    rows.forEach((row, index) => {
+                        if (index === 0) return; // Skip header row
+                        const teacherCell = row.cells[3]; // Teacher column
+                        if (teacherCell && teacherCell.textContent !== professorName) {
+                            row.style.display = 'none';
+                        }
+                    });
+                }
 
                 // Start marking timer
                 function startMarkingTimer() {
@@ -788,6 +811,12 @@
                     const selectedClass = classSelect.value;
                     if (!selectedClass) {
                         showToast('Please select a class');
+                        return;
+                    }
+
+                    // Verify the selected class belongs to this professor
+                    if (!professorData.classes.includes(selectedClass)) {
+                        showToast('You are not authorized to manage this class');
                         return;
                     }
 
