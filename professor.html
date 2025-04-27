@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ISET Siliana Professor</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -93,6 +92,7 @@
             z-index: 2000;
             justify-content: center;
             align-items: center;
+            overflow-y: auto;
         }
 
         .modal-content {
@@ -102,6 +102,8 @@
             border: 2px solid #3498db;
             width: 90%;
             max-width: 360px;
+            max-height: 80vh;
+            overflow-y: auto;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             animation: slideUp 0.4s ease;
             text-align: center;
@@ -128,7 +130,7 @@
             transition: background 0.3s ease;
         }
 
-        .modal-content button, .action-btn, .collective-btn, .undo-btn, .upload-btn, .undo-file-btn {
+        .modal-content button, .action-btn, .collective-btn, .upload-btn, .section-toggle-btn {
             padding: 14px 24px;
             margin: 10px 5px;
             background-color: #3498db;
@@ -141,7 +143,7 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .modal-content button:hover, .action-btn:hover, .collective-btn:hover, .undo-btn:hover, .upload-btn:hover, .undo-file-btn:hover {
+        .modal-content button:hover, .action-btn:hover, .collective-btn:hover, .upload-btn:hover, .section-toggle-btn:hover {
             background-color: #5dade2;
             transform: scale(1.03);
             box-shadow: 0 3px 12px rgba(52, 152, 219, 0.3);
@@ -184,14 +186,61 @@
             background-color: #c0392b;
         }
 
-        .undo-btn, .undo-file-btn {
-            background-color: #f39c12;
-            display: none;
-            margin: 20px auto;
+        .section-toggle-btn.absences {
+            background-color: #e74c3c;
         }
 
-        .undo-btn:hover, .undo-file-btn:hover {
+        .section-toggle-btn.absences:hover {
+            background-color: #c0392b;
+        }
+
+        .section-toggle-btn.files {
+            background-color: #3498db;
+        }
+
+        .section-toggle-btn.files:hover {
+            background-color: #5dade2;
+        }
+
+        .undo-action-btn {
+            background-color: #f39c12;
+            padding: 6px 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .undo-action-btn:hover {
             background-color: #e67e22;
+        }
+
+        .history-section {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .history-section.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #d1d8e0;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .no-history {
+            color: #e74c3c;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
         }
 
         .student-list {
@@ -410,6 +459,10 @@
             background-color: rgba(149, 165, 166, 0.2);
         }
 
+        body.dark-mode .history-item {
+            border-bottom: 1px solid #5dade2;
+        }
+
         body.dark-mode .schedule-table th {
             background-color: #5dade2;
         }
@@ -431,6 +484,11 @@
 
         @keyframes slideUp {
             from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-10px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
 
@@ -460,7 +518,7 @@
             .modal-content h2, .student-list h2, .schedule-table h2 {
                 font-size: 24px;
             }
-            .modal-content select, .modal-content button, .action-btn, .collective-btn, .undo-btn, .upload-btn, .undo-file-btn {
+            .modal-content select, .modal-content button, .action-btn, .collective-btn, .upload-btn, .section-toggle-btn {
                 font-size: 15px;
                 padding: 12px;
             }
@@ -485,7 +543,7 @@
     <nav>
         <button class="nav-btn" id="home-btn"><span>🏠</span><span>Home</span></button>
         <button class="nav-btn" id="share-files-btn"><span>📤</span><span>Share Files</span></button>
-        <button class="nav-btn" id="logout-btn"><span>🚪</span><span>Logout</span></button>
+        <button class="nav-btn" id="undo-btn"><span>↩️</span><span>Undo</span></button>
         <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
     <main>
@@ -505,6 +563,24 @@
                 <input type="file" id="file-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt">
                 <button class="upload-btn" id="upload-file-btn">Upload</button>
                 <button id="close-file-modal">Close</button>
+            </div>
+        </div>
+
+        <!-- Undo History Modal -->
+        <div id="undo-modal" class="modal">
+            <div class="modal-content">
+                <h2>Action History</h2>
+                <button class="section-toggle-btn absences" id="toggle-absences">Absences</button>
+                <button class="section-toggle-btn files" id="toggle-files">Uploaded Files</button>
+                <div class="history-section" id="absences-section">
+                    <h3>Absences</h3>
+                    <div id="absences-history"></div>
+                </div>
+                <div class="history-section" id="files-section">
+                    <h3>Uploaded Files</h3>
+                    <div id="files-history"></div>
+                </div>
+                <button id="close-undo-modal">Close</button>
             </div>
         </div>
 
@@ -529,10 +605,8 @@
             <div id="students"></div>
         </div>
 
-        <!-- Collective Absent and Undo Buttons -->
+        <!-- Collective Absent Button -->
         <button id="collective-absent" class="collective-btn">Collective Absent</button>
-        <button id="undo-btn" class="undo-btn">Undo Last Action</button>
-        <button id="undo-file-btn" class="undo-file-btn">Undo Last Upload</button>
     </main>
     <div id="toast" class="toast hidden"></div>
 
@@ -540,6 +614,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- CryptoJS for encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             try {
@@ -566,26 +642,31 @@
                 const confirmModal = document.getElementById('confirm-modal');
                 const confirmYes = document.getElementById('confirm-yes');
                 const confirmNo = document.getElementById('confirm-no');
-                const undoBtn = document.getElementById('undo-btn');
-                const undoFileBtn = document.getElementById('undo-file-btn');
                 const markingTimer = document.getElementById('marking-timer');
                 const scheduleBody = document.getElementById('schedule-body');
                 const fileUploadModal = document.getElementById('file-upload-modal');
                 const fileInput = document.getElementById('file-input');
                 const uploadFileBtn = document.getElementById('upload-file-btn');
                 const closeFileModalBtn = document.getElementById('close-file-modal');
+                const undoModal = document.getElementById('undo-modal');
+                const toggleAbsencesBtn = document.getElementById('toggle-absences');
+                const toggleFilesBtn = document.getElementById('toggle-files');
+                const absencesSection = document.getElementById('absences-section');
+                const filesSection = document.getElementById('files-section');
+                const absencesHistory = document.getElementById('absences-history');
+                const filesHistory = document.getElementById('files-history');
+                const closeUndoModalBtn = document.getElementById('close-undo-modal');
 
                 let studentsData = [];
                 let selectedStudents = [];
-                let lastAction = null;
-                let lastFileUpload = null;
                 let canMark = false;
                 let markingEndTime = null;
                 let professorData = null;
                 let professorName = '';
+                let professorEmail = '';
 
-                // Encryption key (in production, this should be securely shared, not hardcoded)
-                const ENCRYPTION_KEY = 'my-secret-key-123'; // Replace with a secure key
+                // Encryption passphrase (should be shared securely in a real app)
+                const ENCRYPTION_KEY = 'securePassphrase123';
 
                 // Load dark mode preference
                 if (localStorage.getItem('darkMode') === 'enabled') {
@@ -603,6 +684,7 @@
                         return;
                     }
 
+                    professorEmail = user.email.replace(/[.@]/g, '_');
                     console.log('Logged-in User Email:', user.email);
                     showToast('Logged-in Email: ' + user.email);
 
@@ -693,6 +775,9 @@
                             showToast('Error loading students: ' + error.message);
                             console.error(error);
                         });
+
+                        // Load action history from database
+                        loadActionHistory();
                     }).catch(error => {
                         showToast('Error loading professor data: ' + error.message);
                         console.error(error);
@@ -789,18 +874,34 @@
                         const student = snapshot.val();
                         const absences = student.absences || [];
 
-                        lastAction = { type: 'single', cin, previousAbsences: [...absences] };
-                        undoBtn.style.display = 'block';
-
                         const today = new Date().toISOString().split('T')[0];
-                        absences.push({ date: today, class: 'IT11', status, weight });
-                        studentRef.update({ absences }).then(() => {
-                            showToast(`Marked as ${status}`);
-                            const studentItem = document.querySelector(`.student-item[data-cin="${cin}"]`);
-                            studentItem.classList.remove('present', 'absent', 'not-marked');
-                            studentItem.classList.add(status);
+                        const action = {
+                            type: 'marking',
+                            cin: cin,
+                            studentName: `${student.firstName} ${student.lastName}`,
+                            status: status,
+                            weight: weight,
+                            date: today,
+                            timestamp: new Date().toISOString(),
+                            previousAbsences: [...absences]
+                        };
+
+                        // Add action to database
+                        const actionRef = db.ref(`professorActions/${professorEmail}`).push();
+                        action.actionId = actionRef.key;
+                        actionRef.set(action).then(() => {
+                            absences.push({ date: today, class: 'IT11', status, weight });
+                            studentRef.update({ absences }).then(() => {
+                                showToast(`Marked as ${status}`);
+                                const studentItem = document.querySelector(`.student-item[data-cin="${cin}"]`);
+                                studentItem.classList.remove('present', 'absent', 'not-marked');
+                                studentItem.classList.add(status);
+                            }).catch(error => {
+                                showToast('Error marking student: ' + error.message);
+                                console.error(error);
+                            });
                         }).catch(error => {
-                            showToast('Error marking student: ' + error.message);
+                            showToast('Error saving action: ' + error.message);
                             console.error(error);
                         });
                     }).catch(error => {
@@ -824,26 +925,42 @@
                         previousStates[student.cin] = [...(student.absences || [])];
                     });
 
-                    lastAction = { type: 'collective', previousStates };
-                    undoBtn.style.display = 'block';
-
                     const today = new Date().toISOString().split('T')[0];
-                    const updates = {};
-                    selectedStudents.forEach(student => {
-                        const absences = student.absences || [];
-                        absences.push({ date: today, class: 'IT11', status: 'absent', weight: 2 });
-                        updates['students/' + student.cin + '/absences'] = absences;
-                    });
+                    const action = {
+                        type: 'collective',
+                        previousStates: previousStates,
+                        date: today,
+                        timestamp: new Date().toISOString(),
+                        students: selectedStudents.map(student => ({
+                            cin: student.cin,
+                            name: `${student.firstName} ${student.lastName}`
+                        }))
+                    };
 
-                    db.ref().update(updates).then(() => {
-                        showToast('All students marked as absent (*2)');
-                        confirmModal.style.display = 'none';
-                        document.querySelectorAll('.student-item').forEach(item => {
-                            item.classList.remove('present', 'absent', 'not-marked');
-                            item.classList.add('absent');
+                    // Add action to database
+                    const actionRef = db.ref(`professorActions/${professorEmail}`).push();
+                    action.actionId = actionRef.key;
+                    actionRef.set(action).then(() => {
+                        const updates = {};
+                        selectedStudents.forEach(student => {
+                            const absences = student.absences || [];
+                            absences.push({ date: today, class: 'IT11', status: 'absent', weight: 2 });
+                            updates['students/' + student.cin + '/absences'] = absences;
+                        });
+
+                        db.ref().update(updates).then(() => {
+                            showToast('All students marked as absent (*2)');
+                            confirmModal.style.display = 'none';
+                            document.querySelectorAll('.student-item').forEach(item => {
+                                item.classList.remove('present', 'absent', 'not-marked');
+                                item.classList.add('absent');
+                            });
+                        }).catch(error => {
+                            showToast('Error marking collective absent: ' + error.message);
+                            console.error(error);
                         });
                     }).catch(error => {
-                        showToast('Error marking collective absent: ' + error.message);
+                        showToast('Error saving action: ' + error.message);
                         console.error(error);
                     });
                 });
@@ -859,7 +976,7 @@
 
                 closeFileModalBtn.addEventListener('click', () => {
                     fileUploadModal.style.display = 'none';
-                    fileInput.value = '';
+                    fileInput.value = ''; // Reset file input
                 });
 
                 // Close file upload modal when clicking outside
@@ -868,9 +985,14 @@
                         fileUploadModal.style.display = 'none';
                         fileInput.value = '';
                     }
+                    if (!undoModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#undo-btn') && undoModal.style.display === 'flex') {
+                        undoModal.style.display = 'none';
+                        absencesSection.classList.remove('show');
+                        filesSection.classList.remove('show');
+                    }
                 });
 
-                // Handle File Upload with Encryption
+                // Handle File Upload with Encryption and Chunking
                 uploadFileBtn.addEventListener('click', () => {
                     const file = fileInput.files[0];
                     if (!file) {
@@ -878,7 +1000,7 @@
                         return;
                     }
 
-                    // Check file size (limit to 10 MB before encryption)
+                    // Check file size (limit to 10 MB)
                     const maxSize = 10 * 1024 * 1024; // 10 MB in bytes
                     if (file.size > maxSize) {
                         showToast('File too large. Please upload a file smaller than 10 MB.');
@@ -887,37 +1009,52 @@
 
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        const fileData = e.target.result; // Data URL format: "data:[type];base64,[base64data]"
-                        const base64String = fileData.split(',')[1]; // Extract Base64 part
+                        const base64String = e.target.result; // Base64 string
+                        const rawData = base64String.split(',')[1]; // Remove "data:*/*;base64," prefix
 
                         // Encrypt the Base64 string
-                        const encryptedData = CryptoJS.AES.encrypt(base64String, ENCRYPTION_KEY).toString();
+                        const encryptedData = CryptoJS.AES.encrypt(rawData, ENCRYPTION_KEY).toString();
+
+                        // Split encrypted data into chunks (4 MB each)
+                        const chunkSize = 4 * 1024 * 1024; // 4 MB in characters (Base64 chars are ~1 byte each)
+                        const chunks = [];
+                        for (let i = 0; i < encryptedData.length; i += chunkSize) {
+                            chunks.push(encryptedData.substring(i, i + chunkSize));
+                        }
+
                         const fileName = file.name;
                         const fileType = file.type || 'application/octet-stream';
                         const uploadDate = new Date().toISOString();
 
-                        // Check size after encryption (Base64 of encrypted data)
-                        const encryptedSize = (encryptedData.length * 3) / 4 / 1024 / 1024; // Approximate size in MB
-                        if (encryptedSize > 10) {
-                            showToast('Encrypted file exceeds database size limit. Try a smaller file.');
-                            return;
-                        }
-
                         // Store in Firebase Realtime Database
                         const newFileRef = db.ref('sharedFiles').push();
-                        const fileId = newFileRef.key;
-                        newFileRef.set({
+                        const fileData = {
                             fileName: fileName,
                             fileType: fileType,
-                            base64: encryptedData,
                             uploadDate: uploadDate,
-                            professorName: professorName
-                        }).then(() => {
-                            showToast('File uploaded successfully');
-                            fileUploadModal.style.display = 'none';
-                            fileInput.value = '';
-                            lastFileUpload = { fileId };
-                            undoFileBtn.style.display = 'block';
+                            professorName: professorName,
+                            chunks: chunks,
+                            chunkCount: chunks.length
+                        };
+
+                        newFileRef.set(fileData).then(() => {
+                            // Log the file upload action
+                            const action = {
+                                type: 'fileUpload',
+                                fileId: newFileRef.key,
+                                fileName: fileName,
+                                timestamp: uploadDate
+                            };
+                            const actionRef = db.ref(`professorActions/${professorEmail}`).push();
+                            action.actionId = actionRef.key;
+                            actionRef.set(action).then(() => {
+                                showToast('File uploaded successfully');
+                                fileUploadModal.style.display = 'none';
+                                fileInput.value = '';
+                            }).catch(error => {
+                                showToast('Error saving action: ' + error.message);
+                                console.error(error);
+                            });
                         }).catch(error => {
                             showToast('Error uploading file: ' + error.message);
                             console.error(error);
@@ -926,62 +1063,153 @@
                     reader.onerror = () => {
                         showToast('Error reading file');
                     };
-                    reader.readAsDataURL(file);
+                    reader.readAsDataURL(file); // Convert file to Base64
                 });
 
-                // Undo File Upload
-                undoFileBtn.addEventListener('click', () => {
-                    if (!lastFileUpload) {
-                        showToast('No file upload to undo');
-                        return;
-                    }
+                // Load action history from database and render in modal
+                function loadActionHistory() {
+                    db.ref(`professorActions/${professorEmail}`).on('value', (snapshot) => {
+                        absencesHistory.innerHTML = '';
+                        filesHistory.innerHTML = '';
 
-                    const { fileId } = lastFileUpload;
-                    db.ref('sharedFiles/' + fileId).remove().then(() => {
-                        showToast('File removed successfully');
-                        lastFileUpload = null;
-                        undoFileBtn.style.display = 'none';
-                    }).catch(error => {
-                        showToast('Error removing file: ' + error.message);
+                        const actions = [];
+                        snapshot.forEach(childSnapshot => {
+                            const action = childSnapshot.val();
+                            action.actionId = childSnapshot.key;
+                            actions.push(action);
+                        });
+
+                        // Sort actions by timestamp (newest first)
+                        actions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                        // Separate actions into absences and files
+                        const absenceActions = actions.filter(a => a.type === 'marking' || a.type === 'collective');
+                        const fileActions = actions.filter(a => a.type === 'fileUpload');
+
+                        // Render absence actions
+                        if (absenceActions.length === 0) {
+                            absencesHistory.innerHTML = `<div class="no-history">No absence actions</div>`;
+                        } else {
+                            absenceActions.forEach(action => {
+                                const actionDate = new Date(action.timestamp).toLocaleString('en-GB', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                if (action.type === 'marking') {
+                                    const historyItem = document.createElement('div');
+                                    historyItem.className = 'history-item';
+                                    historyItem.innerHTML = `
+                                        Marked ${action.studentName} as ${action.status} on ${actionDate}
+                                        <button class="undo-action-btn" data-action-id="${action.actionId}">Undo</button>
+                                    `;
+                                    absencesHistory.appendChild(historyItem);
+                                } else if (action.type === 'collective') {
+                                    const historyItem = document.createElement('div');
+                                    historyItem.className = 'history-item';
+                                    historyItem.innerHTML = `
+                                        Marked all students as absent on ${actionDate}
+                                        <button class="undo-action-btn" data-action-id="${action.actionId}">Undo</button>
+                                    `;
+                                    absencesHistory.appendChild(historyItem);
+                                }
+                            });
+                        }
+
+                        // Render file upload actions
+                        if (fileActions.length === 0) {
+                            filesHistory.innerHTML = `<div class="no-history">No file uploads</div>`;
+                        } else {
+                            fileActions.forEach(action => {
+                                const actionDate = new Date(action.timestamp).toLocaleString('en-GB', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                const historyItem = document.createElement('div');
+                                historyItem.className = 'history-item';
+                                historyItem.innerHTML = `
+                                    Uploaded file ${action.fileName} on ${actionDate}
+                                    <button class="undo-action-btn" data-action-id="${action.actionId}">Undo</button>
+                                `;
+                                filesHistory.appendChild(historyItem);
+                            });
+                        }
+
+                        // Add event listeners to undo buttons
+                        document.querySelectorAll('.undo-action-btn').forEach(btn => {
+                            btn.addEventListener('click', () => {
+                                const actionId = btn.dataset.actionId;
+                                undoAction(actionId);
+                            });
+                        });
+                    }, (error) => {
+                        showToast('Error loading action history: ' + error.message);
                         console.error(error);
                     });
-                });
+                }
 
-                // Undo Attendance
-                undoBtn.addEventListener('click', () => {
-                    if (!lastAction) return;
+                // Undo an action
+                function undoAction(actionId) {
+                    const actionRef = db.ref(`professorActions/${professorEmail}/${actionId}`);
+                    actionRef.once('value').then((snapshot) => {
+                        const action = snapshot.val();
+                        if (!action) return;
 
-                    if (lastAction.type === 'single') {
-                        const { cin, previousAbsences } = lastAction;
-                        db.ref('students/' + cin).update({ absences: previousAbsences }).then(() => {
-                            showToast('Undo successful');
-                            lastAction = null;
-                            undoBtn.style.display = 'none';
-                            const student = selectedStudents.find(s => s.cin === cin);
-                            student.absences = previousAbsences;
-                            renderStudents();
-                        }).catch(error => {
-                            showToast('Error undoing action: ' + error.message);
-                            console.error(error);
-                        });
-                    } else if (lastAction.type === 'collective') {
-                        const updates = {};
-                        for (const cin in lastAction.previousStates) {
-                            updates['students/' + cin + '/absences'] = lastAction.previousStates[cin];
-                            const student = selectedStudents.find(s => s.cin === cin);
-                            if (student) student.absences = lastAction.previousStates[cin];
+                        if (action.type === 'marking') {
+                            const { cin, previousAbsences } = action;
+                            db.ref('students/' + cin).update({ absences: previousAbsences }).then(() => {
+                                showToast('Undo successful');
+                                actionRef.remove().catch(error => {
+                                    showToast('Error removing action: ' + error.message);
+                                    console.error(error);
+                                });
+                                const student = selectedStudents.find(s => s.cin === cin);
+                                if (student) student.absences = previousAbsences;
+                                renderStudents();
+                            }).catch(error => {
+                                showToast('Error undoing action: ' + error.message);
+                                console.error(error);
+                            });
+                        } else if (action.type === 'collective') {
+                            const updates = {};
+                            for (const cin in action.previousStates) {
+                                updates['students/' + cin + '/absences'] = action.previousStates[cin];
+                                const student = selectedStudents.find(s => s.cin === cin);
+                                if (student) student.absences = action.previousStates[cin];
+                            }
+                            db.ref().update(updates).then(() => {
+                                showToast('Undo successful');
+                                actionRef.remove().catch(error => {
+                                    showToast('Error removing action: ' + error.message);
+                                    console.error(error);
+                                });
+                                renderStudents();
+                            }).catch(error => {
+                                showToast('Error undoing action: ' + error.message);
+                                console.error(error);
+                            });
+                        } else if (action.type === 'fileUpload') {
+                            db.ref('sharedFiles/' + action.fileId).remove().then(() => {
+                                showToast('File removed successfully');
+                                actionRef.remove().catch(error => {
+                                    showToast('Error removing action: ' + error.message);
+                                    console.error(error);
+                                });
+                            }).catch(error => {
+                                showToast('Error removing file: ' + error.message);
+                                console.error(error);
+                            });
                         }
-                        db.ref().update(updates).then(() => {
-                            showToast('Undo successful');
-                            lastAction = null;
-                            undoBtn.style.display = 'none';
-                            renderStudents();
-                        }).catch(error => {
-                            showToast('Error undoing action: ' + error.message);
-                            console.error(error);
-                        });
-                    }
-                });
+                    }).catch(error => {
+                        showToast('Error fetching action: ' + error.message);
+                        console.error(error);
+                    });
+                }
 
                 // Mark unmarked students after window closes
                 function markUnmarkedStudents(className) {
@@ -1001,18 +1229,33 @@
                     });
                 }
 
-                // Home button
-                document.getElementById('home-btn').addEventListener('click', () => {
-                    auth.signOut().then(() => {
-                        window.location.href = 'index.html';
-                    }).catch(error => {
-                        showToast('Error logging out: ' + error.message);
-                        console.error(error);
-                    });
+                // Undo Modal Toggle
+                document.getElementById('undo-btn').addEventListener('click', () => {
+                    undoModal.style.display = 'flex';
                 });
 
-                // Logout button
-                document.getElementById('logout-btn').addEventListener('click', () => {
+                closeUndoModalBtn.addEventListener('click', () => {
+                    undoModal.style.display = 'none';
+                    absencesSection.classList.remove('show');
+                    filesSection.classList.remove('show');
+                });
+
+                // Toggle Absences Section
+                toggleAbsencesBtn.addEventListener('click', () => {
+                    const isVisible = absencesSection.classList.contains('show');
+                    absencesSection.classList.toggle('show', !isVisible);
+                    filesSection.classList.remove('show');
+                });
+
+                // Toggle Files Section
+                toggleFilesBtn.addEventListener('click', () => {
+                    const isVisible = filesSection.classList.contains('show');
+                    filesSection.classList.toggle('show', !isVisible);
+                    absencesSection.classList.remove('show');
+                });
+
+                // Home button (now acts as logout)
+                document.getElementById('home-btn').addEventListener('click', () => {
                     auth.signOut().then(() => {
                         showToast('Logged out successfully');
                         window.location.href = 'index.html';
