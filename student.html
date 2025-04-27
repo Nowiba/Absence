@@ -515,13 +515,24 @@
             flex: 1;
         }
 
-        .file-item a {
+        .file-name {
+            color: #3498db;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .file-name:hover {
+            color: #5dade2;
+        }
+
+        .download-link {
             color: #3498db;
             text-decoration: none;
             transition: color 0.3s ease;
         }
 
-        .file-item a:hover {
+        .download-link:hover {
             color: #5dade2;
         }
 
@@ -536,6 +547,20 @@
             font-size: 14px;
             text-align: center;
             padding: 10px;
+        }
+
+        .file-viewer-modal .modal-content {
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            padding: 10px;
+        }
+
+        .file-viewer-modal embed,
+        .file-viewer-modal iframe {
+            width: 100%;
+            height: 90%;
+            border: none;
         }
 
         .toast {
@@ -626,11 +651,11 @@
             color: #bbbbbb;
         }
 
-        body.dark-mode .file-item a {
+        body.dark-mode .file-name, body.dark-mode .download-link {
             color: #5dade2;
         }
 
-        body.dark-mode .file-item a:hover {
+        body.dark-mode .file-name:hover, body.dark-mode .download-link:hover {
             color: #7fbfff;
         }
 
@@ -715,6 +740,10 @@
                 font-size: 13px;
                 padding: 6px;
             }
+            .file-viewer-modal .modal-content {
+                max-width: 90%;
+                height: 70vh;
+            }
         }
     </style>
 </head>
@@ -745,13 +774,11 @@
             <div id="shared-files-list"></div>
         </div>
     </main>
-
     <!-- Schedule Modal -->
     <div id="schedule-modal" class="modal">
         <div class="modal-content">
             <h2>Schedule (IT11)</h2>
             <div id="schedule-days"></div>
-            <button id="close-schedule-btn">Close</button>
         </div>
     </div>
 
@@ -760,7 +787,13 @@
         <div class="modal-content">
             <h2>Classmates</h2>
             <div id="modal-classmates-list"></div>
-            <button id="close-classmates-btn">Close</button>
+        </div>
+    </div>
+
+    <!-- File Viewer Modal -->
+    <div id="file-viewer-modal" class="modal file-viewer-modal">
+        <div class="modal-content">
+            <div id="file-viewer-content"></div>
         </div>
     </div>
 
@@ -1004,7 +1037,7 @@
                                 <div class="subject-details" id="details-${subject.replace(/\s+/g, '-')}">
                                     <div class="absence-count">Absences: ${absenceCount}</div>
                                     ${absencesForSubject.length === 0 ? 
-                                        `<div class="no-absences">No F absences recorded for ${subject}</div>` :
+                                        `<div class="no-absences">No absences recorded for ${subject}</div>` :
                                         absencesForSubject.map(a => `
                                             <div class="absence-item">
                                                 Date: ${a.date} | Weight: ${a.weight}
@@ -1043,6 +1076,9 @@
 
                 // Load shared files
                 const sharedFilesList = document.getElementById('shared-files-list');
+                const fileViewerModal = document.getElementById('file-viewer-modal');
+                const fileViewerContent = document.getElementById('file-viewer-content');
+
                 db.ref('sharedFiles').on('value', (snapshot) => {
                     sharedFilesList.innerHTML = '';
                     const files = [];
@@ -1080,20 +1116,49 @@
                             }
 
                             const base64String = `data:${file.fileType};base64,${decryptedBase64}`;
+                            const fileType = file.fileType.toLowerCase();
+                            const isPDF = fileType.includes('pdf');
+                            const isDoc = fileType.includes('msword') || fileType.includes('wordprocessingml');
+                            const isPPT = fileType.includes('presentationml') || fileType.includes('powerpoint');
 
                             const fileItem = document.createElement('div');
                             fileItem.className = 'file-item';
                             fileItem.innerHTML = `
                                 <div class="file-info">
-                                    <span>${file.fileName}</span>
+                                    <a href="#" class="file-name" data-base64="${base64String}" data-type="${fileType}">${file.fileName}</a>
                                     <div class="file-details">
-                                        Uploaded by: ${file.professorName} (${file.subject})<br>
+                                        Uploaded by: ${file.professorName} (${file.subject || 'N/A'})<br>
                                         ${formattedDate}
                                     </div>
                                 </div>
-                                <a href="${base64String}" download="${file.fileName}">Download</a>
+                                <a href="${base64String}" download="${file.fileName}" class="download-link">Download</a>
                             `;
                             sharedFilesList.appendChild(fileItem);
+                        });
+
+                        // Add event listeners for file name clicks
+                        document.querySelectorAll('.file-name').forEach(link => {
+                            link.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                const base64 = link.dataset.base64;
+                                const fileType = link.dataset.type.toLowerCase();
+                                const isPDF = fileType.includes('pdf');
+                                const isDoc = fileType.includes('msword') || fileType.includes('wordprocessingml');
+                                const isPPT = fileType.includes('presentationml') || fileType.includes('powerpoint');
+
+                                if (isPDF) {
+                                    fileViewerContent.innerHTML = `<embed src="${base64}" type="application/pdf">`;
+                                } else if (isDoc || isPPT) {
+                                    // Use Google Docs Viewer for Word and PPTX files
+                                    const encodedUrl = encodeURIComponent(base64);
+                                    fileViewerContent.innerHTML = `<iframe src="https://docs.google.com/viewer?url=${encodedUrl}&embedded=true"></iframe>`;
+                                } else {
+                                    showToast('Preview not supported for this file type');
+                                    return;
+                                }
+
+                                fileViewerModal.style.display = 'flex';
+                            });
                         });
                     }
                 }, (error) => {
@@ -1136,16 +1201,8 @@
                     scheduleModal.style.display = 'flex';
                 });
 
-                document.getElementById('close-schedule-btn').addEventListener('click', () => {
-                    scheduleModal.style.display = 'none';
-                });
-
                 document.getElementById('classmates-btn').addEventListener('click', () => {
                     classmatesModal.style.display = 'flex';
-                });
-
-                document.getElementById('close-classmates-btn').addEventListener('click', () => {
-                    classmatesModal.style.display = 'none';
                 });
 
                 document.getElementById('email-btn').addEventListener('click', () => {
@@ -1179,6 +1236,10 @@
                     }
                     if (!classmatesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#classmates-btn') && classmatesModal.style.display === 'flex') {
                         classmatesModal.style.display = 'none';
+                    }
+                    if (!fileViewerModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('.file-name') && fileViewerModal.style.display === 'flex') {
+                        fileViewerModal.style.display = 'none';
+                        fileViewerContent.innerHTML = ''; // Clear viewer content
                     }
                     if (!emailSidebar.contains(e.target) && !e.target.closest('#email-btn') && emailSidebar.classList.contains('open')) {
                         emailSidebar.classList.remove('open');
