@@ -110,7 +110,6 @@
             text-align: center;
         }
 
-        /* Updated Undo Modal Design */
         #undo-modal .modal-content {
             background-color: #1e2a38;
             border: 2px solid #5dade2;
@@ -175,7 +174,7 @@
             background-color: #c0392b;
         }
 
-        .action-btn:disabled {
+        .action-btn:disabled, .collective-btn:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
         }
@@ -299,11 +298,11 @@
         }
 
         .student-item.present {
-            background-color: rgba(46, 204, 113, 0.1);
+            background-color: #2ecc71; /* Green for present */
         }
 
         .student-item.absent {
-            background-color: rgba(231, 76, 60, 0.1);
+            background-color: #e74c3c; /* Red for absent */
         }
 
         .student-item.not-marked {
@@ -351,14 +350,6 @@
         .student-actions {
             display: flex;
             gap: 10px;
-        }
-
-        .timer {
-            text-align: center;
-            margin: 10px 0;
-            font-size: 16px;
-            color: #e74c3c;
-            font-weight: 700;
         }
 
         .schedule-table {
@@ -472,7 +463,6 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* Dark Mode */
         body.dark-mode {
             background-color: #1a1a1a;
             color: #e0e0e0;
@@ -527,11 +517,11 @@
         }
 
         body.dark-mode .student-item.present {
-            background-color: rgba(46, 204, 113, 0.2);
+            background-color: #2ecc71;
         }
 
         body.dark-mode .student-item.absent {
-            background-color: rgba(231, 76, 60, 0.2);
+            background-color: #e74c3c;
         }
 
         body.dark-mode .student-item.not-marked {
@@ -576,7 +566,6 @@
             color: #e0e0e0;
         }
 
-        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -602,7 +591,6 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* Responsive Design */
         @media (max-width: 600px) {
             header h1 {
                 font-size: 20px;
@@ -663,13 +651,11 @@
         <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
     <main>
-        <!-- Welcome Letter -->
         <section id="welcome-letter" class="welcome-letter">
             <h2>Welcome</h2>
             <p id="welcome-message">Loading...</p>
         </section>
 
-        <!-- Confirmation Modal for Collective Absent -->
         <div id="confirm-modal" class="modal">
             <div class="modal-content">
                 <h2>Are you sure?</h2>
@@ -678,7 +664,6 @@
             </div>
         </div>
 
-        <!-- File Upload Modal -->
         <div id="file-upload-modal" class="modal">
             <div class="modal-content">
                 <h2>Share a File</h2>
@@ -687,7 +672,6 @@
             </div>
         </div>
 
-        <!-- Undo History Modal -->
         <div id="undo-modal" class="modal">
             <div class="modal-content">
                 <h2>Action History</h2>
@@ -704,7 +688,6 @@
             </div>
         </div>
 
-        <!-- Professor's Schedule -->
         <div id="professor-schedule" class="schedule-table">
             <h2>My Schedule (IT11)</h2>
             <table>
@@ -717,29 +700,23 @@
             </table>
         </div>
 
-        <!-- Student List -->
         <div id="student-list" class="student-list">
             <h2>Students in IT11</h2>
             <div>Total Students: <span id="total-students">0</span></div>
-            <div class="timer" id="marking-timer">Marking Window: Loading...</div>
             <div id="students"></div>
         </div>
 
-        <!-- Collective Absent Button -->
         <button id="collective-absent" class="collective-btn">Collective Absent</button>
     </main>
     <div id="toast" class="toast hidden"></div>
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <!-- CryptoJS for encryption -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             try {
-                // Firebase Configuration
                 const firebaseConfig = {
                     apiKey: "AIzaSyAoXhEeGA22chByuIyxjWzmsFsQJSjqZJY",
                     authDomain: "absence-iset-siliana.firebaseapp.com",
@@ -754,7 +731,7 @@
                 const auth = firebase.auth();
                 const db = firebase.database();
 
-                // Elements
+                const welcomeLetter = document.getElementById('welcome-letter');
                 const welcomeMessage = document.getElementById('welcome-message');
                 const studentList = document.getElementById('student-list');
                 const totalStudentsSpan = document.getElementById('total-students');
@@ -763,7 +740,6 @@
                 const confirmModal = document.getElementById('confirm-modal');
                 const confirmYes = document.getElementById('confirm-yes');
                 const confirmNo = document.getElementById('confirm-no');
-                const markingTimer = document.getElementById('marking-timer');
                 const scheduleBody = document.getElementById('schedule-body');
                 const fileUploadModal = document.getElementById('file-upload-modal');
                 const fileInput = document.getElementById('file-input');
@@ -779,16 +755,14 @@
                 let studentsData = [];
                 let selectedStudents = [];
                 let canMark = false;
-                let markingEndTime = null;
                 let professorData = null;
                 let professorName = '';
                 let professorEmail = '';
                 let currentSubject = '';
+                let professorKey = null;
 
-                // Encryption passphrase (should be shared securely in a real app)
                 const ENCRYPTION_KEY = 'securePassphrase123';
 
-                // Toast notification
                 function showToast(message) {
                     const toast = document.getElementById('toast');
                     toast.textContent = message;
@@ -800,7 +774,6 @@
                     }, 3000);
                 }
 
-                // Load dark mode preference
                 if (localStorage.getItem('darkMode') === 'enabled') {
                     document.body.classList.add('dark-mode');
                     const toggleButton = document.getElementById('dark-mode-toggle');
@@ -808,7 +781,6 @@
                     toggleButton.querySelector('span:last-child').textContent = 'Light Mode';
                 }
 
-                // Check authentication
                 auth.onAuthStateChanged((user) => {
                     if (!user) {
                         showToast('Please log in');
@@ -817,82 +789,71 @@
                     }
 
                     professorEmail = user.email.replace(/[.@]/g, '_');
-                    console.log('Logged-in User Email:', user.email);
-                    showToast('Logged-in Email: ' + user.email);
 
-                    // Load professor data using email
                     db.ref('professors').once('value').then((snapshot) => {
                         let professorFound = false;
-                        let professorKey = null;
-                        let databaseEmails = [];
-
                         snapshot.forEach((childSnapshot) => {
                             const professor = childSnapshot.val();
-                            databaseEmails.push(professor.email);
                             if (professor.email === user.email) {
                                 professorData = professor;
                                 professorKey = childSnapshot.key;
                                 professorFound = true;
-                                professorName = professor.name; // e.g., "Mme. Wafa Rejbi"
+                                professorName = professor.name;
                             }
                         });
-
-                        console.log('Database Emails:', databaseEmails);
-                        showToast('Database Emails: ' + databaseEmails.join(', '));
 
                         if (!professorFound || !professorData || !professorData.schedule || !professorData.classes) {
                             showToast('Professor data not found. Please check your email in the database.');
                             return;
                         }
 
-                        console.log('Professor Data:', professorData);
+                        const hasSeenWelcome = professorData.hasSeenWelcome || false;
+                        if (!hasSeenWelcome) {
+                            welcomeMessage.innerHTML = `
+                                Dear ${professorName},<br><br>
+                                Welcome to the ISET Siliana Professor Portal! We are delighted to have you here. This platform allows you to manage your classes, mark student attendance, share files, and track your schedule with ease. If you have any questions or need assistance, feel free to reach out to the administration.<br><br>
+                                Best regards,<br>
+                                ISET Siliana Team
+                            `;
+                            setTimeout(() => {
+                                welcomeMessage.innerHTML = `Welcome Dear ${professorName}`;
+                                db.ref(`professors/${professorKey}`).update({ hasSeenWelcome: true });
+                            }, 30000);
+                        } else {
+                            welcomeMessage.innerHTML = `Welcome Dear ${professorName}`;
+                        }
 
-                        // Display welcome letter
-                        welcomeMessage.innerHTML = `
-                            Dear ${professorName},<br><br>
-                            Welcome to the ISET Siliana Professor Portal! We are delighted to have you here. This platform allows you to manage your classes, mark student attendance, share files, and track your schedule with ease. If you have any questions or need assistance, feel free to reach out to the administration.<br><br>
-                            Best regards,<br>
-                            ISET Siliana Team
-                        `;
-
-                        // Display the professor's schedule
                         displayProfessorSchedule(professorData.schedule);
 
-                        // Determine the current day of the week
                         const today = new Date();
                         const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
                         const currentDay = daysOfWeek[today.getDay()];
 
-                        // Find today's schedule for the professor to get the subject
                         const schedule = professorData.schedule.find(s => s.day === currentDay);
                         if (!schedule) {
                             showToast('No schedule for today');
-                            markingTimer.textContent = 'Marking Window: No session today';
                             collectiveAbsentBtn.style.display = 'none';
-                            currentSubject = ''; // No subject today
+                            currentSubject = '';
                         } else {
-                            currentSubject = schedule.subject; // e.g., "Dev Web"
+                            currentSubject = schedule.subject;
 
-                            // Check if marking is allowed (from 00:00 to 23:59 of the current day)
                             const startOfDay = new Date(today);
                             startOfDay.setHours(0, 0, 0, 0);
                             const endOfDay = new Date(today);
                             endOfDay.setHours(23, 59, 59, 999);
-                            markingEndTime = endOfDay.getTime();
 
                             const currentTime = today.getTime();
                             if (currentTime >= startOfDay.getTime() && currentTime <= endOfDay.getTime()) {
                                 canMark = true;
-                                startMarkingTimer();
                             } else {
                                 showToast('Marking window closed');
-                                markingTimer.textContent = 'Marking Window: Closed';
                                 collectiveAbsentBtn.style.display = 'none';
                                 markUnmarkedStudents(schedule.class);
                             }
                         }
 
-                        // Load students for the professor's class (IT11)
+                        checkAndResetMarkings();
+
                         db.ref('students').once('value').then((snapshot) => {
                             snapshot.forEach((childSnapshot) => {
                                 const student = childSnapshot.val();
@@ -912,19 +873,31 @@
                                 showToast('No students found for IT11');
                             }
                         }).catch(error => {
-                            showToast('Error loading students: ' + error.message);
+                            showToast('Error loading students');
                             console.error(error);
                         });
 
-                        // Load action history from database
                         loadActionHistory();
                     }).catch(error => {
-                        showToast('Error loading professor data: ' + error.message);
+                        showToast('Error loading professor data');
                         console.error(error);
                     });
                 });
 
-                // Display the professor's schedule
+                function checkAndResetMarkings() {
+                    const today = new Date().toISOString().split('T')[0];
+                    const lastMarkingDate = professorData.lastMarkingDate || '';
+
+                    if (lastMarkingDate !== today) {
+                        db.ref(`professorActions/${professorEmail}`).remove().then(() => {
+                            db.ref(`professors/${professorKey}`).update({ lastMarkingDate: today });
+                        }).catch(error => {
+                            showToast('Error resetting markings');
+                            console.error(error);
+                        });
+                    }
+                }
+
                 function displayProfessorSchedule(schedule) {
                     scheduleBody.innerHTML = '';
                     schedule.forEach(session => {
@@ -938,30 +911,6 @@
                     });
                 }
 
-                // Start marking timer
-                function startMarkingTimer() {
-                    const updateTimer = () => {
-                        const now = new Date().getTime();
-                        const timeLeft = markingEndTime - now;
-
-                        if (timeLeft <= 0) {
-                            canMark = false;
-                            markingTimer.textContent = 'Marking Window: Closed';
-                            collectiveAbsentBtn.style.display = 'none';
-                            markUnmarkedStudents('IT11');
-                            return;
-                        }
-
-                        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                        markingTimer.textContent = `Marking Window: ${hours}h ${minutes}m ${seconds}s`;
-                        setTimeout(updateTimer, 1000);
-                    };
-                    updateTimer();
-                }
-
-                // Render students
                 function renderStudents() {
                     studentsDiv.innerHTML = '';
                     selectedStudents.forEach(student => {
@@ -975,10 +924,11 @@
                         const statusClass = todayAbsence ? (todayAbsence.status === 'present' ? 'present' : todayAbsence.status === 'absent' ? 'absent' : 'not-marked') : 'not-marked';
                         studentItem.classList.add(statusClass);
 
-                        // Calculate total absences for the current subject
                         const totalAbsencesForSubject = absences.reduce((total, a) => {
                             return a.status === 'absent' && a.subject === currentSubject ? total + a.weight : total;
                         }, 0);
+
+                        const isMarked = todayAbsence && (todayAbsence.status === 'present' || todayAbsence.status === 'absent');
 
                         studentItem.innerHTML = `
                             <div class="student-info">
@@ -992,27 +942,23 @@
                                 </div>
                             </div>
                             <div class="student-actions">
-                                <button class="action-btn present" data-cin="${student.cin}" ${!canMark ? 'disabled' : ''}>Present</button>
-                                <button class="action-btn absent" data-cin="${student.cin}" ${!canMark ? 'disabled' : ''}>Absent</button>
+                                <button class="action-btn present" data-cin="${student.cin}" ${!canMark || isMarked ? 'disabled' : ''}>Present</button>
+                                <button class="action-btn absent" data-cin="${student.cin}" ${!canMark || isMarked ? 'disabled' : ''}>Absent</button>
                             </div>
                         `;
                         studentsDiv.appendChild(studentItem);
                     });
 
-                    // Add click event listeners for student items
                     document.querySelectorAll('.student-item').forEach(item => {
                         item.addEventListener('click', (e) => {
-                            // Prevent triggering the parent click event when clicking buttons
                             if (e.target.classList.contains('action-btn')) return;
 
                             const cin = item.dataset.cin;
                             const details = document.getElementById(`details-${cin}`);
                             const isVisible = details.classList.contains('show');
 
-                            // Hide all other details
                             document.querySelectorAll('.student-details').forEach(d => d.classList.remove('show'));
 
-                            // Toggle visibility of the clicked student's details
                             if (!isVisible) {
                                 details.classList.add('show');
                             }
@@ -1033,14 +979,24 @@
                     });
                 }
 
-                // Mark a single student
                 function markStudent(cin, status, weight) {
                     const studentRef = db.ref('students/' + cin);
                     studentRef.once('value').then((snapshot) => {
                         const student = snapshot.val();
-                        const absences = student.absences || [];
+                        if (!student) {
+                            showToast('Student not found');
+                            return;
+                        }
 
+                        const absences = student.absences || [];
                         const today = new Date().toISOString().split('T')[0];
+                        const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
+
+                        if (todayAbsence && (todayAbsence.status === 'present' || todayAbsence.status === 'absent')) {
+                            showToast('Student already marked. Use undo to change.');
+                            return;
+                        }
+
                         const action = {
                             type: 'marking',
                             cin: cin,
@@ -1053,46 +1009,71 @@
                             previousAbsences: [...absences]
                         };
 
-                        // Add action to database
                         const actionRef = db.ref(`professorActions/${professorEmail}`).push();
                         action.actionId = actionRef.key;
                         actionRef.set(action).then(() => {
-                            absences.push({ date: today, class: 'IT11', status, weight, subject: currentSubject || 'N/A' });
-                            studentRef.update({ absences }).then(() => {
+                            const updatedAbsences = absences.filter(a => !(a.date === today && a.class === 'IT11'));
+                            updatedAbsences.push({ date: today, class: 'IT11', status, weight, subject: currentSubject || 'N/A' });
+                            studentRef.update({ absences: updatedAbsences }).then(() => {
                                 showToast(`Marked as ${status}`);
                                 const studentItem = document.querySelector(`.student-item[data-cin="${cin}"]`);
                                 studentItem.classList.remove('present', 'absent', 'not-marked');
                                 studentItem.classList.add(status);
+
+                                studentItem.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
+                                collectiveAbsentBtn.disabled = true;
+
+                                const student = selectedStudents.find(s => s.cin === cin);
+                                if (student) student.absences = updatedAbsences;
                             }).catch(error => {
-                                showToast('Error marking student: ' + error.message);
+                                showToast('Error marking student');
                                 console.error(error);
                             });
                         }).catch(error => {
-                            showToast('Error saving action: ' + error.message);
+                            showToast('Error saving action');
                             console.error(error);
                         });
                     }).catch(error => {
-                        showToast('Error fetching student data: ' + error.message);
+                        showToast('Error fetching student data');
                         console.error(error);
                     });
                 }
 
-                // Collective Absent
                 collectiveAbsentBtn.addEventListener('click', () => {
                     if (!canMark) {
                         showToast('Marking window closed');
+                        return;
+                    }
+                    if (collectiveAbsentBtn.disabled) {
+                        showToast('Students already marked. Use undo to change.');
                         return;
                     }
                     confirmModal.style.display = 'flex';
                 });
 
                 confirmYes.addEventListener('click', () => {
+                    const today = new Date().toISOString().split('T')[0];
+                    const updates = {};
                     const previousStates = {};
+
                     selectedStudents.forEach(student => {
-                        previousStates[student.cin] = [...(student.absences || [])];
+                        const absences = student.absences || [];
+                        const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
+                        if (todayAbsence && (todayAbsence.status === 'present' || todayAbsence.status === 'absent')) {
+                            return;
+                        }
+                        previousStates[student.cin] = [...absences];
+                        const updatedAbsences = absences.filter(a => !(a.date === today && a.class === 'IT11'));
+                        updatedAbsences.push({ date: today, class: 'IT11', status: 'absent', weight: 2, subject: currentSubject || 'N/A' });
+                        updates['students/' + student.cin + '/absences'] = updatedAbsences;
                     });
 
-                    const today = new Date().toISOString().split('T')[0];
+                    if (Object.keys(updates).length === 0) {
+                        showToast('All students already marked. Use undo to change.');
+                        confirmModal.style.display = 'none';
+                        return;
+                    }
+
                     const action = {
                         type: 'collective',
                         previousStates: previousStates,
@@ -1105,30 +1086,33 @@
                         }))
                     };
 
-                    // Add action to database
                     const actionRef = db.ref(`professorActions/${professorEmail}`).push();
                     action.actionId = actionRef.key;
                     actionRef.set(action).then(() => {
-                        const updates = {};
-                        selectedStudents.forEach(student => {
-                            const absences = student.absences || [];
-                            absences.push({ date: today, class: 'IT11', status: 'absent', weight: 2, subject: currentSubject || 'N/A' });
-                            updates['students/' + student.cin + '/absences'] = absences;
-                        });
-
                         db.ref().update(updates).then(() => {
                             showToast('All students marked as absent (*2)');
                             confirmModal.style.display = 'none';
                             document.querySelectorAll('.student-item').forEach(item => {
-                                item.classList.remove('present', 'absent', 'not-marked');
-                                item.classList.add('absent');
+                                const cin = item.dataset.cin;
+                                if (previousStates[cin]) {
+                                    item.classList.remove('present', 'absent', 'not-marked');
+                                    item.classList.add('absent');
+                                    item.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
+                                }
+                            });
+                            collectiveAbsentBtn.disabled = true;
+
+                            selectedStudents.forEach(student => {
+                                if (previousStates[student.cin]) {
+                                    student.absences = updates['students/' + student.cin + '/absences'];
+                                }
                             });
                         }).catch(error => {
-                            showToast('Error marking collective absent: ' + error.message);
+                            showToast('Error marking collective absent');
                             console.error(error);
                         });
                     }).catch(error => {
-                        showToast('Error saving action: ' + error.message);
+                        showToast('Error saving action');
                         console.error(error);
                     });
                 });
@@ -1137,12 +1121,10 @@
                     confirmModal.style.display = 'none';
                 });
 
-                // File Upload Modal Toggle
                 document.getElementById('share-files-btn').addEventListener('click', () => {
                     fileUploadModal.style.display = 'flex';
                 });
 
-                // Handle File Upload with Encryption and Chunking
                 uploadFileBtn.addEventListener('click', () => {
                     const file = fileInput.files[0];
                     if (!file) {
@@ -1150,8 +1132,7 @@
                         return;
                     }
 
-                    // Check file size (limit to 10 MB)
-                    const maxSize = 10 * 1024 * 1024; // 10 MB in bytes
+                    const maxSize = 10 * 1024 * 1024;
                     if (file.size > maxSize) {
                         showToast('File too large. Please upload a file smaller than 10 MB.');
                         return;
@@ -1159,14 +1140,12 @@
 
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        const base64String = e.target.result; // Base64 string
-                        const rawData = base64String.split(',')[1]; // Remove "data:*/*;base64," prefix
+                        const base64String = e.target.result;
+                        const rawData = base64String.split(',')[1];
 
-                        // Encrypt the Base64 string
                         const encryptedData = CryptoJS.AES.encrypt(rawData, ENCRYPTION_KEY).toString();
 
-                        // Split encrypted data into chunks (4 MB each)
-                        const chunkSize = 4 * 1024 * 1024; // 4 MB in characters (Base64 chars are ~1 byte each)
+                        const chunkSize = 4 * 1024 * 1024;
                         const chunks = [];
                         for (let i = 0; i < encryptedData.length; i += chunkSize) {
                             chunks.push(encryptedData.substring(i, i + chunkSize));
@@ -1176,7 +1155,6 @@
                         const fileType = file.type || 'application/octet-stream';
                         const uploadDate = new Date().toISOString();
 
-                        // Store in Firebase Realtime Database
                         const newFileRef = db.ref('sharedFiles').push();
                         const fileData = {
                             fileName: fileName,
@@ -1188,7 +1166,6 @@
                         };
 
                         newFileRef.set(fileData).then(() => {
-                            // Log the file upload action
                             const action = {
                                 type: 'fileUpload',
                                 fileId: newFileRef.key,
@@ -1202,21 +1179,20 @@
                                 fileUploadModal.style.display = 'none';
                                 fileInput.value = '';
                             }).catch(error => {
-                                showToast('Error saving action: ' + error.message);
+                                showToast('Error saving action');
                                 console.error(error);
                             });
                         }).catch(error => {
-                            showToast('Error uploading file: ' + error.message);
+                            showToast('Error uploading file');
                             console.error(error);
                         });
                     };
                     reader.onerror = () => {
                         showToast('Error reading file');
                     };
-                    reader.readAsDataURL(file); // Convert file to Base64
+                    reader.readAsDataURL(file);
                 });
 
-                // Load action history from database and render in modal
                 function loadActionHistory() {
                     db.ref(`professorActions/${professorEmail}`).on('value', (snapshot) => {
                         absencesHistory.innerHTML = '';
@@ -1229,14 +1205,11 @@
                             actions.push(action);
                         });
 
-                        // Sort actions by timestamp (newest first)
                         actions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-                        // Separate actions into absences and files
                         const absenceActions = actions.filter(a => a.type === 'marking' || a.type === 'collective');
                         const fileActions = actions.filter(a => a.type === 'fileUpload');
 
-                        // Render absence actions
                         if (absenceActions.length === 0) {
                             absencesHistory.innerHTML = `<div class="no-history">No absence actions</div>`;
                         } else {
@@ -1268,7 +1241,6 @@
                             });
                         }
 
-                        // Render file upload actions
                         if (fileActions.length === 0) {
                             filesHistory.innerHTML = `<div class="no-history">No file uploads</div>`;
                         } else {
@@ -1290,7 +1262,6 @@
                             });
                         }
 
-                        // Add event listeners to undo buttons
                         document.querySelectorAll('.undo-action-btn').forEach(btn => {
                             btn.addEventListener('click', () => {
                                 const actionId = btn.dataset.actionId;
@@ -1298,12 +1269,11 @@
                             });
                         });
                     }, (error) => {
-                        showToast('Error loading action history: ' + error.message);
+                        showToast('Error loading action history');
                         console.error(error);
                     });
                 }
 
-                // Undo an action
                 function undoAction(actionId) {
                     const actionRef = db.ref(`professorActions/${professorEmail}/${actionId}`);
                     actionRef.once('value').then((snapshot) => {
@@ -1315,14 +1285,18 @@
                             db.ref('students/' + cin).update({ absences: previousAbsences }).then(() => {
                                 showToast('Undo successful');
                                 actionRef.remove().catch(error => {
-                                    showToast('Error removing action: ' + error.message);
+                                    showToast('Error removing action');
                                     console.error(error);
                                 });
                                 const student = selectedStudents.find(s => s.cin === cin);
                                 if (student) student.absences = previousAbsences;
                                 renderStudents();
+
+                                const studentItem = document.querySelector(`.student-item[data-cin="${cin}"]`);
+                                studentItem.querySelectorAll('.action-btn').forEach(btn => btn.disabled = false);
+                                checkIfAllStudentsMarked();
                             }).catch(error => {
-                                showToast('Error undoing action: ' + error.message);
+                                showToast('Error undoing action');
                                 console.error(error);
                             });
                         } else if (action.type === 'collective') {
@@ -1335,33 +1309,52 @@
                             db.ref().update(updates).then(() => {
                                 showToast('Undo successful');
                                 actionRef.remove().catch(error => {
-                                    showToast('Error removing action: ' + error.message);
+                                    showToast('Error removing action');
                                     console.error(error);
                                 });
                                 renderStudents();
+                                collectiveAbsentBtn.disabled = false;
+                                document.querySelectorAll('.student-item').forEach(item => {
+                                    const cin = item.dataset.cin;
+                                    if (action.previousStates[cin]) {
+                                        item.querySelectorAll('.action-btn').forEach(btn => btn.disabled = false);
+                                    }
+                                });
                             }).catch(error => {
-                                showToast('Error undoing action: ' + error.message);
+                                showToast('Error undoing action');
                                 console.error(error);
                             });
                         } else if (action.type === 'fileUpload') {
                             db.ref('sharedFiles/' + action.fileId).remove().then(() => {
                                 showToast('File removed successfully');
                                 actionRef.remove().catch(error => {
-                                    showToast('Error removing action: ' + error.message);
+                                    showToast('Error removing action');
                                     console.error(error);
                                 });
                             }).catch(error => {
-                                showToast('Error removing file: ' + error.message);
+                                showToast('Error removing file');
                                 console.error(error);
                             });
                         }
                     }).catch(error => {
-                        showToast('Error fetching action: ' + error.message);
+                        showToast('Error fetching action');
                         console.error(error);
                     });
                 }
 
-                // Mark unmarked students after window closes
+                function checkIfAllStudentsMarked() {
+                    const today = new Date().toISOString().split('T')[0];
+                    let allMarked = true;
+                    selectedStudents.forEach(student => {
+                        const absences = student.absences || [];
+                        const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
+                        if (!todayAbsence || (todayAbsence.status !== 'present' && todayAbsence.status !== 'absent')) {
+                            allMarked = false;
+                        }
+                    });
+                    collectiveAbsentBtn.disabled = allMarked;
+                }
+
                 function markUnmarkedStudents(className) {
                     const today = new Date().toISOString().split('T')[0];
                     const updates = {};
@@ -1374,31 +1367,27 @@
                         }
                     });
                     db.ref().update(updates).catch(error => {
-                        showToast('Error marking unmarked students: ' + error.message);
+                        showToast('Error marking unmarked students');
                         console.error(error);
                     });
                 }
 
-                // Undo Modal Toggle
                 document.getElementById('undo-btn').addEventListener('click', () => {
                     undoModal.style.display = 'flex';
                 });
 
-                // Toggle Absences Section
                 toggleAbsencesBtn.addEventListener('click', () => {
                     const isVisible = absencesSection.classList.contains('show');
                     absencesSection.classList.toggle('show', !isVisible);
                     filesSection.classList.remove('show');
                 });
 
-                // Toggle Files Section
                 toggleFilesBtn.addEventListener('click', () => {
                     const isVisible = filesSection.classList.contains('show');
                     filesSection.classList.toggle('show', !isVisible);
                     absencesSection.classList.remove('show');
                 });
 
-                // Close modals when clicking outside
                 document.addEventListener('click', (e) => {
                     if (!fileUploadModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#share-files-btn') && fileUploadModal.style.display === 'flex') {
                         fileUploadModal.style.display = 'none';
@@ -1414,18 +1403,16 @@
                     }
                 });
 
-                // Home button (now acts as logout)
                 document.getElementById('home-btn').addEventListener('click', () => {
                     auth.signOut().then(() => {
                         showToast('Logged out successfully');
                         window.location.href = 'index.html';
                     }).catch(error => {
-                        showToast('Error logging out: ' + error.message);
+                        showToast('Error logging out');
                         console.error(error);
                     });
                 });
 
-                // Dark mode toggle
                 document.getElementById('dark-mode-toggle').addEventListener('click', () => {
                     document.body.classList.toggle('dark-mode');
                     const isDarkMode = document.body.classList.contains('dark-mode');
@@ -1437,7 +1424,7 @@
                 });
             } catch (error) {
                 console.error('Initialization error:', error);
-                showToast('Error initializing page: ' + error.message);
+                showToast('Error initializing page');
             }
         });
     </script>
