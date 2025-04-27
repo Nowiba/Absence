@@ -14,6 +14,7 @@
             background-color: #f5f5f5;
             color: #333;
             transition: background-color 0.3s ease, color 0.3s ease;
+            user-select: none; /* Prevent text selection */
         }
 
         header {
@@ -109,25 +110,28 @@
             text-align: center;
         }
 
-        .modal-content h2 {
-            margin-bottom: 24px;
-            color: #2c3e50;
-            font-size: 26px;
-            font-weight: 700;
-            position: relative;
-            transition: color 0.3s ease;
+        /* Updated Undo Modal Design */
+        #undo-modal .modal-content {
+            background-color: #1e2a38;
+            border: 2px solid #5dade2;
+            color: #e0e0e0;
         }
 
-        .modal-content h2::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(90deg, #3498db, #5dade2);
-            transition: background 0.3s ease;
+        #undo-modal .modal-content h2 {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        #undo-modal .modal-content h2::after {
+            background: linear-gradient(90deg, #5dade2, #7fbfff);
+        }
+
+        #undo-modal .modal-content h3 {
+            color: #a5d6ff;
+            font-size: 20px;
+            margin-bottom: 10px;
         }
 
         .modal-content button, .action-btn, .collective-btn, .upload-btn, .section-toggle-btn {
@@ -188,6 +192,8 @@
 
         .section-toggle-btn.absences {
             background-color: #e74c3c;
+            border-radius: 20px;
+            padding: 12px 20px;
         }
 
         .section-toggle-btn.absences:hover {
@@ -196,6 +202,8 @@
 
         .section-toggle-btn.files {
             background-color: #3498db;
+            border-radius: 20px;
+            padding: 12px 20px;
         }
 
         .section-toggle-btn.files:hover {
@@ -204,9 +212,10 @@
 
         .undo-action-btn {
             background-color: #f39c12;
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 8px 16px;
+            font-size: 14px;
             margin-left: 10px;
+            border-radius: 15px;
         }
 
         .undo-action-btn:hover {
@@ -216,6 +225,9 @@
         .history-section {
             display: none;
             margin-top: 15px;
+            background-color: #2c3e50;
+            padding: 15px;
+            border-radius: 10px;
         }
 
         .history-section.show {
@@ -224,9 +236,9 @@
         }
 
         .history-item {
-            padding: 10px;
-            border-bottom: 1px solid #d1d8e0;
-            font-size: 14px;
+            padding: 12px;
+            border-bottom: 1px solid #5dade2;
+            font-size: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -237,8 +249,8 @@
         }
 
         .no-history {
-            color: #e74c3c;
-            font-size: 14px;
+            color: #ff6b6b;
+            font-size: 16px;
             text-align: center;
             padding: 10px;
         }
@@ -280,9 +292,6 @@
             padding: 10px;
             border-bottom: 1px solid #d1d8e0;
             font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
             transition: border-color 0.3s ease, background-color 0.3s ease;
@@ -310,6 +319,33 @@
 
         .student-info {
             flex: 1;
+        }
+
+        .student-name {
+            font-size: 18px; /* Increased font size for names */
+            font-weight: 600;
+            cursor: pointer;
+            color: #2c3e50;
+            transition: color 0.3s ease;
+        }
+
+        .student-name:hover {
+            color: #3498db;
+        }
+
+        .student-details {
+            display: none;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin-top: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .student-details.show {
+            display: block;
+            animation: slideDown 0.3s ease;
         }
 
         .student-actions {
@@ -431,6 +467,11 @@
             border-color: #5dade2;
         }
 
+        body.dark-mode #undo-modal .modal-content {
+            background-color: #1e2a38;
+            border-color: #5dade2;
+        }
+
         body.dark-mode .modal-content h2, body.dark-mode .student-list h2, body.dark-mode .schedule-table h2 {
             color: #e0e0e0;
         }
@@ -457,6 +498,23 @@
 
         body.dark-mode .student-item.not-marked {
             background-color: rgba(149, 165, 166, 0.2);
+        }
+
+        body.dark-mode .student-name {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .student-name:hover {
+            color: #5dade2;
+        }
+
+        body.dark-mode .student-details {
+            background-color: #34495e;
+            color: #bbbbbb;
+        }
+
+        body.dark-mode .history-section {
+            background-color: #34495e;
         }
 
         body.dark-mode .history-item {
@@ -525,6 +583,12 @@
             .student-item {
                 font-size: 13px;
             }
+            .student-name {
+                font-size: 16px;
+            }
+            .student-details {
+                font-size: 12px;
+            }
             .schedule-table th, .schedule-table td {
                 font-size: 12px;
                 padding: 6px;
@@ -533,10 +597,17 @@
                 font-size: 13px;
                 padding: 10px 20px;
             }
+            .history-item {
+                font-size: 14px;
+            }
+            .undo-action-btn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
         }
     </style>
 </head>
-<body>
+<body oncopy="return false" oncut="return false" onpaste="return false">
     <header>
         <h1>ISET Siliana Professor</h1>
     </header>
@@ -562,7 +633,6 @@
                 <h2>Share a File</h2>
                 <input type="file" id="file-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt">
                 <button class="upload-btn" id="upload-file-btn">Upload</button>
-                <button id="close-file-modal">Close</button>
             </div>
         </div>
 
@@ -580,7 +650,6 @@
                     <h3>Uploaded Files</h3>
                     <div id="files-history"></div>
                 </div>
-                <button id="close-undo-modal">Close</button>
             </div>
         </div>
 
@@ -647,7 +716,6 @@
                 const fileUploadModal = document.getElementById('file-upload-modal');
                 const fileInput = document.getElementById('file-input');
                 const uploadFileBtn = document.getElementById('upload-file-btn');
-                const closeFileModalBtn = document.getElementById('close-file-modal');
                 const undoModal = document.getElementById('undo-modal');
                 const toggleAbsencesBtn = document.getElementById('toggle-absences');
                 const toggleFilesBtn = document.getElementById('toggle-files');
@@ -655,7 +723,6 @@
                 const filesSection = document.getElementById('files-section');
                 const absencesHistory = document.getElementById('absences-history');
                 const filesHistory = document.getElementById('files-history');
-                const closeUndoModalBtn = document.getElementById('close-undo-modal');
 
                 let studentsData = [];
                 let selectedStudents = [];
@@ -840,10 +907,22 @@
                         const statusClass = todayAbsence ? (todayAbsence.status === 'present' ? 'present' : todayAbsence.status === 'absent' ? 'absent' : 'not-marked') : 'not-marked';
                         studentItem.classList.add(statusClass);
 
+                        // Calculate total absences
+                        const totalAbsences = absences.reduce((total, a) => {
+                            return a.status === 'absent' ? total + a.weight : total;
+                        }, 0);
+
                         studentItem.innerHTML = `
                             <div class="student-info">
-                                CIN: ${formattedCIN}<br>
-                                Name: ${student.firstName} ${student.lastName}
+                                <div class="student-name" data-cin="${student.cin}">
+                                    ${student.firstName} ${student.lastName}
+                                </div>
+                                <div>CIN: ${formattedCIN}</div>
+                                <div class="student-details" id="details-${student.cin}">
+                                    Full CIN: ${student.cin}<br>
+                                    Email: ${student.email || 'Not provided'}<br>
+                                    Total Absences: ${totalAbsences}
+                                </div>
                             </div>
                             <div class="student-actions">
                                 <button class="action-btn present" data-cin="${student.cin}" ${!canMark ? 'disabled' : ''}>Present</button>
@@ -851,6 +930,23 @@
                             </div>
                         `;
                         studentsDiv.appendChild(studentItem);
+                    });
+
+                    // Add click event listeners for student names
+                    document.querySelectorAll('.student-name').forEach(name => {
+                        name.addEventListener('click', (e) => {
+                            const cin = e.target.dataset.cin;
+                            const details = document.getElementById(`details-${cin}`);
+                            const isVisible = details.classList.contains('show');
+
+                            // Hide all other details
+                            document.querySelectorAll('.student-details').forEach(d => d.classList.remove('show'));
+
+                            // Toggle visibility of the clicked student's details
+                            if (!isVisible) {
+                                details.classList.add('show');
+                            }
+                        });
                     });
 
                     document.querySelectorAll('.action-btn').forEach(btn => {
@@ -972,24 +1068,6 @@
                 // File Upload Modal Toggle
                 document.getElementById('share-files-btn').addEventListener('click', () => {
                     fileUploadModal.style.display = 'flex';
-                });
-
-                closeFileModalBtn.addEventListener('click', () => {
-                    fileUploadModal.style.display = 'none';
-                    fileInput.value = ''; // Reset file input
-                });
-
-                // Close file upload modal when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!fileUploadModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#share-files-btn') && fileUploadModal.style.display === 'flex') {
-                        fileUploadModal.style.display = 'none';
-                        fileInput.value = '';
-                    }
-                    if (!undoModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#undo-btn') && undoModal.style.display === 'flex') {
-                        undoModal.style.display = 'none';
-                        absencesSection.classList.remove('show');
-                        filesSection.classList.remove('show');
-                    }
                 });
 
                 // Handle File Upload with Encryption and Chunking
@@ -1234,12 +1312,6 @@
                     undoModal.style.display = 'flex';
                 });
 
-                closeUndoModalBtn.addEventListener('click', () => {
-                    undoModal.style.display = 'none';
-                    absencesSection.classList.remove('show');
-                    filesSection.classList.remove('show');
-                });
-
                 // Toggle Absences Section
                 toggleAbsencesBtn.addEventListener('click', () => {
                     const isVisible = absencesSection.classList.contains('show');
@@ -1252,6 +1324,22 @@
                     const isVisible = filesSection.classList.contains('show');
                     filesSection.classList.toggle('show', !isVisible);
                     absencesSection.classList.remove('show');
+                });
+
+                // Close modals when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!fileUploadModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#share-files-btn') && fileUploadModal.style.display === 'flex') {
+                        fileUploadModal.style.display = 'none';
+                        fileInput.value = '';
+                    }
+                    if (!undoModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#undo-btn') && undoModal.style.display === 'flex') {
+                        undoModal.style.display = 'none';
+                        absencesSection.classList.remove('show');
+                        filesSection.classList.remove('show');
+                    }
+                    if (!confirmModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#collective-absent') && confirmModal.style.display === 'flex') {
+                        confirmModal.style.display = 'none';
+                    }
                 });
 
                 // Home button (now acts as logout)
