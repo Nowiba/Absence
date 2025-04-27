@@ -393,44 +393,50 @@
             background: linear-gradient(90deg, #3498db, #5dade2);
         }
 
-        .total-absences {
-            font-size: 14px;
-            color: #e74c3c;
+        .subject-section {
             margin-bottom: 10px;
-            text-align: center;
+            border-bottom: 1px solid #d1d8e0;
         }
 
-        .subject-filter {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 15px;
-            justify-content: center;
+        .subject-section:last-child {
+            border-bottom: none;
         }
 
-        .subject-btn {
+        .subject-header {
             background-color: #3498db;
             color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 10px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 12px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
         }
 
-        .subject-btn:hover, .subject-btn.active {
+        .subject-header:hover {
             background-color: #5dade2;
-            transform: scale(1.05);
+        }
+
+        .subject-header.active {
+            background-color: #5dade2;
+        }
+
+        .subject-header .arrow {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .subject-header.active .arrow {
+            transform: rotate(180deg);
         }
 
         .subject-details {
             display: none;
-            margin-top: 10px;
             padding: 10px;
-            border: 1px solid #d1d8e0;
-            border-radius: 6px;
             background-color: #f9f9f9;
+            border-radius: 5px;
+            margin-top: 5px;
         }
 
         .subject-details.show {
@@ -446,6 +452,12 @@
 
         .absence-item:last-child {
             border-bottom: none;
+        }
+
+        .absence-count {
+            font-size: 12px;
+            color: #e74c3c;
+            margin: 5px 0;
         }
 
         .no-absences {
@@ -499,6 +511,10 @@
             border-bottom: none;
         }
 
+        .file-info {
+            flex: 1;
+        }
+
         .file-item a {
             color: #3498db;
             text-decoration: none;
@@ -507,6 +523,12 @@
 
         .file-item a:hover {
             color: #5dade2;
+        }
+
+        .file-details {
+            font-size: 12px;
+            color: #555;
+            margin-top: 4px;
         }
 
         .no-files {
@@ -576,19 +598,19 @@
             border-color: #5dade2;
         }
 
-        body.dark-mode .classmate-item, body.dark-mode .absence-item, body.dark-mode .schedule-day, body.dark-mode .schedule-slot, body.dark-mode .file-item {
+        body.dark-mode .classmate-item, body.dark-mode .absence-item, body.dark-mode .schedule-day, body.dark-mode .schedule-slot, body.dark-mode .file-item, body.dark-mode .subject-section {
             border-bottom: 1px solid #5dade2;
         }
 
-        body.dark-mode .schedule-day-header {
+        body.dark-mode .schedule-day-header, body.dark-mode .subject-header {
             background-color: #5dade2;
         }
 
-        body.dark-mode .schedule-day-header:hover, body.dark-mode .schedule-day-header.active {
+        body.dark-mode .schedule-day-header:hover, body.dark-mode .schedule-day-header.active, body.dark-mode .subject-header:hover, body.dark-mode .subject-header.active {
             background-color: #7fbfff;
         }
 
-        body.dark-mode .schedule-day-details {
+        body.dark-mode .schedule-day-details, body.dark-mode .subject-details {
             background-color: #34495e;
         }
 
@@ -596,9 +618,12 @@
             color: #e0e0e0;
         }
 
-        body.dark-mode .subject-details {
-            border-color: #5dade2;
-            background-color: #34495e;
+        body.dark-mode .absence-count {
+            color: #ff6b6b;
+        }
+
+        body.dark-mode .file-details {
+            color: #bbbbbb;
         }
 
         body.dark-mode .file-item a {
@@ -669,9 +694,9 @@
             .classmate-item, .absence-item, .file-item {
                 font-size: 12px;
             }
-            .subject-btn {
-                font-size: 11px;
-                padding: 5px 10px;
+            .subject-header {
+                padding: 8px;
+                font-size: 14px;
             }
             .schedule-day-header {
                 padding: 8px;
@@ -713,8 +738,6 @@
         </div>
         <div class="absence-container">
             <h2>Your Absences</h2>
-            <div class="total-absences" id="total-absences">Total Absences: 0</div>
-            <div id="subject-filter" class="subject-filter"></div>
             <div id="absence-details"></div>
         </div>
         <div class="shared-files">
@@ -756,6 +779,8 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- CryptoJS for decryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             try {
@@ -772,6 +797,9 @@
                 };
                 firebase.initializeApp(firebaseConfig);
                 const db = firebase.database();
+
+                // Encryption passphrase (should match the one used in professor page)
+                const ENCRYPTION_KEY = 'securePassphrase123';
 
                 // Load dark mode preference from localStorage
                 if (localStorage.getItem('darkMode') === 'enabled') {
@@ -797,7 +825,7 @@
                 // Timetable for IT11
                 const timetable = {
                     'Monday': [
-                        { start: '08:30', end: '10:00', class: 'Dev. Web et Multimédias 2', teacher: 'Mme. Wafa REJBI', room: 'T mágico103' },
+                        { start: '08:30', end: '10:00', class: 'Dev. Web et Multimédias 2', teacher: 'Mme. Wafa REJBI', room: 'T103' },
                         { start: '10:10', end: '11:40', class: 'Technique d’expression 2', teacher: 'Imen Bouraoui', room: 'T108' },
                         { start: '11:50', end: '13:20', class: 'UVT3 (2CN)', teacher: 'Mme. Hela DJEBALI', room: '' },
                         { start: '13:20', end: '14:50', class: 'Algo & Programmation', teacher: 'Mme. Hela DJEBALI', room: 'T103' },
@@ -955,59 +983,50 @@
 
                         // Load absences
                         const absences = student.absences || [];
-                        let totalAbsencePoints = 0;
                         const absenceBySubject = {};
-
-                        absences.forEach(absence => {
-                            if (absence.class === studentClass && absence.status === 'absent') {
-                                totalAbsencePoints += absence.weight;
-                            }
-                        });
-
-                        document.getElementById('total-absences').textContent = `Total Absences: ${totalAbsencePoints}`;
 
                         subjects.forEach(subject => {
                             absenceBySubject[subject] = absences.filter(a => a.class === studentClass && a.subject === subject && a.status === 'absent');
                         });
 
-                        const subjectFilter = document.getElementById('subject-filter');
                         const absenceDetails = document.getElementById('absence-details');
 
                         subjects.forEach(subject => {
-                            const btn = document.createElement('button');
-                            btn.className = 'subject-btn';
-                            btn.textContent = subject;
-                            btn.dataset.subject = subject;
-                            subjectFilter.appendChild(btn);
-
-                            const detailsDiv = document.createElement('div');
-                            detailsDiv.className = 'subject-details';
-                            detailsDiv.id = `details-${subject.replace(/\s+/g, '-')}`;
+                            const sectionDiv = document.createElement('div');
+                            sectionDiv.className = 'subject-section';
                             const absencesForSubject = absenceBySubject[subject] || [];
-                            if (absencesForSubject.length === 0) {
-                                detailsDiv.innerHTML = `<div class="no-absences">No absences recorded for ${subject}</div>`;
-                            } else {
-                                detailsDiv.innerHTML = absencesForSubject.map(a => `
-                                    <div class="absence-item">
-                                        Date: ${a.date} | Weight: ${a.weight}
-                                    </div>
-                                `).join('');
-                            }
-                            absenceDetails.appendChild(detailsDiv);
+                            const absenceCount = absencesForSubject.reduce((total, a) => total + a.weight, 0);
+                            sectionDiv.innerHTML = `
+                                <div class="subject-header" data-subject="${subject}">
+                                    <span>${subject}</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="subject-details" id="details-${subject.replace(/\s+/g, '-')}">
+                                    <div class="absence-count">Absences: ${absenceCount}</div>
+                                    ${absencesForSubject.length === 0 ? 
+                                        `<div class="no-absences">No F absences recorded for ${subject}</div>` :
+                                        absencesForSubject.map(a => `
+                                            <div class="absence-item">
+                                                Date: ${a.date} | Weight: ${a.weight}
+                                            </div>
+                                        `).join('')}
+                                </div>
+                            `;
+                            absenceDetails.appendChild(sectionDiv);
                         });
 
-                        document.querySelectorAll('.subject-btn').forEach(btn => {
-                            btn.addEventListener('click', () => {
-                                const subject = btn.dataset.subject;
+                        document.querySelectorAll('.subject-header').forEach(header => {
+                            header.addEventListener('click', () => {
+                                const subject = header.dataset.subject;
                                 const details = document.getElementById(`details-${subject.replace(/\s+/g, '-')}`);
                                 const isVisible = details.classList.contains('show');
 
                                 document.querySelectorAll('.subject-details').forEach(d => d.classList.remove('show'));
-                                document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('active'));
+                                document.querySelectorAll('.subject-header').forEach(h => h.classList.remove('active'));
 
                                 if (!isVisible) {
                                     details.classList.add('show');
-                                    btn.classList.add('active');
+                                    header.classList.add('active');
                                 }
                             });
                         });
@@ -1037,12 +1056,42 @@
                     } else {
                         files.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate)); // Sort by upload date (newest first)
                         files.forEach(file => {
+                            const uploadDate = new Date(file.uploadDate);
+                            const formattedDate = uploadDate.toLocaleDateString('en-GB', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            }) + ', ' + uploadDate.toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                            });
+
+                            // Reconstruct encrypted data from chunks
+                            const encryptedData = file.chunks.join('');
+                            let decryptedBase64;
+                            try {
+                                const decrypted = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
+                                decryptedBase64 = decrypted.toString(CryptoJS.enc.Utf8);
+                            } catch (error) {
+                                console.error('Decryption error:', error);
+                                showToast('Error decrypting file: ' + file.fileName);
+                                return;
+                            }
+
+                            const base64String = `data:${file.fileType};base64,${decryptedBase64}`;
+
                             const fileItem = document.createElement('div');
                             fileItem.className = 'file-item';
-                            const uploadDate = new Date(file.uploadDate).toLocaleDateString();
                             fileItem.innerHTML = `
-                                <span>${file.fileName} (${uploadDate})</span>
-                                <a href="${file.base64}" download="${file.fileName}">Download</a>
+                                <div class="file-info">
+                                    <span>${file.fileName}</span>
+                                    <div class="file-details">
+                                        Uploaded by: ${file.professorName} (${file.subject})<br>
+                                        ${formattedDate}
+                                    </div>
+                                </div>
+                                <a href="${base64String}" download="${file.fileName}">Download</a>
                             `;
                             sharedFilesList.appendChild(fileItem);
                         });
