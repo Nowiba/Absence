@@ -94,6 +94,7 @@
         }
 
         .details-container {
+            display: none;
             background-color: #ffffff;
             padding: 15px;
             border-radius: 10px;
@@ -103,6 +104,10 @@
             margin: 15px auto;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             animation: slideUp 0.4s ease;
+        }
+
+        .details-container.show {
+            display: block;
         }
 
         .details-container h2 {
@@ -308,15 +313,6 @@
             background-color: #5dade2;
         }
 
-        .schedule-day-header .arrow {
-            font-size: 14px;
-            transition: transform 0.3s ease;
-        }
-
-        .schedule-day-header.active .arrow {
-            transform: rotate(180deg);
-        }
-
         .schedule-day-details {
             display: none;
             padding: 10px;
@@ -380,6 +376,7 @@
             font-size: 22px;
             font-weight: 700;
             position: relative;
+            text-align: center;
         }
 
         .absence-container h2::after {
@@ -394,8 +391,9 @@
         }
 
         .subject-section {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             border-bottom: 1px solid #d1d8e0;
+            padding-bottom: 10px;
         }
 
         .subject-section:last-child {
@@ -405,13 +403,15 @@
         .subject-header {
             background-color: #3498db;
             color: white;
-            padding: 10px;
+            padding: 12px;
             border-radius: 5px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
             transition: background-color 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
         }
 
         .subject-header:hover {
@@ -422,21 +422,12 @@
             background-color: #5dade2;
         }
 
-        .subject-header .arrow {
-            font-size: 14px;
-            transition: transform 0.3s ease;
-        }
-
-        .subject-header.active .arrow {
-            transform: rotate(180deg);
-        }
-
         .subject-details {
             display: none;
-            padding: 10px;
+            padding: 12px;
             background-color: #f9f9f9;
             border-radius: 5px;
-            margin-top: 5px;
+            margin-top: 8px;
         }
 
         .subject-details.show {
@@ -445,24 +436,39 @@
         }
 
         .absence-item {
-            padding: 8px;
-            border-bottom: 1px solid #d1d8e0;
-            font-size: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .absence-item:last-child {
             border-bottom: none;
         }
 
-        .absence-count {
-            font-size: 12px;
+        .absence-date {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .absence-weight {
             color: #e74c3c;
-            margin: 5px 0;
+            font-weight: 500;
+        }
+
+        .absence-count {
+            font-size: 14px;
+            color: #e74c3c;
+            margin: 8px 0;
+            font-weight: 600;
+            text-align: center;
         }
 
         .no-absences {
             color: #e74c3c;
-            font-size: 12px;
+            font-size: 14px;
             text-align: center;
             padding: 10px;
         }
@@ -692,6 +698,14 @@
             color: #ff6b6b;
         }
 
+        body.dark-mode .absence-date {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .absence-weight {
+            color: #ff6b6b;
+        }
+
         body.dark-mode .file-details {
             color: #bbbbbb;
         }
@@ -780,7 +794,7 @@
                 font-size: 12px;
             }
             .subject-header {
-                padding: 8px;
+                padding: 10px;
                 font-size: 14px;
             }
             .schedule-day-header {
@@ -788,6 +802,12 @@
                 font-size: 14px;
             }
             .schedule-slot {
+                font-size: 12px;
+            }
+            .absence-count {
+                font-size: 13px;
+            }
+            .absence-date, .absence-weight {
                 font-size: 12px;
             }
             .sidebar {
@@ -970,27 +990,64 @@
                     'A. Programmation'
                 ];
 
-                // Function to get current class based on time
-                function getCurrentClass() {
+                // Function to convert time string to minutes for comparison
+                function timeToMinutes(timeStr) {
+                    const [hours, minutes] = timeStr.split(':').map(Number);
+                    return hours * 60 + minutes;
+                }
+
+                // Function to get current class and determine if details should be shown
+                function updateDetailsVisibility() {
                     const now = new Date();
                     const day = now.toLocaleString('en-US', { weekday: 'long' });
                     const hours = now.getHours().toString().padStart(2, '0');
                     const minutes = now.getMinutes().toString().padStart(2, '0');
                     const currentTime = `${hours}:${minutes}`;
-                    console.log(`Current day: ${day}, time: ${currentTime}`);
+                    const currentMinutes = timeToMinutes(currentTime);
+
+                    const detailsContainer = document.getElementById('details-container');
+                    const currentClassP = document.getElementById('current-class');
 
                     if (!timetable[day]) {
-                        return 'No class scheduled right now';
+                        detailsContainer.classList.remove('show');
+                        currentClassP.textContent = 'No class scheduled today';
+                        return;
                     }
 
                     const todaySchedule = timetable[day];
+                    let shouldShow = false;
+                    let currentClassText = 'No class scheduled right now';
+
                     for (const slot of todaySchedule) {
-                        if (currentTime >= slot.start && currentTime <= slot.end) {
-                            return `Now: ${slot.class} with ${slot.teacher}${slot.room ? ` in ${slot.room}` : ''}`;
+                        const startMinutes = timeToMinutes(slot.start);
+                        const endMinutes = timeToMinutes(slot.end);
+                        const prepStartMinutes = startMinutes - 30; // 30 minutes before class starts
+                        const hideMinutes = startMinutes + 30; // 30 minutes after class starts
+
+                        const prepStartTime = `${Math.floor(prepStartMinutes / 60).toString().padStart(2, '0')}:${(prepStartMinutes % 60).toString().padStart(2, '0')}`;
+                        const hideTime = `${Math.floor(hideMinutes / 60).toString().padStart(2, '0')}:${(hideMinutes % 60).toString().padStart(2, '0')}`;
+
+                        if (currentMinutes >= prepStartMinutes && currentMinutes < hideMinutes) {
+                            shouldShow = true;
+                            if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
+                                currentClassText = `Now: ${slot.class} with ${slot.teacher}${slot.room ? ` in ${slot.room}` : ''}`;
+                            } else if (currentMinutes < startMinutes) {
+                                currentClassText = `Next: ${slot.class} with ${slot.teacher}${slot.room ? ` in ${slot.room}` : ''} at ${slot.start}`;
+                            }
                         }
                     }
-                    return 'No class scheduled right now';
+
+                    if (shouldShow) {
+                        detailsContainer.classList.add('show');
+                        currentClassP.textContent = currentClassText;
+                    } else {
+                        detailsContainer.classList.remove('show');
+                    }
                 }
+
+                // Update details visibility every minute
+                setInterval(updateDetailsVisibility, 60000);
+                updateDetailsVisibility(); // Initial check
 
                 // Populate schedule modal with collapsible days
                 const scheduleDays = document.getElementById('schedule-days');
@@ -1002,7 +1059,6 @@
                     dayDiv.innerHTML = `
                         <div class="schedule-day-header" data-day="${day}">
                             <span>${day}</span>
-                            <span class="arrow">▼</span>
                         </div>
                         <div class="schedule-day-details" id="details-${day}">
                             ${timetable[day].map(slot => `
@@ -1051,9 +1107,7 @@
                         studentClass = student.class || 'Not specified';
                         document.getElementById('welcome-message').textContent = `Welcome, ${fullName}`;
                         document.getElementById('class-info').textContent = `Class: ${studentClass}`;
-                        console.log(`Welcome message set to: Welcome, ${ fullName}`);
-
-                        document.getElementById('current-class').textContent = getCurrentClass();
+                        console.log(`Welcome message set to: Welcome, ${fullName}`);
 
                         const emailInput = document.getElementById('email-input');
                         if (student.email) {
@@ -1072,7 +1126,7 @@
                             });
                             renderClassmates();
                         }).catch(error => {
-                            showToast('Error loading classmates: ' + error.message);
+                            showToast('Error loading classmates');
                             console.error(error);
                         });
 
@@ -1094,7 +1148,6 @@
                             sectionDiv.innerHTML = `
                                 <div class="subject-header" data-subject="${subject}">
                                     <span>${subject}</span>
-                                    <span class="arrow">▼</span>
                                 </div>
                                 <div class="subject-details" id="details-${subject.replace(/\s+/g, '-')}">
                                     <div class="absence-count">Absences: ${absenceCount}</div>
@@ -1102,7 +1155,8 @@
                                         `<div class="no-absences">No absences recorded for ${subject}</div>` :
                                         absencesForSubject.map(a => `
                                             <div class="absence-item">
-                                                Date: ${a.date} | Weight: ${a.weight}
+                                                <span class="absence-date">Date: ${a.date}</span>
+                                                <span class="absence-weight">Weight: ${a.weight}</span>
                                             </div>
                                         `).join('')}
                                 </div>
@@ -1132,7 +1186,7 @@
                         }, 3000);
                     }
                 }).catch(error => {
-                    showToast('Error loading student data: ' + error.message);
+                    showToast('Error loading student data');
                     console.error(error);
                 });
 
@@ -1190,7 +1244,7 @@
                                 <div class="file-info">
                                     <a href="#" class="file-name" data-base64="${base64String}" data-type="${fileType}">${file.fileName}</a>
                                     <div class="file-details">
-                                        Uploaded by: ${file.professorEmail} (${file.subject || 'N/A'})<br>
+                                        Uploaded by: ${file.professorName} (${file.subject || 'N/A'})<br>
                                         ${formattedDate}
                                     </div>
                                 </div>
@@ -1206,30 +1260,25 @@
                                 const base64 = link.dataset.base64;
                                 const fileType = link.dataset.type.toLowerCase();
                                 const isPDF = fileType.includes('pdf');
+                                const isImage = fileType.includes('image/png') || fileType.includes('image/jpeg') || fileType.includes('image/jpg') || fileType.includes('image/gif');
                                 const isDoc = fileType.includes('msword') || fileType.includes('wordprocessingml');
                                 const isPPT = fileType.includes('presentationml') || fileType.includes('powerpoint');
-                                const isImage = fileType.includes('image/png') || fileType.includes('image/jpeg') || fileType.includes('image/jpg') || fileType.includes('image/gif');
 
                                 // Show loading message
                                 fileViewerContent.innerHTML = '';
                                 loadingMessage.classList.add('show');
                                 fileViewerModal.style.display = 'flex';
 
-                                // Simulate a short delay to ensure loading message is visible (optional)
                                 setTimeout(() => {
                                     if (isPDF) {
                                         fileViewerContent.innerHTML = `<embed src="${base64}" type="application/pdf">`;
-                                    } else if (isDoc || isPPT) {
-                                        // Use Google Docs Viewer for Word and PPTX files
-                                        const encodedUrl = encodeURIComponent(base64);
-                                        fileViewerContent.innerHTML = `<iframe src="https://docs.google.com/viewer?url=${encodedUrl}&embedded=true"></iframe>`;
                                     } else if (isImage) {
                                         fileViewerContent.innerHTML = `<img src="${base64}" alt="File preview">`;
+                                    } else if (isDoc || isPPT) {
+                                        // For Word and PPT, use a fallback message or viewer
+                                        fileViewerContent.innerHTML = `<p>Preview not supported for this file type on this platform. Please download to view.</p>`;
                                     } else {
-                                        showToast('Preview not supported for this file type');
-                                        fileViewerModal.style.display = 'none';
-                                        loadingMessage.classList.remove('show');
-                                        return;
+                                        fileViewerContent.innerHTML = `<p>Preview not supported for this file type.</p>`;
                                     }
                                     loadingMessage.classList.remove('show');
                                 }, 500); // Adjust delay as needed
@@ -1237,7 +1286,7 @@
                         });
                     }
                 }, (error) => {
-                    showToast('Error loading shared files: ' + error.message);
+                    showToast('Error loading shared files');
                     console.error(error);
                 });
 
@@ -1249,19 +1298,9 @@
                         modalClassmatesList.innerHTML = `<div class="no-classmates">No classmates found</div>`;
                     } else {
                         classmates.forEach(classmate => {
-                            const cin = classmate.cin;
-                            let formattedCIN = cin;
-                            while (formattedCIN.length < 8) {
-                                formattedCIN = '0' + formattedCIN;
-                            }
-                            formattedCIN = formattedCIN.substring(0, 5) + '***';
-
                             const item = document.createElement('div');
                             item.className = 'classmate-item';
-                            item.innerHTML = `
-                                CIN: ${formattedCIN}<br>
-                                Name: ${classmate.firstName} ${classmate.lastName}
-                            `;
+                            item.innerHTML = `Name: ${classmate.firstName} ${classmate.lastName}`;
                             modalClassmatesList.appendChild(item);
                         });
                     }
@@ -1299,7 +1338,7 @@
                         showToast('Email updated successfully');
                         emailSidebar.classList.remove('open');
                     }).catch(error => {
-                        showToast('Error updating email: ' + error.message);
+                        showToast('Error updating email');
                         console.error(error);
                     });
                 });
@@ -1351,7 +1390,7 @@
                 }
             } catch (error) {
                 console.error('Initialization error:', error);
-                showToast('Error initializing page: ' + error.message);
+                showToast('Error initializing page');
             }
         });
     </script>
