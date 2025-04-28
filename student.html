@@ -1310,7 +1310,7 @@
                                         const encryptedData = fileData.chunks.join('');
                                         const key = deriveKey(salt);
                                         const decrypted = CryptoJS.AES.decrypt(encryptedData, key);
-                                        const decryptedBase64 = decrypted.toString(CryptoJS.enc.Utf8);
+                                        const decryptedBase64 = decrypted.toString(CryptoJS.enc.Base64);
                                         if (!decryptedBase64) {
                                             throw new Error('Decryption resulted in empty data');
                                         }
@@ -1351,7 +1351,7 @@
                                     const encryptedData = fileData.chunks.join('');
                                     const key = deriveKey(salt);
                                     const decrypted = CryptoJS.AES.decrypt(encryptedData, key);
-                                    const decryptedBase64 = decrypted.toString(CryptoJS.enc.Utf8);
+                                    const decryptedBase64 = decrypted.toString(CryptoJS.enc.Base64);
                                     if (!decryptedBase64) {
                                         throw new Error('Decryption resulted in empty data');
                                     }
