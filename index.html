@@ -135,7 +135,7 @@
             background: linear-gradient(90deg, #3498db, #5dade2);
         }
 
-        .modal-content input {
+        .modal-content input, .modal-content select {
             width: 100%;
             padding: 14px;
             margin: 12px 0;
@@ -149,11 +149,11 @@
             animation-delay: 0.1s;
         }
 
-        .modal-content input:nth-child(3) {
+        .modal-content input:nth-child(3), .modal-content select:nth-child(3) {
             animation-delay: 0.2s;
         }
 
-        .modal-content input:focus {
+        .modal-content input:focus, .modal-content select:focus {
             border-color: #3498db;
             box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
             outline: none;
@@ -179,6 +179,18 @@
             background-color: #5dade2;
             transform: scale(1.03);
             box-shadow: 0 3px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .modal-content a {
+            display: block;
+            margin-top: 10px;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .modal-content a:hover {
+            color: #5dade2;
         }
 
         .hidden {
@@ -231,13 +243,15 @@
             color: #e0e0e0;
         }
 
-        body.dark-mode .modal-content input {
+        body.dark-mode .modal-content input,
+        body.dark-mode .modal-content select {
             background-color: #34495e;
             color: #e0e0e0;
             border-color: #5dade2;
         }
 
-        body.dark-mode .modal-content input:focus {
+        body.dark-mode .modal-content input:focus,
+        body.dark-mode .modal-content select:focus {
             border-color: #5dade2;
             box-shadow: 0 0 6px rgba(93, 173, 226, 0.4);
         }
@@ -249,6 +263,14 @@
         body.dark-mode .modal-content button:hover {
             background-color: #5dade2;
             box-shadow: 0 3px 12px rgba(93, 173, 226, 0.3);
+        }
+
+        body.dark-mode .modal-content a {
+            color: #5dade2;
+        }
+
+        body.dark-mode .modal-content a:hover {
+            color: #7fbfff;
         }
 
         body.dark-mode .toast {
@@ -293,9 +315,12 @@
             .modal-content h2 {
                 font-size: 24px;
             }
-            .modal-content input, .modal-content button {
+            .modal-content input, .modal-content button, .modal-content select {
                 font-size: 15px;
                 padding: 12px;
+            }
+            .modal-content a {
+                font-size: 13px;
             }
             .toast {
                 font-size: 13px;
@@ -320,7 +345,40 @@
             <div class="modal-content">
                 <h2>Student Access</h2>
                 <input type="text" id="cin-input" placeholder="Enter 8-digit CIN" maxlength="8">
+                <input type="password" id="password-input" placeholder="Enter 6-digit password" maxlength="6" class="hidden">
                 <button id="student-submit">Validate</button>
+                <a href="#" id="forgot-password-link">Forgot Password?</a>
+            </div>
+        </div>
+        <!-- Registration Modal -->
+        <div id="register-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Complete Registration</h2>
+                <input type="password" id="new-password-input" placeholder="Set 6-digit password" maxlength="6">
+                <select id="validation-question-select">
+                    <option value="" disabled selected>Select a validation question</option>
+                    <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                    <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                    <option value="What is the name of your favorite teacher?">What is the name of your favorite teacher?</option>
+                    <option value="What city were you born in?">What city were you born in?</option>
+                    <option value="What is your favorite book?">What is your favorite book?</option>
+                    <option value="What was your childhood nickname?">What was your childhood nickname?</option>
+                </select>
+                <input type="text" id="validation-answer-input" placeholder="Your answer">
+                <button id="register-submit">Register</button>
+            </div>
+        </div>
+        <!-- Forgot Password Modal -->
+        <div id="forgot-password-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Password Recovery</h2>
+                <input type="text" id="forgot-cin-input" placeholder="Enter 8-digit CIN" maxlength="8">
+                <select id="forgot-validation-question" class="hidden">
+                    <option value="" disabled selected>Loading question...</option>
+                </select>
+                <input type="text" id="forgot-answer-input" placeholder="Your answer" class="hidden">
+                <button id="forgot-password-submit">Submit</button>
+                <a href="#" id="contact-us-link">Contact Us</a>
             </div>
         </div>
         <!-- Professor Modal -->
@@ -370,13 +428,18 @@
                 console.error('Error signing out on page load:', error);
             });
 
-            // Load dark mode preference from localStorage
-            if (localStorage.getItem('darkMode') === 'enabled') {
-                document.body.classList.add('dark-mode');
-                const toggleButton = document.getElementById('dark-mode-toggle');
-                toggleButton.querySelector('span:first-child').textContent = '🌞';
-                toggleButton.querySelector('span:last-child').textContent = 'Light Mode';
-            }
+            // Load dark mode preference (stored in Firebase for security, not localStorage)
+            db.ref('settings/darkMode').once('value').then((snapshot) => {
+                const darkMode = snapshot.val();
+                if (darkMode === 'enabled') {
+                    document.body.classList.add('dark-mode');
+                    const toggleButton = document.getElementById('dark-mode-toggle');
+                    toggleButton.querySelector('span:first-child').textContent = '🌞';
+                    toggleButton.querySelector('span:last-child').textContent = 'Light Mode';
+                }
+            }).catch(error => {
+                console.error('Error loading dark mode preference:', error);
+            });
 
             // Modal show function
             function showModal(modalId) {
@@ -390,7 +453,7 @@
                     }, 10);
                 } else {
                     console.error(`Modal with ID ${modalId} not found`);
-                    alert(`Error: Modal ${modalId} not found.`);
+                    showToast('An error occurred. Please try again.');
                 }
             }
 
@@ -408,32 +471,249 @@
                 });
             });
 
+            // Device registration tracking (using a pseudo-device ID based on browser fingerprint)
+            function getDeviceId() {
+                // Simplified device ID generation (in production, use a more robust fingerprinting library)
+                return navigator.userAgent + navigator.language + screen.width + screen.height;
+            }
+
+            // Check device registration limit (one signup per device every 3 days)
+            async function checkDeviceRegistrationLimit() {
+                const deviceId = getDeviceId();
+                const deviceRef = db.ref(`deviceRegistrations/${deviceId}`);
+                const snapshot = await deviceRef.once('value');
+                const now = Date.now();
+                const threeDays = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds
+
+                if (snapshot.exists()) {
+                    const lastRegistration = snapshot.val().timestamp;
+                    if (now - lastRegistration < threeDays) {
+                        showToast('This device has already registered an account. Please wait 3 days before registering again.');
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // Register device after successful signup
+            async function registerDevice() {
+                const deviceId = getDeviceId();
+                const deviceRef = db.ref(`deviceRegistrations/${deviceId}`);
+                await deviceRef.set({
+                    timestamp: Date.now()
+                });
+            }
+
             // Student CIN submission
-            document.getElementById('student-submit').addEventListener('click', () => {
-                const cin = document.getElementById('cin-input').value;
+            document.getElementById('student-submit').addEventListener('click', async () => {
+                const cin = document.getElementById('cin-input').value.trim();
+                const passwordInput = document.getElementById('password-input');
+                const password = passwordInput.value.trim();
+
                 if (!/^\d{8}$/.test(cin)) {
-                    showToast('Please enter a valid 8-digit CIN');
+                    showToast('Please enter a valid 8-digit CIN.');
                     return;
                 }
-                db.ref('students/' + cin).once('value').then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const studentData = snapshot.val();
-                        db.ref('classes/' + studentData.class).once('value').then((classSnapshot) => {
-                            document.getElementById('student-modal').classList.remove('show');
-                            setTimeout(() => {
-                                document.getElementById('student-modal').classList.add('hidden');
-                                window.location.href = `student.html?cin=${cin}`;
-                            }, 300);
-                            showToast('Access granted');
-                        }).catch(error => {
-                            showToast('Error fetching schedule: ' + error.message);
-                        });
+
+                try {
+                    const studentRef = db.ref('students/' + cin);
+                    const snapshot = await studentRef.once('value');
+
+                    if (!snapshot.exists()) {
+                        // First-time registration
+                        const canRegister = await checkDeviceRegistrationLimit();
+                        if (!canRegister) return;
+
+                        document.getElementById('student-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('student-modal').classList.add('hidden');
+                            showModal('register-modal');
+                        }, 300);
                     } else {
-                        showToast('Student not found');
+                        // Existing student
+                        const studentData = snapshot.val();
+                        if (!passwordInput.classList.contains('hidden')) {
+                            if (!/^\d{6}$/.test(password)) {
+                                showToast('Please enter a valid 6-digit password.');
+                                return;
+                            }
+
+                            if (password !== studentData.password) {
+                                showToast('Incorrect password. Please try again.');
+                                return;
+                            }
+
+                            // Check if validation question is answered
+                            if (!studentData.validationQuestion || !studentData.validationAnswer) {
+                                document.getElementById('student-modal').classList.remove('show');
+                                setTimeout(() => {
+                                    document.getElementById('student-modal').classList.add('hidden');
+                                    showModal('register-modal');
+                                }, 300);
+                            } else {
+                                // Proceed to student page
+                                document.getElementById('student-modal').classList.remove('show');
+                                setTimeout(() => {
+                                    document.getElementById('student-modal').classList.add('hidden');
+                                    window.location.href = `student.html?cin=${cin}`;
+                                }, 300);
+                                showToast('Welcome back!');
+                            }
+                        } else {
+                            // Show password input for returning user
+                            passwordInput.classList.remove('hidden');
+                            passwordInput.focus();
+                        }
                     }
-                }).catch(error => {
-                    showToast('Error: ' + error.message);
-                });
+                } catch (error) {
+                    console.error('Error checking CIN:', error);
+                    showToast('An error occurred. Please try again.');
+                }
+            });
+
+            // Registration submission
+            document.getElementById('register-submit').addEventListener('click', async () => {
+                const cin = document.getElementById('cin-input').value.trim();
+                const password = document.getElementById('new-password-input').value.trim();
+                const question = document.getElementById('validation-question-select').value;
+                const answer = document.getElementById('validation-answer-input').value.trim();
+
+                if (!/^\d{6}$/.test(password)) {
+                    showToast('Please set a valid 6-digit password.');
+                    return;
+                }
+
+                if (!question) {
+                    showToast('Please select a validation question.');
+                    return;
+                }
+
+                if (!answer) {
+                    showToast('Please provide an answer to the validation question.');
+                    return;
+                }
+
+                try {
+                    const studentRef = db.ref('students/' + cin);
+                    await studentRef.set({
+                        password: password,
+                        validationQuestion: question,
+                        validationAnswer: answer.toLowerCase(), // Store answer in lowercase for consistency
+                        failedAttempts: [] // Initialize failed attempts array
+                    });
+
+                    await registerDevice();
+
+                    document.getElementById('register-modal').classList.remove('show');
+                    setTimeout(() => {
+                        document.getElementById('register-modal').classList.add('hidden');
+                        window.location.href = `student.html?cin=${cin}`;
+                    }, 300);
+                    showToast('Registration successful! Welcome!');
+                } catch (error) {
+                    console.error('Error during registration:', error);
+                    showToast('An error occurred during registration. Please try again.');
+                }
+            });
+
+            // Forgot Password Link
+            document.getElementById('forgot-password-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                const cin = document.getElementById('cin-input').value.trim();
+                if (!/^\d{8}$/.test(cin)) {
+                    showToast('Please enter a valid 8-digit CIN.');
+                    return;
+                }
+
+                document.getElementById('forgot-cin-input').value = cin;
+                document.getElementById('student-modal').classList.remove('show');
+                setTimeout(() => {
+                    document.getElementById('student-modal').classList.add('hidden');
+                    showModal('forgot-password-modal');
+                }, 300);
+            });
+
+            // Forgot Password Submission
+            document.getElementById('forgot-password-submit').addEventListener('click', async () => {
+                const cin = document.getElementById('forgot-cin-input').value.trim();
+                const answer = document.getElementById('forgot-answer-input').value.trim().toLowerCase();
+
+                if (!/^\d{8}$/.test(cin)) {
+                    showToast('Please enter a valid 8-digit CIN.');
+                    return;
+                }
+
+                if (!answer) {
+                    showToast('Please provide an answer to the validation question.');
+                    return;
+                }
+
+                try {
+                    const studentRef = db.ref('students/' + cin);
+                    const snapshot = await studentRef.once('value');
+
+                    if (!snapshot.exists()) {
+                        showToast('Student not found.');
+                        return;
+                    }
+
+                    const studentData = snapshot.val();
+                    const questionSelect = document.getElementById('forgot-validation-question');
+                    if (questionSelect.classList.contains('hidden')) {
+                        // Show the validation question
+                        questionSelect.innerHTML = `<option value="${studentData.validationQuestion}" selected>${studentData.validationQuestion}</option>`;
+                        questionSelect.classList.remove('hidden');
+                        document.getElementById('forgot-answer-input').classList.remove('hidden');
+                        return;
+                    }
+
+                    if (answer !== studentData.validationAnswer) {
+                        const now = new Date();
+                        const timestamp = now.toISOString(); // ISO format: YYYY-MM-DDTHH:mm:ss.sssZ
+                        const failedAttempt = {
+                            timestamp: timestamp,
+                            answerAttempted: answer
+                        };
+
+                        // Add failed attempt to the student's record
+                        const failedAttempts = studentData.failedAttempts || [];
+                        failedAttempts.push(failedAttempt);
+                        await studentRef.update({ failedAttempts });
+
+                        showToast('Incorrect answer. Please try again.');
+                        return;
+                    }
+
+                    // Correct answer, allow password reset
+                    const newPassword = prompt('Enter your new 6-digit password:');
+                    if (!newPassword || !/^\d{6}$/.test(newPassword)) {
+                        showToast('Please enter a valid 6-digit password.');
+                        return;
+                    }
+
+                    await studentRef.update({ password: newPassword });
+                    showToast('Password reset successful! Please log in with your new password.');
+
+                    document.getElementById('forgot-password-modal').classList.remove('show');
+                    setTimeout(() => {
+                        document.getElementById('forgot-password-modal').classList.add('hidden');
+                        showModal('student-modal');
+                        document.getElementById('cin-input').value = cin;
+                        document.getElementById('password-input').classList.remove('hidden');
+                    }, 300);
+                } catch (error) {
+                    console.error('Error during password recovery:', error);
+                    showToast('An error occurred. Please try again.');
+                }
+            });
+
+            // Contact Us Link
+            document.getElementById('contact-us-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                const cin = document.getElementById('forgot-cin-input').value.trim();
+                const subject = encodeURIComponent('Password Recovery Assistance');
+                const body = encodeURIComponent(`Dear Support Team,\n\nI am having trouble recovering my password for CIN: ${cin}. Please assist me with resetting my password or recovering my account.\n\nThank you!`);
+                window.location.href = `mailto:support@isetsiliana.edu?subject=${subject}&body=${body}`;
             });
 
             // Professor login
@@ -442,13 +722,13 @@
                 const password = document.getElementById('professor-password').value.trim();
 
                 if (!email || !password) {
-                    showToast('Please enter email and password');
+                    showToast('Please enter both email and password.');
                     return;
                 }
 
                 auth.signInWithEmailAndPassword(email, password)
                     .then((userCredential) => {
-                        showToast('Login successful');
+                        showToast('Login successful!');
                         document.getElementById('professor-modal').classList.remove('show');
                         setTimeout(() => {
                             document.getElementById('professor-modal').classList.add('hidden');
@@ -456,7 +736,7 @@
                         }, 300);
                     })
                     .catch((error) => {
-                        showToast('Invalid credentials: ' + error.message);
+                        showToast('Login failed. Please check your credentials.');
                         console.error('Professor login error:', error);
                     });
             });
@@ -467,13 +747,13 @@
                 const password = document.getElementById('admin-password').value.trim();
 
                 if (!email || !password) {
-                    showToast('Please enter email and password');
+                    showToast('Please enter both email and password.');
                     return;
                 }
 
                 auth.signInWithEmailAndPassword(email, password)
                     .then((userCredential) => {
-                        showToast('Login successful');
+                        showToast('Login successful!');
                         document.getElementById('admin-modal').classList.remove('show');
                         setTimeout(() => {
                             document.getElementById('admin-modal').classList.add('hidden');
@@ -481,7 +761,7 @@
                         }, 300);
                     })
                     .catch((error) => {
-                        showToast('Invalid credentials: ' + error.message);
+                        showToast('Login failed. Please check your credentials.');
                         console.error('Admin login error:', error);
                     });
             });
@@ -493,7 +773,7 @@
                 const toggleButton = document.getElementById('dark-mode-toggle');
                 toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
                 toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
-                localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+                db.ref('settings/darkMode').set(isDarkMode ? 'enabled' : 'disabled');
                 showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
             });
 
@@ -510,7 +790,7 @@
             }
         } catch (error) {
             console.error('Initialization error:', error);
-            alert('Error initializing page: ' + error.message);
+            alert('An error occurred while loading the page. Please try again.');
         }
     </script>
 </body>
