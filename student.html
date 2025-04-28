@@ -578,13 +578,6 @@
             display: block;
         }
 
-        .file-viewer-modal embed,
-        .file-viewer-modal iframe {
-            width: 100%;
-            height: 90%;
-            border: none;
-        }
-
         .file-viewer-modal img {
             width: 100%;
             max-height: 90%;
@@ -871,10 +864,10 @@
         </div>
     </div>
 
-    <!-- File Viewer Modal -->
+    <!-- File Viewer Modal (for images only) -->
     <div id="file-viewer-modal" class="modal file-viewer-modal">
         <div class="modal-content">
-            <div class="loading-message" id="loading-message">Loading file...</div>
+            <div class="loading-message" id="loading-message">Loading image...</div>
             <div id="file-viewer-content"></div>
         </div>
     </div>
@@ -894,7 +887,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <!-- CryptoJS for decryption -->
+    <!-- CryptoJS for encryption/decryption -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -913,8 +906,16 @@
                 firebase.initializeApp(firebaseConfig);
                 const db = firebase.database();
 
-                // Encryption passphrase (should match the one used in professor page)
-                const ENCRYPTION_KEY = 'securePassphrase123';
+                // Base passphrase (this should ideally be stored securely server-side, but for client-side demo we derive it)
+                const BASE_PASSPHRASE = 'ISET_Siliana_Secure_2025!@#$';
+
+                // Function to derive encryption key using PBKDF2 with a salt
+                function deriveKey(salt) {
+                    return CryptoJS.PBKDF2(BASE_PASSPHRASE, salt, {
+                        keySize: 256 / 32, // 256-bit key
+                        iterations: 10000 // High iteration count for better security
+                    }).toString();
+                }
 
                 // Load dark mode preference from localStorage
                 if (localStorage.getItem('darkMode') === 'enabled') {
@@ -1244,7 +1245,7 @@
                     console.error(error);
                 });
 
-                // Load shared files
+                // Load shared files (but don't decrypt yet)
                 const sharedFilesList = document.getElementById('shared-files-list');
                 const fileViewerModal = document.getElementById('file-viewer-modal');
                 const fileViewerContent = document.getElementById('file-viewer-content');
@@ -1274,82 +1275,98 @@
                                 hour12: true
                             });
 
-                            // Reconstruct encrypted data from chunks
-                            const encryptedData = file.chunks.join('');
-                            let decryptedBase64;
-                            try {
-                                const decrypted = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
-                                decryptedBase64 = decrypted.toString(CryptoJS.enc.Utf8);
-                                if (!decryptedBase64) {
-                                    throw new Error('Decryption resulted in empty data');
-                                }
-                            } catch (error) {
-                                console.error('Decryption error:', error);
-                                showToast(`Error decrypting file: ${file.fileName}`);
-                                return;
-                            }
-
-                            const base64String = `data:${file.fileType};base64,${decryptedBase64}`;
                             const fileType = file.fileType.toLowerCase();
+                            const isImage = fileType.includes('image/png') || fileType.includes('image/jpeg') || fileType.includes('image/jpg') || fileType.includes('image/gif');
 
                             const fileItem = document.createElement('div');
                             fileItem.className = 'file-item';
                             fileItem.innerHTML = `
                                 <div class="file-info">
-                                    <a href="#" class="file-name" data-base64="${base64String}" data-type="${fileType}">${file.fileName}</a>
+                                    <a href="#" class="file-name" data-id="${file.id}" data-type="${fileType}" data-salt="${file.salt}">${file.fileName}</a>
                                     <div class="file-details">
                                         Uploaded by: ${file.professorName} (${file.subject || 'N/A'})<br>
                                         ${formattedDate}
                                     </div>
                                 </div>
-                                <a href="${base64String}" download="${file.fileName}" class="download-link">Download</a>
+                                <a href="#" class="download-link" data-id="${file.id}" data-filename="${file.fileName}" data-type="${fileType}" data-salt="${file.salt}">Download</a>
                             `;
                             sharedFilesList.appendChild(fileItem);
                         });
 
                         // Add event listeners for file name clicks
                         document.querySelectorAll('.file-name').forEach(link => {
-                            link.addEventListener('click', (e) => {
+                            link.addEventListener('click', async (e) => {
                                 e.preventDefault();
-                                const base64 = link.dataset.base64;
+                                const fileId = link.dataset.id;
                                 const fileType = link.dataset.type.toLowerCase();
-                                const isPDF = fileType.includes('pdf');
+                                const salt = link.dataset.salt;
                                 const isImage = fileType.includes('image/png') || fileType.includes('image/jpeg') || fileType.includes('image/jpg') || fileType.includes('image/gif');
-                                const isDoc = fileType.includes('msword') || fileType.includes('wordprocessingml');
-                                const isPPT = fileType.includes('presentationml') || fileType.includes('powerpoint');
 
                                 if (isImage) {
-                                    // Show images in modal as before
-                                    fileViewerContent.innerHTML = '';
-                                    loadingMessage.classList.add('show');
-                                    fileViewerModal.style.display = 'flex';
-                                    setTimeout(() => {
-                                        fileViewerContent.innerHTML = `<img src="${base64}" alt="File preview">`;
-                                        loadingMessage.classList.remove('show');
-                                    }, 500);
-                                } else if (isPDF || isDoc || isPPT) {
-                                    // Open PDF, Word, and PPT files in Google Docs Viewer in a new tab
-                                    // Convert base64 to blob and create a temporary URL
-                                    const byteString = atob(base64.split(',')[1]);
-                                    const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
-                                    const ab = new ArrayBuffer(byteString.length);
-                                    const ia = new Uint8Array(ab);
-                                    for (let i = 0; i < byteString.length; i++) {
-                                        ia[i] = byteString.charCodeAt(i);
+                                    // Lazy-load and decrypt image on click
+                                    try {
+                                        const fileSnapshot = await db.ref(`sharedFiles/${fileId}`).once('value');
+                                        const fileData = fileSnapshot.val();
+                                        const encryptedData = fileData.chunks.join('');
+                                        const key = deriveKey(salt);
+                                        const decrypted = CryptoJS.AES.decrypt(encryptedData, key);
+                                        const decryptedBase64 = decrypted.toString(CryptoJS.enc.Utf8);
+                                        if (!decryptedBase64) {
+                                            throw new Error('Decryption resulted in empty data');
+                                        }
+                                        const base64String = `data:${fileType};base64,${decryptedBase64}`;
+
+                                        // Show image in modal
+                                        fileViewerContent.innerHTML = '';
+                                        loadingMessage.classList.add('show');
+                                        fileViewerModal.style.display = 'flex';
+                                        setTimeout(() => {
+                                            fileViewerContent.innerHTML = `<img src="${base64String}" alt="File preview">`;
+                                            loadingMessage.classList.remove('show');
+                                        }, 500);
+                                    } catch (error) {
+                                        console.error('Decryption error:', error);
+                                        showToast(`Error loading image: ${error.message}`);
                                     }
-                                    const blob = new Blob([ab], { type: mimeString });
-                                    const blobUrl = URL.createObjectURL(blob);
-
-                                    // Open in Google Docs Viewer
-                                    const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(blobUrl)}&embedded=true`;
-                                    window.open(googleDocsUrl, '_blank');
-
-                                    // Clean up the blob URL after a delay to ensure the browser has time to use it
-                                    setTimeout(() => {
-                                        URL.revokeObjectURL(blobUrl);
-                                    }, 1000);
                                 } else {
-                                    showToast('Preview not supported for this file type.');
+                                    // For non-image files, trigger download
+                                    const downloadLink = link.parentElement.nextElementSibling;
+                                    downloadLink.click();
+                                }
+                            });
+                        });
+
+                        // Add event listeners for download links
+                        document.querySelectorAll('.download-link').forEach(link => {
+                            link.addEventListener('click', async (e) => {
+                                e.preventDefault();
+                                const fileId = link.dataset.id;
+                                const fileName = link.dataset.filename;
+                                const fileType = link.dataset.type;
+                                const salt = link.dataset.salt;
+
+                                try {
+                                    const fileSnapshot = await db.ref(`sharedFiles/${fileId}`).once('value');
+                                    const fileData = fileSnapshot.val();
+                                    const encryptedData = fileData.chunks.join('');
+                                    const key = deriveKey(salt);
+                                    const decrypted = CryptoJS.AES.decrypt(encryptedData, key);
+                                    const decryptedBase64 = decrypted.toString(CryptoJS.enc.Utf8);
+                                    if (!decryptedBase64) {
+                                        throw new Error('Decryption resulted in empty data');
+                                    }
+                                    const base64String = `data:${fileType};base64,${decryptedBase64}`;
+
+                                    // Trigger download
+                                    const downloadAnchor = document.createElement('a');
+                                    downloadAnchor.href = base64String;
+                                    downloadAnchor.download = fileName;
+                                    document.body.appendChild(downloadAnchor);
+                                    downloadAnchor.click();
+                                    document.body.removeChild(downloadAnchor);
+                                } catch (error) {
+                                    console.error('Decryption error:', error);
+                                    showToast(`Error downloading file: ${error.message}`);
                                 }
                             });
                         });
