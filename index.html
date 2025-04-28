@@ -338,11 +338,11 @@
         }
 
         .modal-content .action-btn.signup {
-            background-color: #28a745;
+            background-color: #1a73e8; /* A vibrant blue matching the theme */
         }
 
         .modal-content .action-btn.forgot {
-            background-color: #dc3545;
+            background-color: #0288d1; /* A slightly darker blue for contrast */
         }
 
         .modal-content .action-btn:hover {
@@ -351,11 +351,11 @@
         }
 
         .modal-content .action-btn.signup:hover {
-            background-color: #218838;
+            background-color: #1557b0; /* Darker shade for hover */
         }
 
         .modal-content .action-btn.forgot:hover {
-            background-color: #c82333;
+            background-color: #01579b; /* Darker shade for hover */
         }
 
         body.dark-mode .modal-content .action-btn {
@@ -505,6 +505,7 @@
         <div id="signup-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Student Sign Up</h2>
+                <input type="text" id="signup-name-input" placeholder="Enter First and Last Name (max 25 letters)" maxlength="25" onkeypress="return (event.charCode !=8 && ((event.charCode >= 65 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122) || event.charCode == 32))">
                 <input type="text" id="signup-cin-input" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
                 <input type="password" id="signup-password-input" placeholder="Set 6-digit password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
                 <select id="signup-class-select">
@@ -570,6 +571,7 @@
                 </select>
                 <input type="text" id="forgot-answer-input" placeholder="Your answer">
                 <button id="forgot-answer-submit">Submit</button>
+                <button class="action-btn" id="forgot-contact-us-link" style="background-color: #6c757d;">Contact Us</button>
             </div>
         </div>
         <!-- Forgot Password Modal - Step 3: Reset Password -->
@@ -921,12 +923,34 @@
 
             // Student Sign Up
             document.getElementById('signup-submit').addEventListener('click', async () => {
+                const fullName = sanitizeInput(document.getElementById('signup-name-input').value.trim());
                 const cin = sanitizeInput(document.getElementById('signup-cin-input').value.trim());
                 const password = sanitizeInput(document.getElementById('signup-password-input').value.trim());
                 const selectedClass = document.getElementById('signup-class-select').value;
                 const classNumber = sanitizeInput(document.getElementById('signup-class-number').value.trim());
                 const question = document.getElementById('validation-question-select').value;
                 const answer = sanitizeInput(document.getElementById('validation-answer-input').value.trim());
+
+                // Validate full name
+                if (!fullName) {
+                    showToast('Please enter your first and last name.');
+                    return;
+                }
+
+                if (fullName.length > 25) {
+                    showToast('Name cannot exceed 25 characters.');
+                    return;
+                }
+
+                if (!/^[a-zA-Z\s]+$/.test(fullName)) {
+                    showToast('Name can only contain letters and spaces.');
+                    return;
+                }
+
+                // Split full name into first and last name
+                const nameParts = fullName.split(/\s+/);
+                let firstName = nameParts[0] || '';
+                let lastName = nameParts.slice(1).join(' ') || '';
 
                 if (!/^\d{8}$/.test(cin)) {
                     showToast('Please enter a valid 8-digit CIN (numbers only).');
@@ -976,8 +1000,8 @@
 
                     const signupDate = new Date().toISOString().split('T')[0];
                     await studentRef.set({
-                        firstName: "",
-                        lastName: "",
+                        firstName: firstName,
+                        lastName: lastName,
                         class: selectedClass,
                         classNumber: classNumber,
                         absences: [],
@@ -1075,6 +1099,16 @@
                     console.error('Error verifying answer:', error);
                     showToast('An error occurred. Please try again.');
                 }
+            });
+
+            // Forgot Password - Contact Us Link
+            document.getElementById('forgot-contact-us-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('forgot-validation-modal').classList.remove('show');
+                setTimeout(() => {
+                    document.getElementById('forgot-validation-modal').classList.add('hidden');
+                    showModal('contact-us-modal');
+                }, 300);
             });
 
             // Forgot Password - Step 3: Reset Password
