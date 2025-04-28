@@ -1318,23 +1318,39 @@
                                 const isDoc = fileType.includes('msword') || fileType.includes('wordprocessingml');
                                 const isPPT = fileType.includes('presentationml') || fileType.includes('powerpoint');
 
-                                // Show loading message
-                                fileViewerContent.innerHTML = '';
-                                loadingMessage.classList.add('show');
-                                fileViewerModal.style.display = 'flex';
-
-                                setTimeout(() => {
-                                    if (isPDF) {
-                                        fileViewerContent.innerHTML = `<embed src="${base64}" type="application/pdf">`;
-                                    } else if (isImage) {
+                                if (isImage) {
+                                    // Show images in modal as before
+                                    fileViewerContent.innerHTML = '';
+                                    loadingMessage.classList.add('show');
+                                    fileViewerModal.style.display = 'flex';
+                                    setTimeout(() => {
                                         fileViewerContent.innerHTML = `<img src="${base64}" alt="File preview">`;
-                                    } else if (isDoc || isPPT) {
-                                        fileViewerContent.innerHTML = `<p>Preview not supported for this file type on this platform. Please download to view.</p>`;
-                                    } else {
-                                        fileViewerContent.innerHTML = `<p>Preview not supported for this file type.</p>`;
+                                        loadingMessage.classList.remove('show');
+                                    }, 500);
+                                } else if (isPDF || isDoc || isPPT) {
+                                    // Open PDF, Word, and PPT files in Google Docs Viewer in a new tab
+                                    // Convert base64 to blob and create a temporary URL
+                                    const byteString = atob(base64.split(',')[1]);
+                                    const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
+                                    const ab = new ArrayBuffer(byteString.length);
+                                    const ia = new Uint8Array(ab);
+                                    for (let i = 0; i < byteString.length; i++) {
+                                        ia[i] = byteString.charCodeAt(i);
                                     }
-                                    loadingMessage.classList.remove('show');
-                                }, 500); // Adjust delay as needed
+                                    const blob = new Blob([ab], { type: mimeString });
+                                    const blobUrl = URL.createObjectURL(blob);
+
+                                    // Open in Google Docs Viewer
+                                    const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(blobUrl)}&embedded=true`;
+                                    window.open(googleDocsUrl, '_blank');
+
+                                    // Clean up the blob URL after a delay to ensure the browser has time to use it
+                                    setTimeout(() => {
+                                        URL.revokeObjectURL(blobUrl);
+                                    }, 1000);
+                                } else {
+                                    showToast('Preview not supported for this file type.');
+                                }
                             });
                         });
                     }
