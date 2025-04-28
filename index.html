@@ -318,24 +318,48 @@
             box-shadow: 0 3px 12px rgba(52, 152, 219, 0.3);
         }
 
-        .modal-content a {
-            display: block;
-            margin-top: 10px;
-            color: #3498db;
-            text-decoration: none;
+        .modal-content .action-btn {
+            display: inline-block;
+            width: 48%;
+            padding: 10px;
+            margin: 5px 1%;
+            background-color: #6c757d;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
             font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0;
+            animation: inputFadeIn 0.3s ease forwards;
+            animation-delay: 0.6s;
         }
 
-        .modal-content a:hover {
-            color: #5dade2;
+        .modal-content .action-btn.signup {
+            background-color: #28a745;
         }
 
-        body.dark-mode .modal-content a {
-            color: #5dade2;
+        .modal-content .action-btn.forgot {
+            background-color: #dc3545;
         }
 
-        body.dark-mode .modal-content a:hover {
-            color: #7fbfff;
+        .modal-content .action-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content .action-btn.signup:hover {
+            background-color: #218838;
+        }
+
+        .modal-content .action-btn.forgot:hover {
+            background-color: #c82333;
+        }
+
+        body.dark-mode .modal-content .action-btn {
+            color: #e0e0e0;
         }
 
         .modal-content .button-group {
@@ -362,31 +386,6 @@
             background-color: #5a6268;
             transform: scale(1.03);
             box-shadow: 0 3px 12px rgba(108, 117, 125, 0.3);
-        }
-
-        .modal-content .password-display {
-            margin: 15px 0;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            font-size: 16px;
-            color: #2c3e50;
-            border: 1px solid #d1d8e0;
-        }
-
-        body.dark-mode .modal-content .password-display {
-            background-color: #34495e;
-            color: #e0e0e0;
-            border-color: #5dade2;
-        }
-
-        .modal-content .password-display span {
-            font-weight: 700;
-            color: #3498db;
-        }
-
-        body.dark-mode .modal-content .password-display span {
-            color: #5dade2;
         }
 
         .hidden {
@@ -451,8 +450,9 @@
                 font-size: 15px;
                 padding: 12px;
             }
-            .modal-content a {
+            .modal-content .action-btn {
                 font-size: 13px;
+                padding: 8px;
             }
             .toast {
                 font-size: 13px;
@@ -497,8 +497,8 @@
                 <input type="text" id="cin-input" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
                 <input type="password" id="password-input" placeholder="Enter 6-digit password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
                 <button id="student-login">Login</button>
-                <a href="#" id="signup-link">Sign Up</a>
-                <a href="#" id="forgot-password-link">Forgot Password?</a>
+                <button class="action-btn signup" id="signup-link">Sign Up</button>
+                <button class="action-btn forgot" id="forgot-password-link">Forgot Password?</button>
             </div>
         </div>
         <!-- Student Signup Modal -->
@@ -553,25 +553,32 @@
                 <button id="select-question-submit">Submit</button>
             </div>
         </div>
-        <!-- Forgot Password Modal -->
+        <!-- Forgot Password Modal - Step 1: Enter CIN -->
         <div id="forgot-password-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Password Recovery</h2>
                 <input type="text" id="forgot-cin-input" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <select id="forgot-validation-question" class="hidden">
+                <button id="forgot-cin-submit">Submit</button>
+            </div>
+        </div>
+        <!-- Forgot Password Modal - Step 2: Validation Question -->
+        <div id="forgot-validation-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Answer Validation Question</h2>
+                <select id="forgot-validation-question" disabled>
                     <option value="" disabled selected>Loading question...</option>
                 </select>
-                <input type="text" id="forgot-answer-input" placeholder="Your answer" class="hidden">
-                <div id="password-display" class="password-display hidden">
-                    <p>Your password: <span id="current-password"></span></p>
-                </div>
-                <input type="password" id="new-password-input" placeholder="New 6-digit password (optional)" maxlength="6" class="hidden" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <div class="button-group hidden" id="forgot-password-actions">
-                    <button id="forgot-password-continue">Continue</button>
-                    <button id="forgot-password-update">Update Password</button>
-                </div>
-                <button id="forgot-password-submit">Submit</button>
-                <a href="#" id="contact-us-link">Contact Us</a>
+                <input type="text" id="forgot-answer-input" placeholder="Your answer">
+                <button id="forgot-answer-submit">Submit</button>
+            </div>
+        </div>
+        <!-- Forgot Password Modal - Step 3: Reset Password -->
+        <div id="forgot-reset-password-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Reset Password</h2>
+                <input type="password" id="forgot-new-password" placeholder="Enter new 6-digit password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
+                <input type="password" id="forgot-confirm-password" placeholder="Confirm new password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
+                <button id="forgot-reset-submit">Update Password</button>
             </div>
         </div>
         <!-- Contact Us Modal -->
@@ -639,7 +646,6 @@
             db.ref('students').once('value', (snapshot) => {
                 snapshot.forEach((childSnapshot) => {
                     const studentData = childSnapshot.val();
-                    // Check if password is undefined or null
                     if (!studentData.hasOwnProperty('password') || studentData.password === null) {
                         db.ref('students/' + childSnapshot.key).update({
                             password: '123456'
@@ -707,34 +713,38 @@
                 });
             });
 
-            // Device registration tracking
-            function getDeviceId() {
-                return navigator.userAgent + navigator.language + screen.width + screen.height;
+            // Cookie-based registration limit
+            function setCookie(name, value, hours) {
+                const expires = new Date();
+                expires.setTime(expires.getTime() + (hours * 60 * 60 * 1000));
+                document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;Secure;SameSite=Strict`;
             }
 
-            async function checkDeviceRegistrationLimit() {
-                const deviceId = getDeviceId();
-                const deviceRef = db.ref(`deviceRegistrations/${deviceId}`);
-                const snapshot = await deviceRef.once('value');
-                const now = Date.now();
-                const threeDays = 3 * 24 * 60 * 60 * 1000;
+            function getCookie(name) {
+                const nameEQ = name + "=";
+                const ca = document.cookie.split(';');
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+                }
+                return null;
+            }
 
-                if (snapshot.exists()) {
-                    const lastRegistration = snapshot.val().timestamp;
-                    if (now - lastRegistration < threeDays) {
-                        showToast('This device has already registered an account. Please wait 3 days before registering again.');
-                        return false;
-                    }
+            function checkSignupLimit() {
+                const lastSignup = getCookie('lastSignup');
+                const now = Date.now();
+                const sixHours = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
+
+                if (lastSignup && (now - parseInt(lastSignup) < sixHours)) {
+                    showToast('You can only sign up once every 6 hours from this device.');
+                    return false;
                 }
                 return true;
             }
 
-            async function registerDevice() {
-                const deviceId = getDeviceId();
-                const deviceRef = db.ref(`deviceRegistrations/${deviceId}`);
-                await deviceRef.set({
-                    timestamp: Date.now()
-                });
+            function recordSignup() {
+                setCookie('lastSignup', Date.now(), 6); // Cookie expires in 6 hours
             }
 
             // Input sanitization to prevent XSS
@@ -961,8 +971,8 @@
                         return;
                     }
 
-                    const canRegister = await checkDeviceRegistrationLimit();
-                    if (!canRegister) return;
+                    const canSignup = checkSignupLimit();
+                    if (!canSignup) return;
 
                     const signupDate = new Date().toISOString().split('T')[0];
                     await studentRef.set({
@@ -978,7 +988,7 @@
                         signupDate: signupDate
                     });
 
-                    await registerDevice();
+                    recordSignup();
 
                     document.getElementById('signup-modal').classList.remove('show');
                     setTimeout(() => {
@@ -996,13 +1006,6 @@
             // Forgot Password Link
             document.getElementById('forgot-password-link').addEventListener('click', (e) => {
                 e.preventDefault();
-                const cin = sanitizeInput(document.getElementById('cin-input').value.trim());
-                if (!/^\d{8}$/.test(cin)) {
-                    showToast('Please enter a valid 8-digit CIN.');
-                    return;
-                }
-
-                document.getElementById('forgot-cin-input').value = cin;
                 document.getElementById('student-modal').classList.remove('show');
                 setTimeout(() => {
                     document.getElementById('student-modal').classList.add('hidden');
@@ -1010,13 +1013,12 @@
                 }, 300);
             });
 
-            // Forgot Password Submission
-            document.getElementById('forgot-password-submit').addEventListener('click', async () => {
+            // Forgot Password - Step 1: Submit CIN
+            document.getElementById('forgot-cin-submit').addEventListener('click', async () => {
                 const cin = sanitizeInput(document.getElementById('forgot-cin-input').value.trim());
-                const answer = sanitizeInput(document.getElementById('forgot-answer-input').value.trim());
 
                 if (!/^\d{8}$/.test(cin)) {
-                    showToast('Please enter a valid 8-digit CIN.');
+                    showToast('Please enter a valid 8-digit CIN (numbers only).');
                     return;
                 }
 
@@ -1030,133 +1032,23 @@
                     }
 
                     const studentData = snapshot.val();
-                    const questionSelect = document.getElementById('forgot-validation-question');
-                    if (questionSelect.classList.contains('hidden')) {
-                        questionSelect.innerHTML = `<option value="${studentData.validationQuestion}" selected>${studentData.validationQuestion}</option>`;
-                        questionSelect.classList.remove('hidden');
-                        document.getElementById('forgot-answer-input').classList.remove('hidden');
-                        document.getElementById('forgot-password-submit').style.display = 'block';
-                        return;
-                    }
-
-                    if (!answer) {
-                        showToast('Please provide an answer to the validation question.');
-                        return;
-                    }
-
-                    if (answer.toLowerCase() !== studentData.validationAnswer.toLowerCase()) {
-                        showToast('Incorrect answer. Please try again.');
-                        return;
-                    }
-
-                    document.getElementById('current-password').textContent = studentData.password;
-                    document.getElementById('password-display').classList.remove('hidden');
-                    document.getElementById('new-password-input').classList.remove('hidden');
-                    document.getElementById('forgot-password-actions').classList.remove('hidden');
-                    document.getElementById('forgot-password-submit').style.display = 'none';
-                    document.getElementById('contact-us-link').style.display = 'none';
+                    document.getElementById('forgot-validation-modal').dataset.cin = cin;
+                    document.getElementById('forgot-validation-question').innerHTML = `<option value="${studentData.validationQuestion}" selected>${studentData.validationQuestion}</option>`;
+                    document.getElementById('forgot-password-modal').classList.remove('show');
+                    setTimeout(() => {
+                        document.getElementById('forgot-password-modal').classList.add('hidden');
+                        showModal('forgot-validation-modal');
+                    }, 300);
                 } catch (error) {
-                    console.error('Error during password recovery:', error);
+                    console.error('Error fetching validation question:', error);
                     showToast('An error occurred. Please try again.');
                 }
             });
 
-            // Forgot Password - Continue
-            document.getElementById('forgot-password-continue').addEventListener('click', () => {
-                const cin = sanitizeInput(document.getElementById('forgot-cin-input').value.trim());
-                document.getElementById('forgot-password-modal').classList.remove('show');
-                setTimeout(() => {
-                    document.getElementById('forgot-password-modal').classList.add('hidden');
-                    showModal('student-modal');
-                    document.getElementById('cin-input').value = cin;
-                }, 300);
-                showToast('You can now log in with your password.');
-            });
-
-            // Forgot Password - Update Password
-            document.getElementById('forgot-password-update').addEventListener('click', async () => {
-                const cin = sanitizeInput(document.getElementById('forgot-cin-input').value.trim());
-                const newPassword = sanitizeInput(document.getElementById('new-password-input').value.trim());
-
-                if (newPassword && !/^\d{6}$/.test(newPassword)) {
-                    showToast('Please enter a valid 6-digit password (numbers only).');
-                    return;
-                }
-
-                if (newPassword === '123456') {
-                    showToast('The password "123456" is not allowed. Please choose a different password.');
-                    return;
-                }
-
-                if (newPassword) {
-                    try {
-                        const studentRef = db.ref('students/' + cin);
-                        await studentRef.update({ password: newPassword });
-                        showToast('Password updated successfully!');
-                    } catch (error) {
-                        console.error('Error updating password:', error);
-                        showToast('An error occurred while updating your password.');
-                        return;
-                    }
-                }
-
-                document.getElementById('forgot-password-modal').classList.remove('show');
-                setTimeout(() => {
-                    document.getElementById('forgot-password-modal').classList.add('hidden');
-                    showModal('student-modal');
-                    document.getElementById('cin-input').value = cin;
-                }, 300);
-                if (newPassword) {
-                    showToast('Password updated. Please log in with your new password.');
-                } else {
-                    showToast('You can now log in with your password.');
-                }
-            });
-
-            // Contact Us Link
-            document.getElementById('contact-us-link').addEventListener('click', (e) => {
-                e.preventDefault();
-                const cin = sanitizeInput(document.getElementById('forgot-cin-input').value.trim());
-                document.getElementById('contact-cin').value = cin;
-                document.getElementById('forgot-password-modal').classList.remove('show');
-                setTimeout(() => {
-                    document.getElementById('forgot-password-modal').classList.add('hidden');
-                    showModal('contact-us-modal');
-                }, 300);
-
-                db.ref('students/' + cin).once('value').then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const studentData = snapshot.val();
-                        document.getElementById('contact-validation-question').innerHTML = `<option value="${studentData.validationQuestion}" selected>${studentData.validationQuestion}</option>`;
-                        document.getElementById('contact-validation-question').classList.remove('hidden');
-                        document.getElementById('contact-answer').classList.remove('hidden');
-                    }
-                });
-            });
-
-            // Contact Us Submission
-            document.getElementById('contact-submit').addEventListener('click', async () => {
-                const fullName = sanitizeInput(document.getElementById('contact-fullname').value.trim());
-                const cin = sanitizeInput(document.getElementById('contact-cin').value.trim());
-                const email = sanitizeInput(document.getElementById('contact-email').value.trim());
-                const question = document.getElementById('contact-validation-question').value;
-                const answer = sanitizeInput(document.getElementById('contact-answer').value.trim());
-                const signupDate = document.getElementById('contact-signup-date').value;
-
-                if (!fullName) {
-                    showToast('Please enter your full name.');
-                    return;
-                }
-
-                if (!/^\d{8}$/.test(cin)) {
-                    showToast('Please enter a valid 8-digit CIN.');
-                    return;
-                }
-
-                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                    showToast('Please enter a valid email address.');
-                    return;
-                }
+            // Forgot Password - Step 2: Submit Answer
+            document.getElementById('forgot-answer-submit').addEventListener('click', async () => {
+                const cin = document.getElementById('forgot-validation-modal').dataset.cin;
+                const answer = sanitizeInput(document.getElementById('forgot-answer-input').value.trim());
 
                 if (!answer) {
                     showToast('Please provide an answer to the validation question.');
@@ -1166,49 +1058,64 @@
                 try {
                     const studentRef = db.ref('students/' + cin);
                     const snapshot = await studentRef.once('value');
-                    if (!snapshot.exists()) {
-                        showToast('Student not found.');
-                        return;
-                    }
-
                     const studentData = snapshot.val();
+
                     if (answer.toLowerCase() !== studentData.validationAnswer.toLowerCase()) {
-                        showToast('Incorrect answer to the validation question.');
+                        showToast('Incorrect answer. Please try again.');
                         return;
                     }
 
-                    if (signupDate) {
-                        const selectedDate = new Date(signupDate);
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        if (selectedDate > today) {
-                            showToast('Signup date cannot be in the future.');
-                            return;
-                        }
-                    }
-
-                    const requestId = Date.now().toString();
-                    const requestRef = db.ref('supportRequests/request_' + requestId);
-                    await requestRef.set({
-                        fullName: fullName,
-                        cin: cin,
-                        email: email,
-                        validationQuestion: question,
-                        validationAnswer: answer,
-                        signupDate: signupDate || null,
-                        timestamp: new Date().toISOString()
-                    });
-
-                    document.getElementById('contact-us-modal').classList.remove('show');
+                    document.getElementById('forgot-reset-password-modal').dataset.cin = cin;
+                    document.getElementById('forgot-validation-modal').classList.remove('show');
                     setTimeout(() => {
-                        document.getElementById('contact-us-modal').classList.add('hidden');
-                        showModal('forgot-password-modal');
-                        document.getElementById('forgot-cin-input').value = cin;
+                        document.getElementById('forgot-validation-modal').classList.add('hidden');
+                        showModal('forgot-reset-password-modal');
                     }, 300);
-                    showToast('Support request submitted successfully!');
                 } catch (error) {
-                    console.error('Error submitting support request:', error);
+                    console.error('Error verifying answer:', error);
                     showToast('An error occurred. Please try again.');
+                }
+            });
+
+            // Forgot Password - Step 3: Reset Password
+            document.getElementById('forgot-reset-submit').addEventListener('click', async () => {
+                const cin = document.getElementById('forgot-reset-password-modal').dataset.cin;
+                const newPassword = sanitizeInput(document.getElementById('forgot-new-password').value.trim());
+                const confirmPassword = sanitizeInput(document.getElementById('forgot-confirm-password').value.trim());
+
+                if (!newPassword) {
+                    showToast('Please enter a new password.');
+                    return;
+                }
+
+                if (!/^\d{6}$/.test(newPassword)) {
+                    showToast('Please enter a valid 6-digit password (numbers only).');
+                    return;
+                }
+
+                if (newPassword === '123456') {
+                    showToast('The password "123456" is not allowed. Please choose a different password.');
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    showToast('Passwords do not match.');
+                    return;
+                }
+
+                try {
+                    const studentRef = db.ref('students/' + cin);
+                    await studentRef.update({ password: newPassword });
+                    document.getElementById('forgot-reset-password-modal').classList.remove('show');
+                    setTimeout(() => {
+                        document.getElementById('forgot-reset-password-modal').classList.add('hidden');
+                        showModal('student-modal');
+                        document.getElementById('cin-input').value = cin;
+                    }, 300);
+                    showToast('Password updated successfully! Please log in with your new password.');
+                } catch (error) {
+                    console.error('Error updating password:', error);
+                    showToast('An error occurred while updating your password.');
                 }
             });
 
@@ -1217,7 +1124,7 @@
                 const cin = sanitizeInput(document.getElementById('parents-cin-input').value.trim());
 
                 if (!/^\d{8}$/.test(cin)) {
-                    showToast('Please enter a valid 8-digit CIN.');
+                    showToast('Please enter a valid 8-digit CIN (numbers only).');
                     return;
                 }
 
