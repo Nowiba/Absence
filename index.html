@@ -153,6 +153,10 @@
             animation-delay: 0.2s;
         }
 
+        .modal-content input:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
         .modal-content input:focus, .modal-content select:focus {
             border-color: #3498db;
             box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
@@ -172,7 +176,7 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.3s;
+            animation-delay: 0.4s;
         }
 
         .modal-content button:hover {
@@ -350,22 +354,30 @@
                 <a href="#" id="forgot-password-link">Forgot Password?</a>
             </div>
         </div>
-        <!-- Registration Modal -->
+        <!-- Registration Modal (Validation Questions) -->
         <div id="register-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Complete Registration</h2>
-                <input type="password" id="new-password-input" placeholder="Set 6-digit password" maxlength="6">
                 <select id="validation-question-select">
                     <option value="" disabled selected>Select a validation question</option>
-                    <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
-                    <option value="What was the name of your first pet?">What was the name of your first pet?</option>
-                    <option value="What is the name of your favorite teacher?">What is the name of your favorite teacher?</option>
-                    <option value="What city were you born in?">What city were you born in?</option>
-                    <option value="What is your favorite book?">What is your favorite book?</option>
-                    <option value="What was your childhood nickname?">What was your childhood nickname?</option>
+                    <option value="What is your dog's name?">What is your dog's name?</option>
+                    <option value="What type of PC do you use?">What type of PC do you use?</option>
+                    <option value="What is your favorite hobby?">What is your favorite hobby?</option>
+                    <option value="What was your first school's name?">What was your first school's name?</option>
+                    <option value="What is your favorite food?">What is your favorite food?</option>
+                    <option value="What is your best friend's name?">What is your best friend's name?</option>
                 </select>
                 <input type="text" id="validation-answer-input" placeholder="Your answer">
-                <button id="register-submit">Register</button>
+                <button id="register-submit">Submit</button>
+            </div>
+        </div>
+        <!-- Change Password Modal -->
+        <div id="change-password-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Change Password</h2>
+                <input type="password" id="new-password-input" placeholder="New 6-digit password" maxlength="6">
+                <input type="password" id="confirm-password-input" placeholder="Confirm new password" maxlength="6">
+                <button id="change-password-submit">Update Password</button>
             </div>
         </div>
         <!-- Forgot Password Modal -->
@@ -428,7 +440,7 @@
                 console.error('Error signing out on page load:', error);
             });
 
-            // Load dark mode preference (stored in Firebase for security, not localStorage)
+            // Load dark mode preference
             db.ref('settings/darkMode').once('value').then((snapshot) => {
                 const darkMode = snapshot.val();
                 if (darkMode === 'enabled') {
@@ -440,6 +452,9 @@
             }).catch(error => {
                 console.error('Error loading dark mode preference:', error);
             });
+
+            // Default password (mapped from "isetsl" to a 6-digit number: i=9, s=19, e=5, t=20 → simplified to 951920)
+            const DEFAULT_PASSWORD = "951920";
 
             // Modal show function
             function showModal(modalId) {
@@ -471,19 +486,17 @@
                 });
             });
 
-            // Device registration tracking (using a pseudo-device ID based on browser fingerprint)
+            // Device registration tracking
             function getDeviceId() {
-                // Simplified device ID generation (in production, use a more robust fingerprinting library)
                 return navigator.userAgent + navigator.language + screen.width + screen.height;
             }
 
-            // Check device registration limit (one signup per device every 3 days)
             async function checkDeviceRegistrationLimit() {
                 const deviceId = getDeviceId();
                 const deviceRef = db.ref(`deviceRegistrations/${deviceId}`);
                 const snapshot = await deviceRef.once('value');
                 const now = Date.now();
-                const threeDays = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds
+                const threeDays = 3 * 24 * 60 * 60 * 1000;
 
                 if (snapshot.exists()) {
                     const lastRegistration = snapshot.val().timestamp;
@@ -495,7 +508,6 @@
                 return true;
             }
 
-            // Register device after successful signup
             async function registerDevice() {
                 const deviceId = getDeviceId();
                 const deviceRef = db.ref(`deviceRegistrations/${deviceId}`);
@@ -524,11 +536,18 @@
                         const canRegister = await checkDeviceRegistrationLimit();
                         if (!canRegister) return;
 
-                        document.getElementById('student-modal').classList.remove('show');
-                        setTimeout(() => {
-                            document.getElementById('student-modal').classList.add('hidden');
-                            showModal('register-modal');
-                        }, 300);
+                        // Set default password
+                        await studentRef.set({
+                            password: DEFAULT_PASSWORD,
+                            failedAttempts: []
+                        });
+
+                        await registerDevice();
+
+                        // Show password input for first login
+                        passwordInput.classList.remove('hidden');
+                        passwordInput.focus();
+                        showToast('Please enter the default password to continue.');
                     } else {
                         // Existing student
                         const studentData = snapshot.val();
@@ -540,6 +559,16 @@
 
                             if (password !== studentData.password) {
                                 showToast('Incorrect password. Please try again.');
+                                return;
+                            }
+
+                            // Check if using default password
+                            if (password === DEFAULT_PASSWORD) {
+                                document.getElementById('student-modal').classList.remove('show');
+                                setTimeout(() => {
+                                    document.getElementById('student-modal').classList.add('hidden');
+                                    showModal('change-password-modal');
+                                }, 300);
                                 return;
                             }
 
@@ -571,17 +600,56 @@
                 }
             });
 
-            // Registration submission
-            document.getElementById('register-submit').addEventListener('click', async () => {
+            // Change Password Submission
+            document.getElementById('change-password-submit').addEventListener('click', async () => {
                 const cin = document.getElementById('cin-input').value.trim();
-                const password = document.getElementById('new-password-input').value.trim();
-                const question = document.getElementById('validation-question-select').value;
-                const answer = document.getElementById('validation-answer-input').value.trim();
+                const newPassword = document.getElementById('new-password-input').value.trim();
+                const confirmPassword = document.getElementById('confirm-password-input').value.trim();
 
-                if (!/^\d{6}$/.test(password)) {
-                    showToast('Please set a valid 6-digit password.');
+                if (!/^\d{6}$/.test(newPassword)) {
+                    showToast('Please set a valid 6-digit password (numbers only).');
                     return;
                 }
+
+                if (newPassword !== confirmPassword) {
+                    showToast('Passwords do not match. Please try again.');
+                    return;
+                }
+
+                if (newPassword === DEFAULT_PASSWORD) {
+                    showToast('Please choose a different password.');
+                    return;
+                }
+
+                try {
+                    const studentRef = db.ref('students/' + cin);
+                    await studentRef.update({ password: newPassword });
+
+                    // Check if validation question is answered
+                    const snapshot = await studentRef.once('value');
+                    const studentData = snapshot.val();
+
+                    document.getElementById('change-password-modal').classList.remove('show');
+                    setTimeout(() => {
+                        document.getElementById('change-password-modal').classList.add('hidden');
+                        if (!studentData.validationQuestion || !studentData.validationAnswer) {
+                            showModal('register-modal');
+                        } else {
+                            window.location.href = `student.html?cin=${cin}`;
+                            showToast('Password updated successfully! Welcome!');
+                        }
+                    }, 300);
+                } catch (error) {
+                    console.error('Error updating password:', error);
+                    showToast('An error occurred while updating your password. Please try again.');
+                }
+            });
+
+            // Registration submission (Validation Question)
+            document.getElementById('register-submit').addEventListener('click', async () => {
+                const cin = document.getElementById('cin-input').value.trim();
+                const question = document.getElementById('validation-question-select').value;
+                const answer = document.getElementById('validation-answer-input').value.trim();
 
                 if (!question) {
                     showToast('Please select a validation question.');
@@ -595,21 +663,17 @@
 
                 try {
                     const studentRef = db.ref('students/' + cin);
-                    await studentRef.set({
-                        password: password,
+                    await studentRef.update({
                         validationQuestion: question,
-                        validationAnswer: answer.toLowerCase(), // Store answer in lowercase for consistency
-                        failedAttempts: [] // Initialize failed attempts array
+                        validationAnswer: answer.toLowerCase()
                     });
-
-                    await registerDevice();
 
                     document.getElementById('register-modal').classList.remove('show');
                     setTimeout(() => {
                         document.getElementById('register-modal').classList.add('hidden');
                         window.location.href = `student.html?cin=${cin}`;
                     }, 300);
-                    showToast('Registration successful! Welcome!');
+                    showToast('Registration completed! Welcome!');
                 } catch (error) {
                     console.error('Error during registration:', error);
                     showToast('An error occurred during registration. Please try again.');
@@ -660,7 +724,6 @@
                     const studentData = snapshot.val();
                     const questionSelect = document.getElementById('forgot-validation-question');
                     if (questionSelect.classList.contains('hidden')) {
-                        // Show the validation question
                         questionSelect.innerHTML = `<option value="${studentData.validationQuestion}" selected>${studentData.validationQuestion}</option>`;
                         questionSelect.classList.remove('hidden');
                         document.getElementById('forgot-answer-input').classList.remove('hidden');
@@ -669,13 +732,12 @@
 
                     if (answer !== studentData.validationAnswer) {
                         const now = new Date();
-                        const timestamp = now.toISOString(); // ISO format: YYYY-MM-DDTHH:mm:ss.sssZ
+                        const timestamp = now.toISOString();
                         const failedAttempt = {
                             timestamp: timestamp,
                             answerAttempted: answer
                         };
 
-                        // Add failed attempt to the student's record
                         const failedAttempts = studentData.failedAttempts || [];
                         failedAttempts.push(failedAttempt);
                         await studentRef.update({ failedAttempts });
@@ -684,10 +746,9 @@
                         return;
                     }
 
-                    // Correct answer, allow password reset
-                    const newPassword = prompt('Enter your new 6-digit password:');
+                    const newPassword = prompt('Enter your new 6-digit password (numbers only):');
                     if (!newPassword || !/^\d{6}$/.test(newPassword)) {
-                        showToast('Please enter a valid 6-digit password.');
+                        showToast('Please enter a valid 6-digit password (numbers only).');
                         return;
                     }
 
