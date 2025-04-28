@@ -133,6 +133,7 @@
         .add-student-form input:nth-child(2), .add-student-form select:nth-child(2) { animation-delay: 0.1s; }
         .add-student-form input:nth-child(3) { animation-delay: 0.2s; }
         .add-student-form input:nth-child(4) { animation-delay: 0.3s; }
+        .add-student-form input:nth-child(5) { animation-delay: 0.4s; }
 
         .add-student-form input:focus, .add-student-form select:focus {
             border-color: #3498db;
@@ -153,7 +154,7 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.4s;
+            animation-delay: 0.5s;
         }
 
         .add-student-form button:hover {
@@ -310,15 +311,16 @@
         <!-- Add Student Form -->
         <div class="add-student-form">
             <h2>Add Student</h2>
-            <input type="text" id="full-name-input" placeholder="Enter Full Name (e.g., Ali Ben)">
+            <input type="text" id="first-name-input" placeholder="Enter First Name (e.g., Mohamed)">
+            <input type="text" id="last-name-input" placeholder="Enter Last Name (e.g., Laabidi)">
             <input type="text" id="cin-input" placeholder="Enter 8-digit CIN" maxlength="8" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <input type="email" id="email-input" placeholder="Enter Email (optional)">
             <select id="class-select">
                 <option value="IT">IT</option>
                 <option value="RSI">RSI</option>
                 <option value="DSI">DSI</option>
             </select>
-            <input type="text" id="class-number-input" placeholder="Optional: Add number (e.g., 101)" maxlength="3" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-a>
+            <input type="text" id="class-number-input" placeholder="Add number (e.g., 11)" maxlength="3" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <button id="add-student-submit">Add Student</button>
         </div>
     </main>
@@ -366,26 +368,33 @@ a>
 
                 // Add Student Form
                 const addStudentSubmit = document.getElementById('add-student-submit');
-                const fullNameInput = document.getElementById('full-name-input');
+                const firstNameInput = document.getElementById('first-name-input');
+                const lastNameInput = document.getElementById('last-name-input');
                 const cinInput = document.getElementById('cin-input');
+                const emailInput = document.getElementById('email-input');
                 const classSelect = document.getElementById('class-select');
                 const classNumberInput = document.getElementById('class-number-input');
 
                 addStudentSubmit.addEventListener('click', () => {
                     console.log('Add student submit clicked');
-                    const fullName = fullNameInput.value.trim();
+                    const firstName = firstNameInput.value.trim();
+                    const lastName = lastNameInput.value.trim();
                     const cin = cinInput.value.trim();
+                    const email = emailInput.value.trim();
                     const classBase = classSelect.value;
                     const classNumber = classNumberInput.value.trim();
 
-                    // Validate full name
-                    const nameParts = fullName.split(' ');
-                    if (nameParts.length < 2) {
-                        showToast('Please enter both first and last name (e.g., Ali Ben)');
+                    // Validate first name
+                    if (!firstName) {
+                        showToast('Please enter the first name');
                         return;
                     }
-                    const firstName = nameParts[0];
-                    const lastName = nameParts.slice(1).join(' ');
+
+                    // Validate last name
+                    if (!lastName) {
+                        showToast('Please enter the last name');
+                        return;
+                    }
 
                     // Validate CIN
                     if (!/^\d{8}$/.test(cin)) {
@@ -393,29 +402,45 @@ a>
                         return;
                     }
 
-                    // Validate class number (optional, up to 3 digits)
-                    if (classNumber && !/^\d{1,3}$/.test(classNumber)) {
-                        showToast('Class number must be 1 to 3 digits');
+                    // Validate email (if provided)
+                    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        showToast('Please enter a valid email or leave it empty');
+                        return;
+                    }
+
+                    // Validate class number (must be provided and 1-2 digits)
+                    if (!classNumber || !/^\d{1,2}$/.test(classNumber)) {
+                        showToast('Class number must be 1 to 2 digits (e.g., 11)');
                         return;
                     }
 
                     // Combine class
-                    const classValue = classNumber ? `${classBase}${classNumber}` : classBase;
+                    const classValue = `${classBase}${classNumber}`;
 
                     // Check if CIN already exists
                     db.ref('students/' + cin).once('value').then((snapshot) => {
                         if (snapshot.exists()) {
                             showToast('Student with this CIN already exists');
                         } else {
-                            db.ref('students/' + cin).set({
+                            // Create student object matching the database structure
+                            const studentData = {
                                 firstName: firstName,
                                 lastName: lastName,
                                 class: classValue,
-                                absences: []
-                            }).then(() => {
+                                absences: [] // Initialize as empty array
+                            };
+                            if (email) {
+                                studentData.email = email;
+                            }
+
+                            // Save to database
+                            db.ref('students/' + cin).set(studentData).then(() => {
                                 showToast('Student added successfully');
-                                fullNameInput.value = '';
+                                // Clear form
+                                firstNameInput.value = '';
+                                lastNameInput.value = '';
                                 cinInput.value = '';
+                                emailInput.value = '';
                                 classSelect.value = 'IT';
                                 classNumberInput.value = '';
                             }).catch(error => {
@@ -460,7 +485,7 @@ a>
                 }
             } catch (error) {
                 console.error('Initialization error:', error);
-                alert('Error initializing page: ' + error.message);
+                showToast('Error initializing page: ' + error.message);
             }
         });
     </script>
