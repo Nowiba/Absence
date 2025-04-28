@@ -990,6 +990,29 @@
                     'A. Programmation'
                 ];
 
+                // Mapping of professor-reported subjects to student page subjects
+                const subjectMapping = {
+                    'Dev Web': 'Dev. Web et Multimédias 2',
+                    'A. Dev Web': 'A. Dev. Web et Multimédias 2',
+                    'Technique d\'expression': 'Technique d’expression 2',
+                    'UVT3': 'UVT3 (2CN)',
+                    'Algo & Prog': 'Algo & Programmation',
+                    'Atelier Linux': 'Option 2: Atelier Linux',
+                    'Sys Exploitation': 'Sys. Exploitation',
+                    'Fond Reseaux': 'Fond Réseaux',
+                    'English': 'English for Computing 2',
+                    'A. Systeme': 'A. Système 1',
+                    'Prep Metiers': 'Préparation aux métiers',
+                    'Stat Proba': 'Stat & Proba',
+                    'Rech Op': 'Recherche Opérationnelle',
+                    'A. Prog': 'A. Programmation'
+                };
+
+                // Function to normalize strings for comparison
+                function normalizeString(str) {
+                    return str ? str.trim().toLowerCase() : '';
+                }
+
                 // Function to convert time string to minutes for comparison
                 function timeToMinutes(timeStr) {
                     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -1023,9 +1046,6 @@
                         const endMinutes = timeToMinutes(slot.end);
                         const prepStartMinutes = startMinutes - 30; // 30 minutes before class starts
                         const hideMinutes = startMinutes + 30; // 30 minutes after class starts
-
-                        const prepStartTime = `${Math.floor(prepStartMinutes / 60).toString().padStart(2, '0')}:${(prepStartMinutes % 60).toString().padStart(2, '0')}`;
-                        const hideTime = `${Math.floor(hideMinutes / 60).toString().padStart(2, '0')}:${(hideMinutes % 60).toString().padStart(2, '0')}`;
 
                         if (currentMinutes >= prepStartMinutes && currentMinutes < hideMinutes) {
                             shouldShow = true;
@@ -1097,10 +1117,94 @@
                     });
                 });
 
-                // Fetch student details
+                // Fetch student details and listen for changes
                 let studentClass = '';
                 let classmates = [];
-                db.ref('students/' + cin).once('value').then((snapshot) => {
+                const studentRef = db.ref('students/' + cin);
+
+                // Function to render absences from professorActions
+                function renderAbsences(absences) {
+                    console.log('Processed absences:', absences); // Debug log
+
+                    const absenceBySubject = {};
+                    subjects.forEach(subject => {
+                        const normalizedSubject = normalizeString(subject);
+                        absenceBySubject[subject] = absences.filter(a => {
+                            const normalizedAbsenceSubject = normalizeString(a.mappedSubject);
+                            const normalizedStudentClass = normalizeString(studentClass);
+                            return normalizedAbsenceSubject === normalizedSubject &&
+                                   a.status === 'absent';
+                        });
+                    });
+
+                    const absenceDetails = document.getElementById('absence-details');
+                    absenceDetails.innerHTML = ''; // Clear previous content
+
+                    subjects.forEach(subject => {
+                        const sectionDiv = document.createElement('div');
+                        sectionDiv.className = 'subject-section';
+                        const absencesForSubject = absenceBySubject[subject] || [];
+                        const absenceCount = absencesForSubject.reduce((total, a) => total + (a.weight || 0), 0);
+                        sectionDiv.innerHTML = `
+                            <div class="subject-header" data-subject="${subject}">
+                                <span>${subject}</span>
+                            </div>
+                            <div class="subject-details" id="details-${subject.replace(/\s+/g, '-')}">
+                                <div class="absence-count">Absences: ${absenceCount}</div>
+                                ${absencesForSubject.length === 0 ? 
+                                    `<div class="no-absences">No absences recorded for ${subject}</div>` :
+                                    absencesForSubject.map(a => `
+                                        <div class="absence-item">
+                                            <span class="absence-date">Date: ${a.date || 'N/A'}</span>
+                                            <span class="absence-weight">Weight: ${a.weight || 'N/A'}</span>
+                                        </div>
+                                    `).join('')}
+                            </div>
+                        `;
+                        absenceDetails.appendChild(sectionDiv);
+                    });
+
+                    document.querySelectorAll('.subject-header').forEach(header => {
+                        header.addEventListener('click', () => {
+                            const subject = header.dataset.subject;
+                            const details = document.getElementById(`details-${subject.replace(/\s+/g, '-')}`);
+                            const isVisible = details.classList.contains('show');
+
+                            document.querySelectorAll('.subject-details').forEach(d => d.classList.remove('show'));
+                            document.querySelectorAll('.subject-header').forEach(h => h.classList.remove('active'));
+
+                            if (!isVisible) {
+                                details.classList.add('show');
+                                header.classList.add('active');
+                            }
+                        });
+                    });
+                }
+
+                // Fetch absences from professorActions
+                const professorActionsRef = db.ref('professorActions');
+                professorActionsRef.on('value', (snapshot) => {
+                    const allActions = [];
+                    snapshot.forEach(professorSnapshot => {
+                        professorSnapshot.forEach(actionSnapshot => {
+                            const action = actionSnapshot.val();
+                            if (action.cin === cin && action.status === 'absent') {
+                                const mappedSubject = subjectMapping[action.subject] || action.subject;
+                                allActions.push({
+                                    ...action,
+                                    mappedSubject: mappedSubject
+                                });
+                            }
+                        });
+                    });
+                    renderAbsences(allActions);
+                }, (error) => {
+                    showToast('Error loading absence data');
+                    console.error(error);
+                });
+
+                // Listen for changes to student data
+                studentRef.on('value', (snapshot) => {
                     if (snapshot.exists()) {
                         const student = snapshot.val();
                         const fullName = `${student.firstName} ${student.lastName}`;
@@ -1129,63 +1233,13 @@
                             showToast('Error loading classmates');
                             console.error(error);
                         });
-
-                        // Load absences
-                        const absences = student.absences || [];
-                        const absenceBySubject = {};
-
-                        subjects.forEach(subject => {
-                            absenceBySubject[subject] = absences.filter(a => a.class === studentClass && a.subject === subject && a.status === 'absent');
-                        });
-
-                        const absenceDetails = document.getElementById('absence-details');
-
-                        subjects.forEach(subject => {
-                            const sectionDiv = document.createElement('div');
-                            sectionDiv.className = 'subject-section';
-                            const absencesForSubject = absenceBySubject[subject] || [];
-                            const absenceCount = absencesForSubject.reduce((total, a) => total + a.weight, 0);
-                            sectionDiv.innerHTML = `
-                                <div class="subject-header" data-subject="${subject}">
-                                    <span>${subject}</span>
-                                </div>
-                                <div class="subject-details" id="details-${subject.replace(/\s+/g, '-')}">
-                                    <div class="absence-count">Absences: ${absenceCount}</div>
-                                    ${absencesForSubject.length === 0 ? 
-                                        `<div class="no-absences">No absences recorded for ${subject}</div>` :
-                                        absencesForSubject.map(a => `
-                                            <div class="absence-item">
-                                                <span class="absence-date">Date: ${a.date}</span>
-                                                <span class="absence-weight">Weight: ${a.weight}</span>
-                                            </div>
-                                        `).join('')}
-                                </div>
-                            `;
-                            absenceDetails.appendChild(sectionDiv);
-                        });
-
-                        document.querySelectorAll('.subject-header').forEach(header => {
-                            header.addEventListener('click', () => {
-                                const subject = header.dataset.subject;
-                                const details = document.getElementById(`details-${subject.replace(/\s+/g, '-')}`);
-                                const isVisible = details.classList.contains('show');
-
-                                document.querySelectorAll('.subject-details').forEach(d => d.classList.remove('show'));
-                                document.querySelectorAll('.subject-header').forEach(h => h.classList.remove('active'));
-
-                                if (!isVisible) {
-                                    details.classList.add('show');
-                                    header.classList.add('active');
-                                }
-                            });
-                        });
                     } else {
                         showToast('Student not found. Please log in again.');
                         setTimeout(() => {
                             window.location.href = 'index.html';
                         }, 3000);
                     }
-                }).catch(error => {
+                }, (error) => {
                     showToast('Error loading student data');
                     console.error(error);
                 });
@@ -1275,7 +1329,6 @@
                                     } else if (isImage) {
                                         fileViewerContent.innerHTML = `<img src="${base64}" alt="File preview">`;
                                     } else if (isDoc || isPPT) {
-                                        // For Word and PPT, use a fallback message or viewer
                                         fileViewerContent.innerHTML = `<p>Preview not supported for this file type on this platform. Please download to view.</p>`;
                                     } else {
                                         fileViewerContent.innerHTML = `<p>Preview not supported for this file type.</p>`;
