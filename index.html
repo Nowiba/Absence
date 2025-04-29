@@ -6,20 +6,45 @@
     <title>ISET Siliana Attendance</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script>
-        // Set the default mode to light if not set in localStorage
-        (function() {
-            if (localStorage.getItem('darkMode') === 'enabled') {
-                document.documentElement.classList.add('dark-mode');
+        // Ensure light mode is the default on page load
+        localStorage.setItem('darkMode', 'disabled');
+
+        // Define showToast and showModal in global scope for inline onclick handlers
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = message;
+                toast.classList.remove('hidden');
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toast.classList.add('hidden');
+                }, 3000);
+            } else {
+                console.error('Toast element not found');
             }
-        })();
+        }
+
+        function showModal(modalId) {
+            console.log(`Attempting to show modal: ${modalId}`);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+            } else {
+                showToast('An error occurred. Please try again.');
+            }
+        }
     </script>
     <style>
         /* Ensure full viewport height and initial background */
         html, body {
             margin: 0;
             padding: 0;
-            min-height: 100vh; /* Ensure the background covers the full viewport */
-            background-color: #f5f5f5; /* Light mode background */
+            min-height: 100vh;
+            background-color: #f5f5f5;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
@@ -221,7 +246,7 @@
         }
 
         main {
-            min-height: calc(100vh - 120px); /* Ensure main takes up remaining space */
+            min-height: calc(100vh - 120px);
         }
 
         .modal {
@@ -240,7 +265,7 @@
         }
 
         body.dark-mode .modal {
-            background-color: rgba(0,0,0,0.9); /* Darker backdrop in dark mode */
+            background-color: rgba(0,0,0,0.9);
         }
 
         .modal.show {
@@ -717,6 +742,22 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
+        // Dark Mode Toggle (outside try-catch to ensure it always works)
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Attaching dark mode toggle event listener');
+            const toggleButton = document.getElementById('dark-mode-toggle');
+            toggleButton.addEventListener('click', () => {
+                console.log('Dark mode toggle clicked');
+                document.body.classList.toggle('dark-mode');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
+                toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+                localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+                showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
+            });
+        });
+
+        // Main script with Firebase-dependent logic
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 // Firebase Configuration
@@ -765,17 +806,10 @@
                     });
                 });
 
-                // Load dark mode preference from localStorage
-                if (localStorage.getItem('darkMode') === 'enabled') {
-                    document.body.classList.add('dark-mode');
-                    const toggleButton = document.getElementById('dark-mode-toggle');
-                    toggleButton.querySelector('span:first-child').textContent = '🌞';
-                    toggleButton.querySelector('span:last-child').textContent = 'Light Mode';
-                }
-
                 // Hamburger menu toggle
                 const sidebar = document.getElementById('admin-sidebar');
                 document.getElementById('hamburger-btn').addEventListener('click', () => {
+                    console.log('Hamburger button clicked');
                     sidebar.classList.toggle('open');
                 });
 
@@ -785,19 +819,6 @@
                         sidebar.classList.remove('open');
                     }
                 });
-
-                // Modal show function
-                function showModal(modalId) {
-                    const modal = document.getElementById(modalId);
-                    if (modal) {
-                        modal.classList.remove('hidden');
-                        setTimeout(() => {
-                            modal.classList.add('show');
-                        }, 10);
-                    } else {
-                        showToast('An error occurred. Please try again.');
-                    }
-                }
 
                 // Close modals when clicking outside
                 document.querySelectorAll('.modal').forEach(modal => {
@@ -853,14 +874,16 @@
                             '<': '&lt;',
                             '>': '&gt;',
                             '"': '&quot;',
-                            "'": '&apos;'
+                            "'": '\''
                         };
                         return escapeMap[char] || char;
                     });
                 }
 
                 // Student Login
+                console.log('Attaching student login event listener');
                 document.getElementById('student-login').addEventListener('click', async () => {
+                    console.log('Student login button clicked');
                     const cin = sanitizeInput(document.getElementById('cin-input').value.trim());
                     const password = sanitizeInput(document.getElementById('password-input').value.trim());
 
@@ -942,6 +965,7 @@
 
                 // Change Password Submission
                 document.getElementById('change-password-submit').addEventListener('click', async () => {
+                    console.log('Change password submit button clicked');
                     const cin = document.getElementById('change-password-modal').dataset.cin;
                     const newPassword = sanitizeInput(document.getElementById('new-password-input').value.trim());
                     const confirmPassword = sanitizeInput(document.getElementById('confirm-password-input').value.trim());
@@ -984,6 +1008,7 @@
 
                 // Select Validation Question Submission
                 document.getElementById('select-question-submit').addEventListener('click', async () => {
+                    console.log('Select question submit button clicked');
                     const cin = document.getElementById('select-question-modal').dataset.cin;
                     const question = document.getElementById('new-validation-question-select').value;
                     const answer = sanitizeInput(document.getElementById('new-validation-answer-input').value.trim());
@@ -1019,6 +1044,7 @@
 
                 // Sign Up Link
                 document.getElementById('signup-link').addEventListener('click', (e) => {
+                    console.log('Sign up link clicked');
                     e.preventDefault();
                     const cin = sanitizeInput(document.getElementById('cin-input').value.trim());
                     document.getElementById('signup-cin-input').value = cin;
@@ -1030,7 +1056,9 @@
                 });
 
                 // Student Sign Up
+                console.log('Attaching signup submit event listener');
                 document.getElementById('signup-submit').addEventListener('click', async () => {
+                    console.log('Signup submit button clicked');
                     const fullName = sanitizeInput(document.getElementById('signup-name-input').value.trim());
                     const cin = sanitizeInput(document.getElementById('signup-cin-input').value.trim());
                     const password = sanitizeInput(document.getElementById('signup-password-input').value.trim());
@@ -1148,6 +1176,7 @@
 
                 // Forgot Password Link
                 document.getElementById('forgot-password-link').addEventListener('click', (e) => {
+                    console.log('Forgot password link clicked');
                     e.preventDefault();
                     document.getElementById('student-modal').classList.remove('show');
                     setTimeout(() => {
@@ -1158,6 +1187,7 @@
 
                 // Forgot Password - Step 1: Submit CIN
                 document.getElementById('forgot-cin-submit').addEventListener('click', async () => {
+                    console.log('Forgot CIN submit button clicked');
                     const cin = sanitizeInput(document.getElementById('forgot-cin-input').value.trim());
 
                     if (!/^\d{8}$/.test(cin)) {
@@ -1190,6 +1220,7 @@
 
                 // Forgot Password - Step 2: Submit Answer
                 document.getElementById('forgot-answer-submit').addEventListener('click', async () => {
+                    console.log('Forgot answer submit button clicked');
                     const cin = document.getElementById('forgot-validation-modal').dataset.cin;
                     const answer = sanitizeInput(document.getElementById('forgot-answer-input').value.trim());
 
@@ -1222,6 +1253,7 @@
 
                 // Forgot Password - Contact Us Link
                 document.getElementById('forgot-contact-us-link').addEventListener('click', (e) => {
+                    console.log('Forgot contact us link clicked');
                     e.preventDefault();
                     document.getElementById('forgot-validation-modal').classList.remove('show');
                     setTimeout(() => {
@@ -1232,6 +1264,7 @@
 
                 // Forgot Password - Step 3: Reset Password
                 document.getElementById('forgot-reset-submit').addEventListener('click', async () => {
+                    console.log('Forgot reset submit button clicked');
                     const cin = document.getElementById('forgot-reset-password-modal').dataset.cin;
                     const newPassword = sanitizeInput(document.getElementById('forgot-new-password').value.trim());
                     const confirmPassword = sanitizeInput(document.getElementById('forgot-confirm-password').value.trim());
@@ -1274,6 +1307,7 @@
 
                 // Contact Us Submission
                 document.getElementById('contact-submit').addEventListener('click', async () => {
+                    console.log('Contact submit button clicked');
                     const fullName = sanitizeInput(document.getElementById('contact-fullname').value.trim());
                     const cin = sanitizeInput(document.getElementById('contact-cin').value.trim());
                     const email = sanitizeInput(document.getElementById('contact-email').value.trim());
@@ -1344,6 +1378,7 @@
 
                 // Parents Submission
                 document.getElementById('parents-submit').addEventListener('click', async () => {
+                    console.log('Parents submit button clicked');
                     const cin = sanitizeInput(document.getElementById('parents-cin-input').value.trim());
 
                     if (!/^\d{8}$/.test(cin)) {
@@ -1372,6 +1407,7 @@
 
                 // Professor Login
                 document.getElementById('professor-login').addEventListener('click', () => {
+                    console.log('Professor login button clicked');
                     const email = sanitizeInput(document.getElementById('professor-email').value.trim());
                     const password = sanitizeInput(document.getElementById('professor-password').value.trim());
 
@@ -1397,6 +1433,7 @@
 
                 // Admin Login
                 document.getElementById('admin-login').addEventListener('click', () => {
+                    console.log('Admin login button clicked');
                     const email = sanitizeInput(document.getElementById('admin-email').value.trim());
                     const password = sanitizeInput(document.getElementById('admin-password').value.trim());
 
@@ -1418,29 +1455,6 @@
                             console.error('Admin login error:', error);
                         });
                 });
-
-                // Dark Mode Toggle
-                document.getElementById('dark-mode-toggle').addEventListener('click', () => {
-                    document.body.classList.toggle('dark-mode');
-                    const isDarkMode = document.body.classList.contains('dark-mode');
-                    const toggleButton = document.getElementById('dark-mode-toggle');
-                    toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
-                    toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
-                    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
-                    showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
-                });
-
-                // Toast Notification Function
-                function showToast(message) {
-                    const toast = document.getElementById('toast');
-                    toast.textContent = message;
-                    toast.classList.remove('hidden');
-                    toast.classList.add('show');
-                    setTimeout(() => {
-                        toast.classList.remove('show');
-                        toast.classList.add('hidden');
-                    }, 3000);
-                }
 
                 // Set max date for date inputs to today
                 const signupDateInput = document.getElementById('contact-signup-date');
