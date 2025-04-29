@@ -6,8 +6,13 @@
     <title>ISET Siliana Attendance</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script>
-        // Ensure light mode is the default on page load
-        localStorage.setItem('darkMode', 'disabled');
+        // Apply dark mode based on localStorage before DOM renders
+        (function() {
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'enabled') {
+                document.documentElement.classList.add('dark-mode');
+            }
+        })();
 
         // Define showToast and showModal in global scope for inline onclick handlers
         function showToast(message) {
@@ -350,42 +355,43 @@
             box-sizing: border-box;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.1s;
+            animation-delay: 0.05s; /* Start at 50ms */
         }
 
+        /* Staggered delays for inputs/selects/labels, reduced to milliseconds */
         .modal-content input:nth-child(2), .modal-content select:nth-child(2),
         .modal-content label:nth-child(2) {
-            animation-delay: 0.2s;
+            animation-delay: 0.06s; /* 60ms */
         }
 
         .modal-content input:nth-child(3), .modal-content select:nth-child(3),
         .modal-content label:nth-child(3) {
-            animation-delay: 0.3s;
+            animation-delay: 0.07s; /* 70ms */
         }
 
         .modal-content input:nth-child(4), .modal-content select:nth-child(4),
         .modal-content label:nth-child(4) {
-            animation-delay: 0.4s;
+            animation-delay: 0.08s; /* 80ms */
         }
 
         .modal-content input:nth-child(5), .modal-content select:nth-child(5),
         .modal-content label:nth-child(5) {
-            animation-delay: 0.5s;
+            animation-delay: 0.09s; /* 90ms */
         }
 
         .modal-content input:nth-child(6), .modal-content select:nth-child(6),
         .modal-content label:nth-child(6) {
-            animation-delay: 0.6s;
+            animation-delay: 0.10s; /* 100ms */
         }
 
         .modal-content input:nth-child(7), .modal-content select:nth-child(7),
         .modal-content label:nth-child(7) {
-            animation-delay: 0.7s;
+            animation-delay: 0.11s; /* 110ms */
         }
 
         .modal-content input:nth-child(8), .modal-content select:nth-child(8),
         .modal-content label:nth-child(8) {
-            animation-delay: 0.8s;
+            animation-delay: 0.12s; /* 120ms */
         }
 
         body.dark-mode .modal-content input,
@@ -420,7 +426,7 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.9s;
+            animation-delay: 0.13s; /* 130ms for main buttons like "Sign Up", "Login" */
         }
 
         body.dark-mode .modal-content button {
@@ -449,7 +455,7 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.6s;
+            animation-delay: 0.14s; /* 140ms for action buttons like "Sign Up", "Forgot Password?" */
         }
 
         .modal-content .action-btn.signup {
@@ -490,7 +496,7 @@
             font-size: 15px;
             border-radius: 8px;
             transition: all 0.3s ease;
-            animation-delay: 0.5s;
+            animation-delay: 0.13s; /* Same as main buttons */
         }
 
         .modal-content .button-group button:first-child {
@@ -742,18 +748,23 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        // Dark Mode Toggle (outside try-catch to ensure it always works)
+        // Dark Mode Toggle (initialize button state based on localStorage)
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Attaching dark mode toggle event listener');
             const toggleButton = document.getElementById('dark-mode-toggle');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            // Set initial button state
+            toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
+            toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+
             toggleButton.addEventListener('click', () => {
                 console.log('Dark mode toggle clicked');
                 document.body.classList.toggle('dark-mode');
-                const isDarkMode = document.body.classList.contains('dark-mode');
-                toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
-                toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
-                localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
-                showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
+                const isDarkModeAfterToggle = document.body.classList.contains('dark-mode');
+                toggleButton.querySelector('span:first-child').textContent = isDarkModeAfterToggle ? '🌞' : '🌙';
+                toggleButton.querySelector('span:last-child').textContent = isDarkModeAfterToggle ? 'Light Mode' : 'Dark Mode';
+                localStorage.setItem('darkMode', isDarkModeAfterToggle ? 'enabled' : 'disabled');
+                showToast(isDarkModeAfterToggle ? 'Dark mode enabled' : 'Light mode enabled');
             });
         });
 
@@ -870,10 +881,10 @@
                 function sanitizeInput(input) {
                     return input.replace(/[&<>"']/g, (char) => {
                         const escapeMap = {
-                            '&': '&amp;',
-                            '<': '&lt;',
-                            '>': '&gt;',
-                            '"': '&quot;',
+                            '&': '&',
+                            '<': '<',
+                            '>': '>',
+                            '"': '"',
                             "'": '\''
                         };
                         return escapeMap[char] || char;
