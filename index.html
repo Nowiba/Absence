@@ -338,11 +338,11 @@
         }
 
         .modal-content .action-btn.signup {
-            background-color: #1a73e8; /* A vibrant blue matching the theme */
+            background-color: #1a73e8;
         }
 
         .modal-content .action-btn.forgot {
-            background-color: #0288d1; /* A slightly darker blue for contrast */
+            background-color: #0288d1;
         }
 
         .modal-content .action-btn:hover {
@@ -351,11 +351,11 @@
         }
 
         .modal-content .action-btn.signup:hover {
-            background-color: #1557b0; /* Darker shade for hover */
+            background-color: #1557b0;
         }
 
         .modal-content .action-btn.forgot:hover {
-            background-color: #01579b; /* Darker shade for hover */
+            background-color: #01579b;
         }
 
         body.dark-mode .modal-content .action-btn {
@@ -419,7 +419,6 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -430,7 +429,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Responsive Design */
         @media (max-width: 600px) {
             header h1 {
                 font-size: 20px;
@@ -644,18 +642,28 @@
                 console.error('Error signing out on page load:', error);
             });
 
-            // Update students without passwords
+            // Update students without passwords or validation questions
             db.ref('students').once('value', (snapshot) => {
                 snapshot.forEach((childSnapshot) => {
                     const studentData = childSnapshot.val();
+                    const updates = {};
                     if (!studentData.hasOwnProperty('password') || studentData.password === null) {
-                        db.ref('students/' + childSnapshot.key).update({
-                            password: '123456'
-                        }).then(() => {
-                            console.log(`Updated password for student ${childSnapshot.key} to 123456`);
-                        }).catch(error => {
-                            console.error(`Error updating password for student ${childSnapshot.key}:`, error);
-                        });
+                        updates.password = '123456';
+                    }
+                    if (!studentData.hasOwnProperty('validationQuestion') || !studentData.validationQuestion) {
+                        updates.validationQuestion = 'What is your favorite hobby?';
+                    }
+                    if (!studentData.hasOwnProperty('validationAnswer') || !studentData.validationAnswer) {
+                        updates.validationAnswer = 'default';
+                    }
+                    if (Object.keys(updates).length > 0) {
+                        db.ref('students/' + childSnapshot.key).update(updates)
+                            .then(() => {
+                                console.log(`Updated student ${childSnapshot.key} with missing fields`);
+                            })
+                            .catch(error => {
+                                console.error(`Error updating student ${childSnapshot.key}:`, error);
+                            });
                     }
                 });
             });
@@ -751,13 +759,13 @@
 
             // Input sanitization to prevent XSS
             function sanitizeInput(input) {
-                return input.replace(/[<>&"']/g, (char) => {
+                return input.replace(/[&<>"']/g, (char) => {
                     const escapeMap = {
+                        '&': '&amp;',
                         '<': '&lt;',
                         '>': '&gt;',
-                        '&': '&amp;',
                         '"': '&quot;',
-                        "'": '&apos;'
+                        "'": '&#39;'
                     };
                     return escapeMap[char] || char;
                 });
@@ -817,6 +825,18 @@
                             document.getElementById('change-password-modal').dataset.cin = cin;
                         }, 300);
                         showToast('Please change your password.');
+                        return;
+                    }
+
+                    // Check if validation question/answer are missing
+                    if (!studentData.validationQuestion || !studentData.validationAnswer) {
+                        document.getElementById('student-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('student-modal').classList.add('hidden');
+                            showModal('select-question-modal');
+                            document.getElementById('select-question-modal').dataset.cin = cin;
+                        }, 300);
+                        showToast('Please set a validation question for password recovery.');
                         return;
                     }
 
@@ -947,10 +967,14 @@
                     return;
                 }
 
-                // Split full name into first and last name
                 const nameParts = fullName.split(/\s+/);
                 let firstName = nameParts[0] || '';
                 let lastName = nameParts.slice(1).join(' ') || '';
+
+                if (!firstName || !lastName) {
+                    showToast('Please provide both first and last names.');
+                    return;
+                }
 
                 if (!/^\d{8}$/.test(cin)) {
                     showToast('Please enter a valid 8-digit CIN (numbers only).');
@@ -969,6 +993,11 @@
 
                 if (!selectedClass) {
                     showToast('Please select your class.');
+                    return;
+                }
+
+                if (!classNumber) {
+                    showToast('Please enter your class number.');
                     return;
                 }
 
