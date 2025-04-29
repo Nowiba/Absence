@@ -512,7 +512,7 @@
                     <option value="RSI">RSI</option>
                     <option value="DSI">DSI</option>
                 </select>
-                <input type="text" id="signup-class-number" placeholder="Enter class number (4 digits)" maxlength="4" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
+                <input type="text" id="signup-class-number" placeholder="Enter class number (2 digits)" maxlength="2" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
                 <select id="validation-question-select">
                     <option value="" disabled selected>Select a validation question</option>
                     <option value="What is your dog's name?">What is your dog's name?</option>
@@ -765,7 +765,7 @@
                         '<': '&lt;',
                         '>': '&gt;',
                         '"': '&quot;',
-                        "'": '&#39;'
+                        "'": '&apos;'
                     };
                     return escapeMap[char] || char;
                 });
@@ -1001,8 +1001,8 @@
                     return;
                 }
 
-                if (!/^\d{1,4}$/.test(classNumber)) {
-                    showToast('Please enter a valid class number (1-4 digits, numbers only).');
+                if (!/^\d{2}$/.test(classNumber)) {
+                    showToast('Please enter a valid 2-digit class number (numbers only).');
                     return;
                 }
 
@@ -1015,6 +1015,9 @@
                     showToast('Please provide an answer to the validation question.');
                     return;
                 }
+
+                // Combine class and classNumber into a single field (e.g., "IT11")
+                const combinedClass = `${selectedClass}${classNumber}`;
 
                 try {
                     const studentRef = db.ref('students/' + cin);
@@ -1031,8 +1034,7 @@
                     await studentRef.set({
                         firstName: firstName,
                         lastName: lastName,
-                        class: selectedClass,
-                        classNumber: classNumber,
+                        class: combinedClass, // Store as "IT11" instead of separate fields
                         absences: [],
                         password: password,
                         validationQuestion: question,
