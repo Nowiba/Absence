@@ -5,53 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ISET Siliana Attendance</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <script>
-        // Apply dark mode based on localStorage and set button state before DOM renders
-        (function() {
-            const darkMode = localStorage.getItem('darkMode');
-            if (darkMode === 'enabled') {
-                document.body.classList.add('dark-mode');
-            }
-            // Ensure the toggle button reflects the correct state on load
-            document.addEventListener('DOMContentLoaded', () => {
-                const toggleButton = document.getElementById('dark-mode-toggle');
-                if (toggleButton) {
-                    const isDarkMode = document.body.classList.contains('dark-mode');
-                    toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
-                    toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
-                }
-            });
-        })();
-
-        // Define showToast and showModal in global scope for inline onclick handlers
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            if (toast) {
-                toast.textContent = message;
-                toast.classList.remove('hidden');
-                toast.classList.add('show');
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    toast.classList.add('hidden');
-                }, 3000);
-            } else {
-                console.error('Toast element not found');
-            }
-        }
-
-        function showModal(modalId) {
-            console.log(`Attempting to show modal: ${modalId}`);
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.add('show');
-                }, 10);
-            } else {
-                showToast('An error occurred. Please try again.');
-            }
-        }
-    </script>
     <style>
         /* Ensure full viewport height and initial background */
         html, body {
@@ -601,6 +554,17 @@
     </style>
 </head>
 <body>
+    <!-- Apply dark mode immediately after body is available -->
+    <script>
+        // Apply dark mode based on localStorage
+        (function() {
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'enabled') {
+                document.body.classList.add('dark-mode');
+            }
+        })();
+    </script>
+
     <header>
         <button class="hamburger-btn" id="hamburger-btn">☰</button>
         <h1>ISET Siliana Attendance</h1>
@@ -757,10 +721,45 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        // Dark Mode Toggle (event listener for toggling)
+        // Define showToast and showModal in global scope for inline onclick handlers
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = message;
+                toast.classList.remove('hidden');
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toast.classList.add('hidden');
+                }, 3000);
+            } else {
+                console.error('Toast element not found');
+            }
+        }
+
+        function showModal(modalId) {
+            console.log(`Attempting to show modal: ${modalId}`);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+            } else {
+                showToast('An error occurred. Please try again.');
+            }
+        }
+
+        // Dark Mode Toggle Logic
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('Attaching dark mode toggle event listener');
             const toggleButton = document.getElementById('dark-mode-toggle');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+
+            // Set initial button state based on applied mode
+            toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
+            toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+
+            // Toggle dark mode on button click
             toggleButton.addEventListener('click', () => {
                 console.log('Dark mode toggle clicked');
                 document.body.classList.toggle('dark-mode');
@@ -1185,7 +1184,7 @@
                         showToast('Sign up successful! Please log in.');
                     } catch (error) {
                         console.error('Error during sign up:', error);
-                        showToast('An error occurred during sign up. Please try again.');
+                        showToast('An error occurred during sign up. filter_nonePlease try again.');
                     }
                 });
 
