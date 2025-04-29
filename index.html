@@ -8,20 +8,18 @@
     <script>
         // Set the default mode to light if not set in localStorage
         (function() {
-            const darkMode = localStorage.getItem('darkMode');
-            if (darkMode === null) {
-                localStorage.setItem('darkMode', 'disabled'); // Default to light mode
-            } else if (darkMode === 'enabled') {
+            if (localStorage.getItem('darkMode') === 'enabled') {
                 document.documentElement.classList.add('dark-mode');
             }
         })();
     </script>
     <style>
-        /* Set initial background to light mode to avoid white flash */
+        /* Ensure full viewport height and initial background */
         html, body {
-            background-color: #f5f5f5; /* Light mode background */
             margin: 0;
             padding: 0;
+            min-height: 100vh; /* Ensure the background covers the full viewport */
+            background-color: #f5f5f5; /* Light mode background */
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
@@ -29,6 +27,7 @@
             font-family: 'Roboto', sans-serif;
             padding-bottom: 60px;
             color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         body.dark-mode {
@@ -59,7 +58,11 @@
             font-weight: 700;
             margin: 0;
             transform: scale(1);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode header h1 {
+            color: #e0e0e0;
         }
 
         .hamburger-btn {
@@ -69,6 +72,10 @@
             font-size: 24px;
             cursor: pointer;
             transition: transform 0.2s ease;
+        }
+
+        body.dark-mode .hamburger-btn {
+            color: #e0e0e0;
         }
 
         .hamburger-btn:hover {
@@ -84,7 +91,7 @@
             background-color: #2c3e50;
             box-shadow: 2px 0 10px rgba(0,0,0,0.3);
             z-index: 2000;
-            transition: left 0.3s ease;
+            transition: left 0.3s ease, background-color 0.3s ease;
         }
 
         body.dark-mode .sidebar {
@@ -98,6 +105,10 @@
         .sidebar-content {
             padding: 20px;
             color: white;
+        }
+
+        body.dark-mode .sidebar-content {
+            color: #e0e0e0;
         }
 
         .sidebar-content h2 {
@@ -118,10 +129,21 @@
             color: white;
         }
 
+        body.dark-mode .sidebar-content input {
+            background-color: #2c3e50;
+            border-color: #5dade2;
+            color: #e0e0e0;
+        }
+
         .sidebar-content input:focus {
             border-color: #3498db;
             outline: none;
             box-shadow: 0 0 5px rgba(52, 152, 219, 0.4);
+        }
+
+        body.dark-mode .sidebar-content input:focus {
+            border-color: #5dade2;
+            box-shadow: 0 0 5px rgba(93, 173, 226, 0.4);
         }
 
         .sidebar-content button {
@@ -135,6 +157,11 @@
             font-size: 16px;
             font-weight: 700;
             transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        body.dark-mode .sidebar-content button {
+            background-color: #5dade2;
+            color: #e0e0e0;
         }
 
         .sidebar-content button:hover {
@@ -173,15 +200,28 @@
             border-radius: 6px;
         }
 
+        body.dark-mode .nav-btn {
+            color: #e0e0e0;
+        }
+
         .nav-btn:hover, .nav-btn:active {
             transform: scale(1.1) rotate(2deg);
-            color: #3498db;
+            color: #a5d6ff;
             background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        body.dark-mode .nav-btn:hover, body.dark-mode .nav-btn:active {
+            color: #a5d6ff;
+            background-color: rgba(93, 173, 226, 0.1);
         }
 
         .nav-btn span {
             margin-top: 2px;
             transition: transform 0.2s ease;
+        }
+
+        main {
+            min-height: calc(100vh - 120px); /* Ensure main takes up remaining space */
         }
 
         .modal {
@@ -196,7 +236,11 @@
             align-items: center;
             z-index: 2000;
             opacity: 0;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.4s ease, background-color 0.3s ease;
+        }
+
+        body.dark-mode .modal {
+            background-color: rgba(0,0,0,0.9); /* Darker backdrop in dark mode */
         }
 
         .modal.show {
@@ -252,6 +296,24 @@
             background: linear-gradient(90deg, #3498db, #5dade2);
         }
 
+        body.dark-mode .modal-content h2::after {
+            background: linear-gradient(90deg, #5dade2, #7fbfff);
+        }
+
+        .modal-content label {
+            display: block;
+            text-align: left;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+            opacity: 0;
+            animation: inputFadeIn 0.3s ease forwards;
+        }
+
+        body.dark-mode .modal-content label {
+            color: #b0b0b0;
+        }
+
         .modal-content input, .modal-content select {
             width: 100%;
             padding: 14px;
@@ -266,28 +328,39 @@
             animation-delay: 0.1s;
         }
 
-        .modal-content input:nth-child(2), .modal-content select:nth-child(2) {
+        .modal-content input:nth-child(2), .modal-content select:nth-child(2),
+        .modal-content label:nth-child(2) {
             animation-delay: 0.2s;
         }
 
-        .modal-content input:nth-child(3), .modal-content select:nth-child(3) {
+        .modal-content input:nth-child(3), .modal-content select:nth-child(3),
+        .modal-content label:nth-child(3) {
             animation-delay: 0.3s;
         }
 
-        .modal-content input:nth-child(4), .modal-content select:nth-child(4) {
+        .modal-content input:nth-child(4), .modal-content select:nth-child(4),
+        .modal-content label:nth-child(4) {
             animation-delay: 0.4s;
         }
 
-        .modal-content input:nth-child(5), .modal-content select:nth-child(5) {
+        .modal-content input:nth-child(5), .modal-content select:nth-child(5),
+        .modal-content label:nth-child(5) {
             animation-delay: 0.5s;
         }
 
-        .modal-content input:nth-child(6), .modal-content select:nth-child(6) {
+        .modal-content input:nth-child(6), .modal-content select:nth-child(6),
+        .modal-content label:nth-child(6) {
             animation-delay: 0.6s;
         }
 
-        .modal-content input:nth-child(7), .modal-content select:nth-child(7) {
+        .modal-content input:nth-child(7), .modal-content select:nth-child(7),
+        .modal-content label:nth-child(7) {
             animation-delay: 0.7s;
+        }
+
+        .modal-content input:nth-child(8), .modal-content select:nth-child(8),
+        .modal-content label:nth-child(8) {
+            animation-delay: 0.8s;
         }
 
         body.dark-mode .modal-content input,
@@ -322,7 +395,11 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.5s;
+            animation-delay: 0.9s;
+        }
+
+        body.dark-mode .modal-content button {
+            background-color: #5dade2;
         }
 
         .modal-content button:hover {
@@ -418,7 +495,7 @@
             font-weight: 400;
             opacity: 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), background 0.3s ease, color 0.3s ease;
             z-index: 3000;
         }
 
@@ -456,6 +533,9 @@
             }
             .modal-content h2 {
                 font-size: 24px;
+            }
+            .modal-content label {
+                font-size: 13px;
             }
             .modal-content input, .modal-content button, .modal-content select {
                 font-size: 15px;
@@ -605,8 +685,10 @@
                     <option value="" disabled selected>Loading question...</option>
                 </select>
                 <input type="text" id="contact-answer" placeholder="Your answer" class="hidden">
-                <input type="date" id="contact-signup-date" placeholder="Enter the date you created your account (optional)">
-                <input type="date" id="contact-forgot-password-date" placeholder="Enter the date you forgot your password (optional)">
+                <label for="contact-signup-date">Enter the date you created your account (optional)</label>
+                <input type="date" id="contact-signup-date">
+                <label for="contact-forgot-password-date">Enter the date you forgot your password (optional)</label>
+                <input type="date" id="contact-forgot-password-date">
                 <button id="contact-submit">Submit</button>
             </div>
         </div>
@@ -635,740 +717,742 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        try {
-            // Firebase Configuration
-            const firebaseConfig = {
-                apiKey: "AIzaSyAoXhEeGA22chByuIyxjWzmsFsQJSjqZJY",
-                authDomain: "absence-iset-siliana.firebaseapp.com",
-                databaseURL: "https://absence-iset-siliana-default-rtdb.europe-west1.firebasedatabase.app",
-                projectId: "absence-iset-siliana",
-                storageBucket: "absence-iset-siliana.firebasestorage.app",
-                messagingSenderId: "519382535146",
-                appId: "1:519382535146:web:94629d286b19b8c103c093",
-                measurementId: "G-3Q9F4KP217"
-            };
-            firebase.initializeApp(firebaseConfig);
-            const auth = firebase.auth();
-            const db = firebase.database();
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Firebase Configuration
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAoXhEeGA22chByuIyxjWzmsFsQJSjqZJY",
+                    authDomain: "absence-iset-siliana.firebaseapp.com",
+                    databaseURL: "https://absence-iset-siliana-default-rtdb.europe-west1.firebasedatabase.app",
+                    projectId: "absence-iset-siliana",
+                    storageBucket: "absence-iset-siliana.firebasestorage.app",
+                    messagingSenderId: "519382535146",
+                    appId: "1:519382535146:web:94629d286b19b8c103c093",
+                    measurementId: "G-3Q9F4KP217"
+                };
+                firebase.initializeApp(firebaseConfig);
+                const auth = firebase.auth();
+                const db = firebase.database();
 
-            // Sign out on page load to ensure fresh session
-            auth.signOut().catch(error => {
-                console.error('Error signing out on page load:', error);
-            });
+                // Sign out on page load to ensure fresh session
+                auth.signOut().catch(error => {
+                    console.error('Error signing out on page load:', error);
+                });
 
-            // Update students without passwords or validation questions
-            db.ref('students').once('value', (snapshot) => {
-                snapshot.forEach((childSnapshot) => {
-                    const studentData = childSnapshot.val();
-                    const updates = {};
-                    if (!studentData.hasOwnProperty('password') || studentData.password === null) {
-                        updates.password = '123456';
-                    }
-                    if (!studentData.hasOwnProperty('validationQuestion') || !studentData.validationQuestion) {
-                        updates.validationQuestion = 'What is your favorite hobby?';
-                    }
-                    if (!studentData.hasOwnProperty('validationAnswer') || !studentData.validationAnswer) {
-                        updates.validationAnswer = 'default';
-                    }
-                    if (Object.keys(updates).length > 0) {
-                        db.ref('students/' + childSnapshot.key).update(updates)
-                            .then(() => {
-                                console.log(`Updated student ${childSnapshot.key} with missing fields`);
-                            })
-                            .catch(error => {
-                                console.error(`Error updating student ${childSnapshot.key}:`, error);
-                            });
+                // Update students without passwords or validation questions
+                db.ref('students').once('value', (snapshot) => {
+                    snapshot.forEach((childSnapshot) => {
+                        const studentData = childSnapshot.val();
+                        const updates = {};
+                        if (!studentData.hasOwnProperty('password') || studentData.password === null) {
+                            updates.password = '123456';
+                        }
+                        if (!studentData.hasOwnProperty('validationQuestion') || !studentData.validationQuestion) {
+                            updates.validationQuestion = 'What is your favorite hobby?';
+                        }
+                        if (!studentData.hasOwnProperty('validationAnswer') || !studentData.validationAnswer) {
+                            updates.validationAnswer = 'default';
+                        }
+                        if (Object.keys(updates).length > 0) {
+                            db.ref('students/' + childSnapshot.key).update(updates)
+                                .then(() => {
+                                    console.log(`Updated student ${childSnapshot.key} with missing fields`);
+                                })
+                                .catch(error => {
+                                    console.error(`Error updating student ${childSnapshot.key}:`, error);
+                                });
+                        }
+                    });
+                });
+
+                // Load dark mode preference from localStorage
+                if (localStorage.getItem('darkMode') === 'enabled') {
+                    document.body.classList.add('dark-mode');
+                    const toggleButton = document.getElementById('dark-mode-toggle');
+                    toggleButton.querySelector('span:first-child').textContent = '🌞';
+                    toggleButton.querySelector('span:last-child').textContent = 'Light Mode';
+                }
+
+                // Hamburger menu toggle
+                const sidebar = document.getElementById('admin-sidebar');
+                document.getElementById('hamburger-btn').addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                });
+
+                // Close sidebar when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!sidebar.contains(e.target) && !e.target.closest('#hamburger-btn') && sidebar.classList.contains('open')) {
+                        sidebar.classList.remove('open');
                     }
                 });
-            });
 
-            // Set dark mode toggle button state based on localStorage
-            const applyDarkModeToggleState = () => {
-                const darkMode = localStorage.getItem('darkMode') === 'enabled';
-                const toggleButton = document.getElementById('dark-mode-toggle');
-                toggleButton.querySelector('span:first-child').textContent = darkMode ? '🌞' : '🌙';
-                toggleButton.querySelector('span:last-child').textContent = darkMode ? 'Light Mode' : 'Dark Mode';
-            };
-            applyDarkModeToggleState();
-
-            // Hamburger menu toggle
-            const sidebar = document.getElementById('admin-sidebar');
-            document.getElementById('hamburger-btn').addEventListener('click', () => {
-                sidebar.classList.toggle('open');
-            });
-
-            // Close sidebar when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!sidebar.contains(e.target) && !e.target.closest('#hamburger-btn') && sidebar.classList.contains('open')) {
-                    sidebar.classList.remove('open');
-                }
-            });
-
-            // Modal show function
-            function showModal(modalId) {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    setTimeout(() => {
-                        modal.classList.add('show');
-                    }, 10);
-                } else {
-                    showToast('An error occurred. Please try again.');
-                }
-            }
-
-            // Close modals when clicking outside
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.classList.remove('show');
+                // Modal show function
+                function showModal(modalId) {
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        modal.classList.remove('hidden');
                         setTimeout(() => {
-                            modal.classList.add('hidden');
-                        }, 300);
+                            modal.classList.add('show');
+                        }, 10);
+                    } else {
+                        showToast('An error occurred. Please try again.');
                     }
+                }
+
+                // Close modals when clicking outside
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            modal.classList.remove('show');
+                            setTimeout(() => {
+                                modal.classList.add('hidden');
+                            }, 300);
+                        }
+                    });
                 });
-            });
 
-            // Cookie-based registration limit
-            function setCookie(name, value, hours) {
-                const expires = new Date();
-                expires.setTime(expires.getTime() + (hours * 60 * 60 * 1000));
-                document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;Secure;SameSite=Strict`;
-            }
-
-            function getCookie(name) {
-                const nameEQ = name + "=";
-                const ca = document.cookie.split(';');
-                for (let i = 0; i < ca.length; i++) {
-                    let c = ca[i];
-                    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-                    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-                }
-                return null;
-            }
-
-            function checkSignupLimit() {
-                const lastSignup = getCookie('lastSignup');
-                const now = Date.now();
-                const sixHours = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
-
-                if (lastSignup && (now - parseInt(lastSignup) < sixHours)) {
-                    showToast('You can only sign up once every 6 hours from this device.');
-                    return false;
-                }
-                return true;
-            }
-
-            function recordSignup() {
-                setCookie('lastSignup', Date.now(), 6); // Cookie expires in 6 hours
-            }
-
-            // Input sanitization to prevent XSS
-            function sanitizeInput(input) {
-                return input.replace(/[&<>"']/g, (char) => {
-                    const escapeMap = {
-                        '&': '&amp;',
-                        '<': '&lt;',
-                        '>': '&gt;',
-                        '"': '&quot;',
-                        "'": '&apos;'
-                    };
-                    return escapeMap[char] || char;
-                });
-            }
-
-            // Student Login
-            document.getElementById('student-login').addEventListener('click', async () => {
-                const cin = sanitizeInput(document.getElementById('cin-input').value.trim());
-                const password = sanitizeInput(document.getElementById('password-input').value.trim());
-
-                if (!/^\d{8}$/.test(cin)) {
-                    showToast('Please enter a valid 8-digit CIN (numbers only).');
-                    return;
+                // Cookie-based registration limit
+                function setCookie(name, value, hours) {
+                    const expires = new Date();
+                    expires.setTime(expires.getTime() + (hours * 60 * 60 * 1000));
+                    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;Secure;SameSite=Strict`;
                 }
 
-                if (!/^\d{6}$/.test(password)) {
-                    showToast('Please enter a valid 6-digit password (numbers only).');
-                    return;
+                function getCookie(name) {
+                    const nameEQ = name + "=";
+                    const ca = document.cookie.split(';');
+                    for (let i = 0; i < ca.length; i++) {
+                        let c = ca[i];
+                        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+                    }
+                    return null;
                 }
 
-                try {
-                    const studentRef = db.ref('students/' + cin);
-                    const snapshot = await studentRef.once('value');
+                function checkSignupLimit() {
+                    const lastSignup = getCookie('lastSignup');
+                    const now = Date.now();
+                    const sixHours = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
 
-                    if (!snapshot.exists()) {
-                        showToast('Student not found. Please sign up.');
+                    if (lastSignup && (now - parseInt(lastSignup) < sixHours)) {
+                        showToast('You can only sign up once every 6 hours from this device.');
+                        return false;
+                    }
+                    return true;
+                }
+
+                function recordSignup() {
+                    setCookie('lastSignup', Date.now(), 6); // Cookie expires in 6 hours
+                }
+
+                // Input sanitization to prevent XSS
+                function sanitizeInput(input) {
+                    return input.replace(/[&<>"']/g, (char) => {
+                        const escapeMap = {
+                            '&': '&amp;',
+                            '<': '&lt;',
+                            '>': '&gt;',
+                            '"': '&quot;',
+                            "'": '&apos;'
+                        };
+                        return escapeMap[char] || char;
+                    });
+                }
+
+                // Student Login
+                document.getElementById('student-login').addEventListener('click', async () => {
+                    const cin = sanitizeInput(document.getElementById('cin-input').value.trim());
+                    const password = sanitizeInput(document.getElementById('password-input').value.trim());
+
+                    if (!/^\d{8}$/.test(cin)) {
+                        showToast('Please enter a valid 8-digit CIN (numbers only).');
                         return;
                     }
 
-                    const studentData = snapshot.val();
-                    if (!studentData.hasOwnProperty('password') || studentData.password === null) {
-                        await studentRef.update({ password: '123456' });
-                        studentData.password = '123456';
+                    if (!/^\d{6}$/.test(password)) {
+                        showToast('Please enter a valid 6-digit password (numbers only).');
+                        return;
                     }
 
-                    if (password !== studentData.password) {
-                        const now = new Date();
-                        const timestamp = now.toISOString();
-                        const failedAttempt = {
-                            timestamp: timestamp,
-                            passwordAttempted: password
-                        };
+                    try {
+                        const studentRef = db.ref('students/' + cin);
+                        const snapshot = await studentRef.once('value');
 
-                        const failedLoginAttempts = studentData.failedLoginAttempts || [];
-                        failedLoginAttempts.push(failedAttempt);
-                        await studentRef.update({ failedLoginAttempts });
+                        if (!snapshot.exists()) {
+                            showToast('Student not found. Please sign up.');
+                            return;
+                        }
 
-                        showToast('Incorrect password. Please try again.');
+                        const studentData = snapshot.val();
+                        if (!studentData.hasOwnProperty('password') || studentData.password === null) {
+                            await studentRef.update({ password: '123456' });
+                            studentData.password = '123456';
+                        }
+
+                        if (password !== studentData.password) {
+                            const now = new Date();
+                            const timestamp = now.toISOString();
+                            const failedAttempt = {
+                                timestamp: timestamp,
+                                passwordAttempted: password
+                            };
+
+                            const failedLoginAttempts = studentData.failedLoginAttempts || [];
+                            failedLoginAttempts.push(failedAttempt);
+                            await studentRef.update({ failedLoginAttempts });
+
+                            showToast('Incorrect password. Please try again.');
+                            return;
+                        }
+
+                        if (password === '123456') {
+                            document.getElementById('student-modal').classList.remove('show');
+                            setTimeout(() => {
+                                document.getElementById('student-modal').classList.add('hidden');
+                                showModal('change-password-modal');
+                                document.getElementById('change-password-modal').dataset.cin = cin;
+                            }, 300);
+                            showToast('Please change your password.');
+                            return;
+                        }
+
+                        // Check if validation question/answer are missing
+                        if (!studentData.validationQuestion || !studentData.validationAnswer) {
+                            document.getElementById('student-modal').classList.remove('show');
+                            setTimeout(() => {
+                                document.getElementById('student-modal').classList.add('hidden');
+                                showModal('select-question-modal');
+                                document.getElementById('select-question-modal').dataset.cin = cin;
+                            }, 300);
+                            showToast('Please set a validation question for password recovery.');
+                            return;
+                        }
+
+                        document.getElementById('student-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('student-modal').classList.add('hidden');
+                            window.location.href = `student.html?cin=${cin}`;
+                        }, 300);
+                        showToast('Login successful! Welcome!');
+                    } catch (error) {
+                        console.error('Error during login:', error);
+                        showToast('An error occurred during login. Please try again.');
+                    }
+                });
+
+                // Change Password Submission
+                document.getElementById('change-password-submit').addEventListener('click', async () => {
+                    const cin = document.getElementById('change-password-modal').dataset.cin;
+                    const newPassword = sanitizeInput(document.getElementById('new-password-input').value.trim());
+                    const confirmPassword = sanitizeInput(document.getElementById('confirm-password-input').value.trim());
+
+                    if (!newPassword) {
+                        showToast('Please enter a new password.');
+                        return;
+                    }
+
+                    if (!/^\d{6}$/.test(newPassword)) {
+                        showToast('Please enter a valid 6-digit password (numbers only).');
+                        return;
+                    }
+
+                    if (newPassword === '123456') {
+                        showToast('The password "123456" is not allowed. Please choose a different password.');
+                        return;
+                    }
+
+                    if (newPassword !== confirmPassword) {
+                        showToast('Passwords do not match.');
+                        return;
+                    }
+
+                    try {
+                        const studentRef = db.ref('students/' + cin);
+                        await studentRef.update({ password: newPassword });
+                        document.getElementById('change-password-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('change-password-modal').classList.add('hidden');
+                            showModal('select-question-modal');
+                            document.getElementById('select-question-modal').dataset.cin = cin;
+                        }, 300);
+                        showToast('Password updated successfully! Please select a validation question.');
+                    } catch (error) {
+                        console.error('Error updating password:', error);
+                        showToast('An error occurred while updating your password.');
+                    }
+                });
+
+                // Select Validation Question Submission
+                document.getElementById('select-question-submit').addEventListener('click', async () => {
+                    const cin = document.getElementById('select-question-modal').dataset.cin;
+                    const question = document.getElementById('new-validation-question-select').value;
+                    const answer = sanitizeInput(document.getElementById('new-validation-answer-input').value.trim());
+
+                    if (!question) {
+                        showToast('Please select a validation question.');
+                        return;
+                    }
+
+                    if (!answer) {
+                        showToast('Please provide an answer to the validation question.');
+                        return;
+                    }
+
+                    try {
+                        const studentRef = db.ref('students/' + cin);
+                        await studentRef.update({
+                            validationQuestion: question,
+                            validationAnswer: answer
+                        });
+                        document.getElementById('select-question-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('select-question-modal').classList.add('hidden');
+                            showModal('student-modal');
+                            document.getElementById('cin-input').value = cin;
+                        }, 300);
+                        showToast('Validation question set successfully! Please log in with your new password.');
+                    } catch (error) {
+                        console.error('Error setting validation question:', error);
+                        showToast('An error occurred while setting your validation question.');
+                    }
+                });
+
+                // Sign Up Link
+                document.getElementById('signup-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const cin = sanitizeInput(document.getElementById('cin-input').value.trim());
+                    document.getElementById('signup-cin-input').value = cin;
+                    document.getElementById('student-modal').classList.remove('show');
+                    setTimeout(() => {
+                        document.getElementById('student-modal').classList.add('hidden');
+                        showModal('signup-modal');
+                    }, 300);
+                });
+
+                // Student Sign Up
+                document.getElementById('signup-submit').addEventListener('click', async () => {
+                    const fullName = sanitizeInput(document.getElementById('signup-name-input').value.trim());
+                    const cin = sanitizeInput(document.getElementById('signup-cin-input').value.trim());
+                    const password = sanitizeInput(document.getElementById('signup-password-input').value.trim());
+                    const selectedClass = document.getElementById('signup-class-select').value;
+                    const classNumber = sanitizeInput(document.getElementById('signup-class-number').value.trim());
+                    const question = document.getElementById('validation-question-select').value;
+                    const answer = sanitizeInput(document.getElementById('validation-answer-input').value.trim());
+
+                    // Validate full name
+                    if (!fullName) {
+                        showToast('Please enter your first and last name.');
+                        return;
+                    }
+
+                    if (fullName.length > 25) {
+                        showToast('Name cannot exceed 25 characters.');
+                        return;
+                    }
+
+                    if (!/^[a-zA-Z\s]+$/.test(fullName)) {
+                        showToast('Name can only contain letters and spaces.');
+                        return;
+                    }
+
+                    const nameParts = fullName.split(/\s+/);
+                    let firstName = nameParts[0] || '';
+                    let lastName = nameParts.slice(1).join(' ') || '';
+
+                    if (!firstName || !lastName) {
+                        showToast('Please provide both first and last names.');
+                        return;
+                    }
+
+                    if (!/^\d{8}$/.test(cin)) {
+                        showToast('Please enter a valid 8-digit CIN (numbers only).');
+                        return;
+                    }
+
+                    if (!/^\d{6}$/.test(password)) {
+                        showToast('Please set a valid 6-digit password (numbers only).');
                         return;
                     }
 
                     if (password === '123456') {
-                        document.getElementById('student-modal').classList.remove('show');
-                        setTimeout(() => {
-                            document.getElementById('student-modal').classList.add('hidden');
-                            showModal('change-password-modal');
-                            document.getElementById('change-password-modal').dataset.cin = cin;
-                        }, 300);
-                        showToast('Please change your password.');
+                        showToast('The password "123456" is not allowed. Please choose a different password.');
                         return;
                     }
 
-                    // Check if validation question/answer are missing
-                    if (!studentData.validationQuestion || !studentData.validationAnswer) {
-                        document.getElementById('student-modal').classList.remove('show');
-                        setTimeout(() => {
-                            document.getElementById('student-modal').classList.add('hidden');
-                            showModal('select-question-modal');
-                            document.getElementById('select-question-modal').dataset.cin = cin;
-                        }, 300);
-                        showToast('Please set a validation question for password recovery.');
+                    if (!selectedClass) {
+                        showToast('Please select your class.');
                         return;
                     }
 
+                    if (!classNumber) {
+                        showToast('Please enter your class number.');
+                        return;
+                    }
+
+                    if (!/^\d{2}$/.test(classNumber)) {
+                        showToast('Please enter a valid 2-digit class number (numbers only).');
+                        return;
+                    }
+
+                    if (!question) {
+                        showToast('Please select a validation question.');
+                        return;
+                    }
+
+                    if (!answer) {
+                        showToast('Please provide an answer to the validation question.');
+                        return;
+                    }
+
+                    // Combine class and classNumber into a single field (e.g., "IT11")
+                    const combinedClass = `${selectedClass}${classNumber}`;
+
+                    try {
+                        const studentRef = db.ref('students/' + cin);
+                        const snapshot = await studentRef.once('value');
+                        if (snapshot.exists()) {
+                            showToast('This CIN is already registered. Please log in.');
+                            return;
+                        }
+
+                        const canSignup = checkSignupLimit();
+                        if (!canSignup) return;
+
+                        const signupDate = new Date().toISOString().split('T')[0];
+                        await studentRef.set({
+                            firstName: firstName,
+                            lastName: lastName,
+                            class: combinedClass,
+                            absences: [],
+                            password: password,
+                            validationQuestion: question,
+                            validationAnswer: answer,
+                            failedLoginAttempts: [],
+                            signupDate: signupDate
+                        });
+
+                        recordSignup();
+
+                        document.getElementById('signup-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('signup-modal').classList.add('hidden');
+                            showModal('student-modal');
+                            document.getElementById('cin-input').value = cin;
+                        }, 300);
+                        showToast('Sign up successful! Please log in.');
+                    } catch (error) {
+                        console.error('Error during sign up:', error);
+                        showToast('An error occurred during sign up. Please try again.');
+                    }
+                });
+
+                // Forgot Password Link
+                document.getElementById('forgot-password-link').addEventListener('click', (e) => {
+                    e.preventDefault();
                     document.getElementById('student-modal').classList.remove('show');
                     setTimeout(() => {
                         document.getElementById('student-modal').classList.add('hidden');
-                        window.location.href = `student.html?cin=${cin}`;
+                        showModal('forgot-password-modal');
                     }, 300);
-                    showToast('Login successful! Welcome!');
-                } catch (error) {
-                    console.error('Error during login:', error);
-                    showToast('An error occurred during login. Please try again.');
-                }
-            });
+                });
 
-            // Change Password Submission
-            document.getElementById('change-password-submit').addEventListener('click', async () => {
-                const cin = document.getElementById('change-password-modal').dataset.cin;
-                const newPassword = sanitizeInput(document.getElementById('new-password-input').value.trim());
-                const confirmPassword = sanitizeInput(document.getElementById('confirm-password-input').value.trim());
+                // Forgot Password - Step 1: Submit CIN
+                document.getElementById('forgot-cin-submit').addEventListener('click', async () => {
+                    const cin = sanitizeInput(document.getElementById('forgot-cin-input').value.trim());
 
-                if (!newPassword) {
-                    showToast('Please enter a new password.');
-                    return;
-                }
-
-                if (!/^\d{6}$/.test(newPassword)) {
-                    showToast('Please enter a valid 6-digit password (numbers only).');
-                    return;
-                }
-
-                if (newPassword === '123456') {
-                    showToast('The password "123456" is not allowed. Please choose a different password.');
-                    return;
-                }
-
-                if (newPassword !== confirmPassword) {
-                    showToast('Passwords do not match.');
-                    return;
-                }
-
-                try {
-                    const studentRef = db.ref('students/' + cin);
-                    await studentRef.update({ password: newPassword });
-                    document.getElementById('change-password-modal').classList.remove('show');
-                    setTimeout(() => {
-                        document.getElementById('change-password-modal').classList.add('hidden');
-                        showModal('select-question-modal');
-                        document.getElementById('select-question-modal').dataset.cin = cin;
-                    }, 300);
-                    showToast('Password updated successfully! Please select a validation question.');
-                } catch (error) {
-                    console.error('Error updating password:', error);
-                    showToast('An error occurred while updating your password.');
-                }
-            });
-
-            // Select Validation Question Submission
-            document.getElementById('select-question-submit').addEventListener('click', async () => {
-                const cin = document.getElementById('select-question-modal').dataset.cin;
-                const question = document.getElementById('new-validation-question-select').value;
-                const answer = sanitizeInput(document.getElementById('new-validation-answer-input').value.trim());
-
-                if (!question) {
-                    showToast('Please select a validation question.');
-                    return;
-                }
-
-                if (!answer) {
-                    showToast('Please provide an answer to the validation question.');
-                    return;
-                }
-
-                try {
-                    const studentRef = db.ref('students/' + cin);
-                    await studentRef.update({
-                        validationQuestion: question,
-                        validationAnswer: answer
-                    });
-                    document.getElementById('select-question-modal').classList.remove('show');
-                    setTimeout(() => {
-                        document.getElementById('select-question-modal').classList.add('hidden');
-                        showModal('student-modal');
-                        document.getElementById('cin-input').value = cin;
-                    }, 300);
-                    showToast('Validation question set successfully! Please log in with your new password.');
-                } catch (error) {
-                    console.error('Error setting validation question:', error);
-                    showToast('An error occurred while setting your validation question.');
-                }
-            });
-
-            // Sign Up Link
-            document.getElementById('signup-link').addEventListener('click', (e) => {
-                e.preventDefault();
-                const cin = sanitizeInput(document.getElementById('cin-input').value.trim());
-                document.getElementById('signup-cin-input').value = cin;
-                document.getElementById('student-modal').classList.remove('show');
-                setTimeout(() => {
-                    document.getElementById('student-modal').classList.add('hidden');
-                    showModal('signup-modal');
-                }, 300);
-            });
-
-            // Student Sign Up
-            document.getElementById('signup-submit').addEventListener('click', async () => {
-                const fullName = sanitizeInput(document.getElementById('signup-name-input').value.trim());
-                const cin = sanitizeInput(document.getElementById('signup-cin-input').value.trim());
-                const password = sanitizeInput(document.getElementById('signup-password-input').value.trim());
-                const selectedClass = document.getElementById('signup-class-select').value;
-                const classNumber = sanitizeInput(document.getElementById('signup-class-number').value.trim());
-                const question = document.getElementById('validation-question-select').value;
-                const answer = sanitizeInput(document.getElementById('validation-answer-input').value.trim());
-
-                // Validate full name
-                if (!fullName) {
-                    showToast('Please enter your first and last name.');
-                    return;
-                }
-
-                if (fullName.length > 25) {
-                    showToast('Name cannot exceed 25 characters.');
-                    return;
-                }
-
-                if (!/^[a-zA-Z\s]+$/.test(fullName)) {
-                    showToast('Name can only contain letters and spaces.');
-                    return;
-                }
-
-                const nameParts = fullName.split(/\s+/);
-                let firstName = nameParts[0] || '';
-                let lastName = nameParts.slice(1).join(' ') || '';
-
-                if (!firstName || !lastName) {
-                    showToast('Please provide both first and last names.');
-                    return;
-                }
-
-                if (!/^\d{8}$/.test(cin)) {
-                    showToast('Please enter a valid 8-digit CIN (numbers only).');
-                    return;
-                }
-
-                if (!/^\d{6}$/.test(password)) {
-                    showToast('Please set a valid 6-digit password (numbers only).');
-                    return;
-                }
-
-                if (password === '123456') {
-                    showToast('The password "123456" is not allowed. Please choose a different password.');
-                    return;
-                }
-
-                if (!selectedClass) {
-                    showToast('Please select your class.');
-                    return;
-                }
-
-                if (!classNumber) {
-                    showToast('Please enter your class number.');
-                    return;
-                }
-
-                if (!/^\d{2}$/.test(classNumber)) {
-                    showToast('Please enter a valid 2-digit class number (numbers only).');
-                    return;
-                }
-
-                if (!question) {
-                    showToast('Please select a validation question.');
-                    return;
-                }
-
-                if (!answer) {
-                    showToast('Please provide an answer to the validation question.');
-                    return;
-                }
-
-                // Combine class and classNumber into a single field (e.g., "IT11")
-                const combinedClass = `${selectedClass}${classNumber}`;
-
-                try {
-                    const studentRef = db.ref('students/' + cin);
-                    const snapshot = await studentRef.once('value');
-                    if (snapshot.exists()) {
-                        showToast('This CIN is already registered. Please log in.');
+                    if (!/^\d{8}$/.test(cin)) {
+                        showToast('Please enter a valid 8-digit CIN (numbers only).');
                         return;
                     }
 
-                    const canSignup = checkSignupLimit();
-                    if (!canSignup) return;
+                    try {
+                        const studentRef = db.ref('students/' + cin);
+                        const snapshot = await studentRef.once('value');
 
-                    const signupDate = new Date().toISOString().split('T')[0];
-                    await studentRef.set({
-                        firstName: firstName,
-                        lastName: lastName,
-                        class: combinedClass, // Store as "IT11" instead of separate fields
-                        absences: [],
-                        password: password,
-                        validationQuestion: question,
-                        validationAnswer: answer,
-                        failedLoginAttempts: [],
-                        signupDate: signupDate
-                    });
+                        if (!snapshot.exists()) {
+                            showToast('Student not found.');
+                            return;
+                        }
 
-                    recordSignup();
+                        const studentData = snapshot.val();
+                        document.getElementById('forgot-validation-modal').dataset.cin = cin;
+                        document.getElementById('forgot-validation-question').innerHTML = `<option value="${studentData.validationQuestion}" selected>${studentData.validationQuestion}</option>`;
+                        document.getElementById('forgot-password-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('forgot-password-modal').classList.add('hidden');
+                            showModal('forgot-validation-modal');
+                        }, 300);
+                    } catch (error) {
+                        console.error('Error fetching validation question:', error);
+                        showToast('An error occurred. Please try again.');
+                    }
+                });
 
-                    document.getElementById('signup-modal').classList.remove('show');
-                    setTimeout(() => {
-                        document.getElementById('signup-modal').classList.add('hidden');
-                        showModal('student-modal');
-                        document.getElementById('cin-input').value = cin;
-                    }, 300);
-                    showToast('Sign up successful! Please log in.');
-                } catch (error) {
-                    console.error('Error during sign up:', error);
-                    showToast('An error occurred during sign up. Please try again.');
-                }
-            });
+                // Forgot Password - Step 2: Submit Answer
+                document.getElementById('forgot-answer-submit').addEventListener('click', async () => {
+                    const cin = document.getElementById('forgot-validation-modal').dataset.cin;
+                    const answer = sanitizeInput(document.getElementById('forgot-answer-input').value.trim());
 
-            // Forgot Password Link
-            document.getElementById('forgot-password-link').addEventListener('click', (e) => {
-                e.preventDefault();
-                document.getElementById('student-modal').classList.remove('show');
-                setTimeout(() => {
-                    document.getElementById('student-modal').classList.add('hidden');
-                    showModal('forgot-password-modal');
-                }, 300);
-            });
-
-            // Forgot Password - Step 1: Submit CIN
-            document.getElementById('forgot-cin-submit').addEventListener('click', async () => {
-                const cin = sanitizeInput(document.getElementById('forgot-cin-input').value.trim());
-
-                if (!/^\d{8}$/.test(cin)) {
-                    showToast('Please enter a valid 8-digit CIN (numbers only).');
-                    return;
-                }
-
-                try {
-                    const studentRef = db.ref('students/' + cin);
-                    const snapshot = await studentRef.once('value');
-
-                    if (!snapshot.exists()) {
-                        showToast('Student not found.');
+                    if (!answer) {
+                        showToast('Please provide an answer to the validation question.');
                         return;
                     }
 
-                    const studentData = snapshot.val();
-                    document.getElementById('forgot-validation-modal').dataset.cin = cin;
-                    document.getElementById('forgot-validation-question').innerHTML = `<option value="${studentData.validationQuestion}" selected>${studentData.validationQuestion}</option>`;
-                    document.getElementById('forgot-password-modal').classList.remove('show');
-                    setTimeout(() => {
-                        document.getElementById('forgot-password-modal').classList.add('hidden');
-                        showModal('forgot-validation-modal');
-                    }, 300);
-                } catch (error) {
-                    console.error('Error fetching validation question:', error);
-                    showToast('An error occurred. Please try again.');
-                }
-            });
+                    try {
+                        const studentRef = db.ref('students/' + cin);
+                        const snapshot = await studentRef.once('value');
+                        const studentData = snapshot.val();
 
-            // Forgot Password - Step 2: Submit Answer
-            document.getElementById('forgot-answer-submit').addEventListener('click', async () => {
-                const cin = document.getElementById('forgot-validation-modal').dataset.cin;
-                const answer = sanitizeInput(document.getElementById('forgot-answer-input').value.trim());
+                        if (answer.toLowerCase() !== studentData.validationAnswer.toLowerCase()) {
+                            showToast('Incorrect answer. Please try again.');
+                            return;
+                        }
 
-                if (!answer) {
-                    showToast('Please provide an answer to the validation question.');
-                    return;
-                }
-
-                try {
-                    const studentRef = db.ref('students/' + cin);
-                    const snapshot = await studentRef.once('value');
-                    const studentData = snapshot.val();
-
-                    if (answer.toLowerCase() !== studentData.validationAnswer.toLowerCase()) {
-                        showToast('Incorrect answer. Please try again.');
-                        return;
+                        document.getElementById('forgot-reset-password-modal').dataset.cin = cin;
+                        document.getElementById('forgot-validation-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('forgot-validation-modal').classList.add('hidden');
+                            showModal('forgot-reset-password-modal');
+                        }, 300);
+                    } catch (error) {
+                        console.error('Error verifying answer:', error);
+                        showToast('An error occurred. Please try again.');
                     }
+                });
 
-                    document.getElementById('forgot-reset-password-modal').dataset.cin = cin;
+                // Forgot Password - Contact Us Link
+                document.getElementById('forgot-contact-us-link').addEventListener('click', (e) => {
+                    e.preventDefault();
                     document.getElementById('forgot-validation-modal').classList.remove('show');
                     setTimeout(() => {
                         document.getElementById('forgot-validation-modal').classList.add('hidden');
-                        showModal('forgot-reset-password-modal');
+                        showModal('contact-us-modal');
                     }, 300);
-                } catch (error) {
-                    console.error('Error verifying answer:', error);
-                    showToast('An error occurred. Please try again.');
-                }
-            });
+                });
 
-            // Forgot Password - Contact Us Link
-            document.getElementById('forgot-contact-us-link').addEventListener('click', (e) => {
-                e.preventDefault();
-                document.getElementById('forgot-validation-modal').classList.remove('show');
-                setTimeout(() => {
-                    document.getElementById('forgot-validation-modal').classList.add('hidden');
-                    showModal('contact-us-modal');
-                }, 300);
-            });
+                // Forgot Password - Step 3: Reset Password
+                document.getElementById('forgot-reset-submit').addEventListener('click', async () => {
+                    const cin = document.getElementById('forgot-reset-password-modal').dataset.cin;
+                    const newPassword = sanitizeInput(document.getElementById('forgot-new-password').value.trim());
+                    const confirmPassword = sanitizeInput(document.getElementById('forgot-confirm-password').value.trim());
 
-            // Forgot Password - Step 3: Reset Password
-            document.getElementById('forgot-reset-submit').addEventListener('click', async () => {
-                const cin = document.getElementById('forgot-reset-password-modal').dataset.cin;
-                const newPassword = sanitizeInput(document.getElementById('forgot-new-password').value.trim());
-                const confirmPassword = sanitizeInput(document.getElementById('forgot-confirm-password').value.trim());
-
-                if (!newPassword) {
-                    showToast('Please enter a new password.');
-                    return;
-                }
-
-                if (!/^\d{6}$/.test(newPassword)) {
-                    showToast('Please enter a valid 6-digit password (numbers only).');
-                    return;
-                }
-
-                if (newPassword === '123456') {
-                    showToast('The password "123456" is not allowed. Please choose a different password.');
-                    return;
-                }
-
-                if (newPassword !== confirmPassword) {
-                    showToast('Passwords do not match.');
-                    return;
-                }
-
-                try {
-                    const studentRef = db.ref('students/' + cin);
-                    await studentRef.update({ password: newPassword });
-                    document.getElementById('forgot-reset-password-modal').classList.remove('show');
-                    setTimeout(() => {
-                        document.getElementById('forgot-reset-password-modal').classList.add('hidden');
-                        showModal('student-modal');
-                        document.getElementById('cin-input').value = cin;
-                    }, 300);
-                    showToast('Password updated successfully! Please log in with your new password.');
-                } catch (error) {
-                    console.error('Error updating password:', error);
-                    showToast('An error occurred while updating your password.');
-                }
-            });
-
-            // Contact Us Submission
-            document.getElementById('contact-submit').addEventListener('click', async () => {
-                const fullName = sanitizeInput(document.getElementById('contact-fullname').value.trim());
-                const cin = sanitizeInput(document.getElementById('contact-cin').value.trim());
-                const email = sanitizeInput(document.getElementById('contact-email').value.trim());
-                const signupDate = document.getElementById('contact-signup-date').value;
-                const forgotPasswordDate = document.getElementById('contact-forgot-password-date').value;
-
-                // Validate inputs
-                if (!fullName) {
-                    showToast('Please enter your full name.');
-                    return;
-                }
-
-                if (!/^[a-zA-Z\s]+$/.test(fullName)) {
-                    showToast('Name can only contain letters and spaces.');
-                    return;
-                }
-
-                if (!/^\d{8}$/.test(cin)) {
-                    showToast('Please enter a valid 8-digit CIN (numbers only).');
-                    return;
-                }
-
-                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                    showToast('Please enter a valid email address.');
-                    return;
-                }
-
-                try {
-                    // Check if student exists
-                    const studentRef = db.ref('students/' + cin);
-                    const snapshot = await studentRef.once('value');
-                    if (!snapshot.exists()) {
-                        showToast('Student not found.');
+                    if (!newPassword) {
+                        showToast('Please enter a new password.');
                         return;
                     }
 
-                    // Prepare submission data
-                    const submissionData = {
-                        fullName: fullName,
-                        cin: cin,
-                        email: email,
-                        signupDate: signupDate || 'Not provided',
-                        forgotPasswordDate: forgotPasswordDate || 'Not provided',
-                        timestamp: new Date().toISOString()
-                    };
-
-                    // Save to Firebase under contactUsSubmissions
-                    const newSubmissionRef = db.ref('contactUsSubmissions').push();
-                    await newSubmissionRef.set(submissionData);
-
-                    // Close modal and show success message
-                    document.getElementById('contact-us-modal').classList.remove('show');
-                    setTimeout(() => {
-                        document.getElementById('contact-us-modal').classList.add('hidden');
-                        // Clear form
-                        document.getElementById('contact-fullname').value = '';
-                        document.getElementById('contact-cin').value = '';
-                        document.getElementById('contact-email').value = '';
-                        document.getElementById('contact-signup-date').value = '';
-                        document.getElementById('contact-forgot-password-date').value = '';
-                    }, 300);
-                    showToast('Your request has been submitted successfully!');
-                } catch (error) {
-                    console.error('Error submitting contact form:', error);
-                    showToast('An error occurred while submitting your request.');
-                }
-            });
-
-            // Parents Submission
-            document.getElementById('parents-submit').addEventListener('click', async () => {
-                const cin = sanitizeInput(document.getElementById('parents-cin-input').value.trim());
-
-                if (!/^\d{8}$/.test(cin)) {
-                    showToast('Please enter a valid 8-digit CIN (numbers only).');
-                    return;
-                }
-
-                try {
-                    const studentRef = db.ref('students/' + cin);
-                    const snapshot = await studentRef.once('value');
-                    if (!snapshot.exists()) {
-                        showToast('Student not found.');
+                    if (!/^\d{6}$/.test(newPassword)) {
+                        showToast('Please enter a valid 6-digit password (numbers only).');
                         return;
                     }
 
-                    document.getElementById('parents-modal').classList.remove('show');
+                    if (newPassword === '123456') {
+                        showToast('The password "123456" is not allowed. Please choose a different password.');
+                        return;
+                    }
+
+                    if (newPassword !== confirmPassword) {
+                        showToast('Passwords do not match.');
+                        return;
+                    }
+
+                    try {
+                        const studentRef = db.ref('students/' + cin);
+                        await studentRef.update({ password: newPassword });
+                        document.getElementById('forgot-reset-password-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('forgot-reset-password-modal').classList.add('hidden');
+                            showModal('student-modal');
+                            document.getElementById('cin-input').value = cin;
+                        }, 300);
+                        showToast('Password updated successfully! Please log in with your new password.');
+                    } catch (error) {
+                        console.error('Error updating password:', error);
+                        showToast('An error occurred while updating your password.');
+                    }
+                });
+
+                // Contact Us Submission
+                document.getElementById('contact-submit').addEventListener('click', async () => {
+                    const fullName = sanitizeInput(document.getElementById('contact-fullname').value.trim());
+                    const cin = sanitizeInput(document.getElementById('contact-cin').value.trim());
+                    const email = sanitizeInput(document.getElementById('contact-email').value.trim());
+                    const signupDate = document.getElementById('contact-signup-date').value;
+                    const forgotPasswordDate = document.getElementById('contact-forgot-password-date').value;
+
+                    // Validate inputs
+                    if (!fullName) {
+                        showToast('Please enter your full name.');
+                        return;
+                    }
+
+                    if (!/^[a-zA-Z\s]+$/.test(fullName)) {
+                        showToast('Name can only contain letters and spaces.');
+                        return;
+                    }
+
+                    if (!/^\d{8}$/.test(cin)) {
+                        showToast('Please enter a valid 8-digit CIN (numbers only).');
+                        return;
+                    }
+
+                    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        showToast('Please enter a valid email address.');
+                        return;
+                    }
+
+                    try {
+                        // Check if student exists
+                        const studentRef = db.ref('students/' + cin);
+                        const snapshot = await studentRef.once('value');
+                        if (!snapshot.exists()) {
+                            showToast('Student not found.');
+                            return;
+                        }
+
+                        // Prepare submission data
+                        const submissionData = {
+                            fullName: fullName,
+                            cin: cin,
+                            email: email,
+                            signupDate: signupDate || 'Not provided',
+                            forgotPasswordDate: forgotPasswordDate || 'Not provided',
+                            timestamp: new Date().toISOString()
+                        };
+
+                        // Save to Firebase under contactUsSubmissions
+                        const newSubmissionRef = db.ref('contactUsSubmissions').push();
+                        await newSubmissionRef.set(submissionData);
+
+                        // Close modal and show success message
+                        document.getElementById('contact-us-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('contact-us-modal').classList.add('hidden');
+                            // Clear form
+                            document.getElementById('contact-fullname').value = '';
+                            document.getElementById('contact-cin').value = '';
+                            document.getElementById('contact-email').value = '';
+                            document.getElementById('contact-signup-date').value = '';
+                            document.getElementById('contact-forgot-password-date').value = '';
+                        }, 300);
+                        showToast('Your request has been submitted successfully!');
+                    } catch (error) {
+                        console.error('Error submitting contact form:', error);
+                        showToast('An error occurred while submitting your request.');
+                    }
+                });
+
+                // Parents Submission
+                document.getElementById('parents-submit').addEventListener('click', async () => {
+                    const cin = sanitizeInput(document.getElementById('parents-cin-input').value.trim());
+
+                    if (!/^\d{8}$/.test(cin)) {
+                        showToast('Please enter a valid 8-digit CIN (numbers only).');
+                        return;
+                    }
+
+                    try {
+                        const studentRef = db.ref('students/' + cin);
+                        const snapshot = await studentRef.once('value');
+                        if (!snapshot.exists()) {
+                            showToast('Student not found.');
+                            return;
+                        }
+
+                        document.getElementById('parents-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('parents-modal').classList.add('hidden');
+                            window.location.href = `parents.html?cin=${cin}`;
+                        }, 300);
+                    } catch (error) {
+                        console.error('Error checking CIN:', error);
+                        showToast('An error occurred. Please try again.');
+                    }
+                });
+
+                // Professor Login
+                document.getElementById('professor-login').addEventListener('click', () => {
+                    const email = sanitizeInput(document.getElementById('professor-email').value.trim());
+                    const password = sanitizeInput(document.getElementById('professor-password').value.trim());
+
+                    if (!email || !password) {
+                        showToast('Please enter both email and password.');
+                        return;
+                    }
+
+                    auth.signInWithEmailAndPassword(email, password)
+                        .then((userCredential) => {
+                            showToast('Login successful!');
+                            document.getElementById('professor-modal').classList.remove('show');
+                            setTimeout(() => {
+                                document.getElementById('professor-modal').classList.add('hidden');
+                                window.location.href = 'professor.html';
+                            }, 300);
+                        })
+                        .catch((error) => {
+                            showToast('Login failed. Please check your credentials.');
+                            console.error('Professor login error:', error);
+                        });
+                });
+
+                // Admin Login
+                document.getElementById('admin-login').addEventListener('click', () => {
+                    const email = sanitizeInput(document.getElementById('admin-email').value.trim());
+                    const password = sanitizeInput(document.getElementById('admin-password').value.trim());
+
+                    if (!email || !password) {
+                        showToast('Please enter both email and password.');
+                        return;
+                    }
+
+                    auth.signInWithEmailAndPassword(email, password)
+                        .then((userCredential) => {
+                            showToast('Login successful!');
+                            sidebar.classList.remove('open');
+                            setTimeout(() => {
+                                window.location.href = 'admin.html';
+                            }, 300);
+                        })
+                        .catch((error) => {
+                            showToast('Login failed. Please check your credentials.');
+                            console.error('Admin login error:', error);
+                        });
+                });
+
+                // Dark Mode Toggle
+                document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+                    document.body.classList.toggle('dark-mode');
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    const toggleButton = document.getElementById('dark-mode-toggle');
+                    toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
+                    toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+                    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+                    showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
+                });
+
+                // Toast Notification Function
+                function showToast(message) {
+                    const toast = document.getElementById('toast');
+                    toast.textContent = message;
+                    toast.classList.remove('hidden');
+                    toast.classList.add('show');
                     setTimeout(() => {
-                        document.getElementById('parents-modal').classList.add('hidden');
-                        window.location.href = `parents.html?cin=${cin}`;
-                    }, 300);
-                } catch (error) {
-                    console.error('Error checking CIN:', error);
-                    showToast('An error occurred. Please try again.');
-                }
-            });
-
-            // Professor Login
-            document.getElementById('professor-login').addEventListener('click', () => {
-                const email = sanitizeInput(document.getElementById('professor-email').value.trim());
-                const password = sanitizeInput(document.getElementById('professor-password').value.trim());
-
-                if (!email || !password) {
-                    showToast('Please enter both email and password.');
-                    return;
+                        toast.classList.remove('show');
+                        toast.classList.add('hidden');
+                    }, 3000);
                 }
 
-                auth.signInWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        showToast('Login successful!');
-                        document.getElementById('professor-modal').classList.remove('show');
-                        setTimeout(() => {
-                            document.getElementById('professor-modal').classList.add('hidden');
-                            window.location.href = 'professor.html';
-                        }, 300);
-                    })
-                    .catch((error) => {
-                        showToast('Login failed. Please check your credentials.');
-                        console.error('Professor login error:', error);
-                    });
-            });
-
-            // Admin Login
-            document.getElementById('admin-login').addEventListener('click', () => {
-                const email = sanitizeInput(document.getElementById('admin-email').value.trim());
-                const password = sanitizeInput(document.getElementById('admin-password').value.trim());
-
-                if (!email || !password) {
-                    showToast('Please enter both email and password.');
-                    return;
-                }
-
-                auth.signInWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        showToast('Login successful!');
-                        sidebar.classList.remove('open');
-                        setTimeout(() => {
-                            window.location.href = 'admin.html';
-                        }, 300);
-                    })
-                    .catch((error) => {
-                        showToast('Login failed. Please check your credentials.');
-                        console.error('Admin login error:', error);
-                    });
-            });
-
-            // Dark Mode Toggle
-            document.getElementById('dark-mode-toggle').addEventListener('click', () => {
-                const isDarkMode = document.body.classList.toggle('dark-mode');
-                const toggleButton = document.getElementById('dark-mode-toggle');
-                toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
-                toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
-                localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
-                showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
-            });
-
-            // Toast Notification Function
-            function showToast(message) {
-                const toast = document.getElementById('toast');
-                toast.textContent = message;
-                toast.classList.remove('hidden');
-                toast.classList.add('show');
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    toast.classList.add('hidden');
-                }, 3000);
+                // Set max date for date inputs to today
+                const signupDateInput = document.getElementById('contact-signup-date');
+                const forgotPasswordDateInput = document.getElementById('contact-forgot-password-date');
+                const today = new Date().toISOString().split('T')[0];
+                signupDateInput.setAttribute('max', today);
+                forgotPasswordDateInput.setAttribute('max', today);
+            } catch (error) {
+                console.error('Initialization error:', error);
+                alert('An error occurred while loading the page. Please try again.');
             }
-
-            // Set max date for date inputs to today
-            const signupDateInput = document.getElementById('contact-signup-date');
-            const forgotPasswordDateInput = document.getElementById('contact-forgot-password-date');
-            const today = new Date().toISOString().split('T')[0];
-            signupDateInput.setAttribute('max', today);
-            forgotPasswordDateInput.setAttribute('max', today);
-        } catch (error) {
-            console.error('Initialization error:', error);
-            alert('An error occurred while loading the page. Please try again.');
-        }
+        });
     </script>
 </body>
 </html>
