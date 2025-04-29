@@ -6,24 +6,29 @@
     <title>ISET Siliana Attendance</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script>
-        // Apply dark mode immediately based on local storage
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.documentElement.classList.add('dark-mode');
-        } else {
-            // Default to dark mode if not set
-            localStorage.setItem('darkMode', 'enabled');
-            document.documentElement.classList.add('dark-mode');
-        }
+        // Set the default mode to light if not set in localStorage
+        (function() {
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === null) {
+                localStorage.setItem('darkMode', 'disabled'); // Default to light mode
+            } else if (darkMode === 'enabled') {
+                document.documentElement.classList.add('dark-mode');
+            }
+        })();
     </script>
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
+        /* Set initial background to light mode to avoid white flash */
+        html, body {
+            background-color: #f5f5f5; /* Light mode background */
             margin: 0;
             padding: 0;
-            padding-bottom: 60px;
-            background-color: #f5f5f5;
-            color: #333;
             transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            padding-bottom: 60px;
+            color: #333;
         }
 
         body.dark-mode {
@@ -275,6 +280,14 @@
 
         .modal-content input:nth-child(5), .modal-content select:nth-child(5) {
             animation-delay: 0.5s;
+        }
+
+        .modal-content input:nth-child(6), .modal-content select:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+        .modal-content input:nth-child(7), .modal-content select:nth-child(7) {
+            animation-delay: 0.7s;
         }
 
         body.dark-mode .modal-content input,
@@ -592,7 +605,8 @@
                     <option value="" disabled selected>Loading question...</option>
                 </select>
                 <input type="text" id="contact-answer" placeholder="Your answer" class="hidden">
-                <input type="date" id="contact-signup-date" placeholder="Signup Date (Optional)">
+                <input type="date" id="contact-signup-date" placeholder="Enter the date you created your account (optional)">
+                <input type="date" id="contact-forgot-password-date" placeholder="Enter the date you forgot your password (optional)">
                 <button id="contact-submit">Submit</button>
             </div>
         </div>
@@ -668,22 +682,14 @@
                 });
             });
 
-            // Apply dark mode based on local storage
-            const applyDarkMode = () => {
+            // Set dark mode toggle button state based on localStorage
+            const applyDarkModeToggleState = () => {
                 const darkMode = localStorage.getItem('darkMode') === 'enabled';
-                if (darkMode) {
-                    document.body.classList.add('dark-mode');
-                    const toggleButton = document.getElementById('dark-mode-toggle');
-                    toggleButton.querySelector('span:first-child').textContent = '🌞';
-                    toggleButton.querySelector('span:last-child').textContent = 'Light Mode';
-                } else {
-                    document.body.classList.remove('dark-mode');
-                    const toggleButton = document.getElementById('dark-mode-toggle');
-                    toggleButton.querySelector('span:first-child').textContent = '🌙';
-                    toggleButton.querySelector('span:last-child').textContent = 'Dark Mode';
-                }
+                const toggleButton = document.getElementById('dark-mode-toggle');
+                toggleButton.querySelector('span:first-child').textContent = darkMode ? '🌞' : '🌙';
+                toggleButton.querySelector('span:last-child').textContent = darkMode ? 'Light Mode' : 'Dark Mode';
             };
-            applyDarkMode();
+            applyDarkModeToggleState();
 
             // Hamburger menu toggle
             const sidebar = document.getElementById('admin-sidebar');
@@ -1184,6 +1190,76 @@
                 }
             });
 
+            // Contact Us Submission
+            document.getElementById('contact-submit').addEventListener('click', async () => {
+                const fullName = sanitizeInput(document.getElementById('contact-fullname').value.trim());
+                const cin = sanitizeInput(document.getElementById('contact-cin').value.trim());
+                const email = sanitizeInput(document.getElementById('contact-email').value.trim());
+                const signupDate = document.getElementById('contact-signup-date').value;
+                const forgotPasswordDate = document.getElementById('contact-forgot-password-date').value;
+
+                // Validate inputs
+                if (!fullName) {
+                    showToast('Please enter your full name.');
+                    return;
+                }
+
+                if (!/^[a-zA-Z\s]+$/.test(fullName)) {
+                    showToast('Name can only contain letters and spaces.');
+                    return;
+                }
+
+                if (!/^\d{8}$/.test(cin)) {
+                    showToast('Please enter a valid 8-digit CIN (numbers only).');
+                    return;
+                }
+
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    showToast('Please enter a valid email address.');
+                    return;
+                }
+
+                try {
+                    // Check if student exists
+                    const studentRef = db.ref('students/' + cin);
+                    const snapshot = await studentRef.once('value');
+                    if (!snapshot.exists()) {
+                        showToast('Student not found.');
+                        return;
+                    }
+
+                    // Prepare submission data
+                    const submissionData = {
+                        fullName: fullName,
+                        cin: cin,
+                        email: email,
+                        signupDate: signupDate || 'Not provided',
+                        forgotPasswordDate: forgotPasswordDate || 'Not provided',
+                        timestamp: new Date().toISOString()
+                    };
+
+                    // Save to Firebase under contactUsSubmissions
+                    const newSubmissionRef = db.ref('contactUsSubmissions').push();
+                    await newSubmissionRef.set(submissionData);
+
+                    // Close modal and show success message
+                    document.getElementById('contact-us-modal').classList.remove('show');
+                    setTimeout(() => {
+                        document.getElementById('contact-us-modal').classList.add('hidden');
+                        // Clear form
+                        document.getElementById('contact-fullname').value = '';
+                        document.getElementById('contact-cin').value = '';
+                        document.getElementById('contact-email').value = '';
+                        document.getElementById('contact-signup-date').value = '';
+                        document.getElementById('contact-forgot-password-date').value = '';
+                    }, 300);
+                    showToast('Your request has been submitted successfully!');
+                } catch (error) {
+                    console.error('Error submitting contact form:', error);
+                    showToast('An error occurred while submitting your request.');
+                }
+            });
+
             // Parents Submission
             document.getElementById('parents-submit').addEventListener('click', async () => {
                 const cin = sanitizeInput(document.getElementById('parents-cin-input').value.trim());
@@ -1283,10 +1359,12 @@
                 }, 3000);
             }
 
-            // Set max date for signup date input to today
+            // Set max date for date inputs to today
             const signupDateInput = document.getElementById('contact-signup-date');
+            const forgotPasswordDateInput = document.getElementById('contact-forgot-password-date');
             const today = new Date().toISOString().split('T')[0];
             signupDateInput.setAttribute('max', today);
+            forgotPasswordDateInput.setAttribute('max', today);
         } catch (error) {
             console.error('Initialization error:', error);
             alert('An error occurred while loading the page. Please try again.');
