@@ -6,12 +6,21 @@
     <title>ISET Siliana Attendance</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script>
-        // Apply dark mode based on localStorage before DOM renders
+        // Apply dark mode based on localStorage and set button state before DOM renders
         (function() {
             const darkMode = localStorage.getItem('darkMode');
             if (darkMode === 'enabled') {
-                document.documentElement.classList.add('dark-mode');
+                document.body.classList.add('dark-mode');
             }
+            // Ensure the toggle button reflects the correct state on load
+            document.addEventListener('DOMContentLoaded', () => {
+                const toggleButton = document.getElementById('dark-mode-toggle');
+                if (toggleButton) {
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
+                    toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+                }
+            });
         })();
 
         // Define showToast and showModal in global scope for inline onclick handlers
@@ -748,15 +757,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        // Dark Mode Toggle (initialize button state based on localStorage)
+        // Dark Mode Toggle (event listener for toggling)
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Attaching dark mode toggle event listener');
             const toggleButton = document.getElementById('dark-mode-toggle');
-            const isDarkMode = document.body.classList.contains('dark-mode');
-            // Set initial button state
-            toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
-            toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
-
             toggleButton.addEventListener('click', () => {
                 console.log('Dark mode toggle clicked');
                 document.body.classList.toggle('dark-mode');
