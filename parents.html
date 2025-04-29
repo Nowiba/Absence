@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISET Siliana Parent Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 60px;
+            background-color: #f5f5f5;
+            color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            background-color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: headerFadeIn 0.5s ease-in;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        header h1 {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+
+        nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #2c3e50;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 10px;
+            padding: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+            border-radius: 6px;
+        }
+
+        .nav-btn:hover, .nav-btn:active {
+            transform: scale(1.1) rotate(2deg);
+            color: #3498db;
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .nav-btn span {
+            margin-top: 2px;
+            transition: transform 0.2s ease;
+        }
+
+        main {
+            padding: 15px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .welcome {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .absence-container {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #3498db;
+            width: 90%;
+            max-width: 340px;
+            margin: 15px auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        .absence-container h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 22px;
+            font-weight: 700;
+            position: relative;
+            text-align: center;
+        }
+
+        .absence-container h2::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, #3498db, #5dade2);
+        }
+
+        .subject-section {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #d1d8e0;
+            padding-bottom: 10px;
+        }
+
+        .subject-section:last-child {
+            border-bottom: none;
+        }
+
+        .subject-header {
+            background-color: #3498db;
+            color: white;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .subject-header:hover {
+            background-color: #5dade2;
+        }
+
+        .subject-header.active {
+            background-color: #5dade2;
+        }
+
+        .subject-details {
+            display: none;
+            padding: 12px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin-top: 8px;
+        }
+
+        .subject-details.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .absence-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .absence-item:last-child {
+            border-bottom: none;
+        }
+
+        .absence-date {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .absence-weight {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+
+        .absence-count {
+            font-size: 14px;
+            color: #e74c3c;
+            margin: 8px 0;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .no-absences {
+            color: #e74c3c;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50px);
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 400;
+            opacity: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 3000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode header {
+            background-color: #1f2a44;
+        }
+
+        body.dark-mode nav {
+            background-color: #1f2a44;
+        }
+
+        body.dark-mode .welcome {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .absence-container {
+            background-color: #2c3e50;
+            color: #e0e0e0;
+            border-color: #5dade2;
+        }
+
+        body.dark-mode .absence-container h2 {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .absence-container h2::after {
+            background: linear-gradient(90deg, #5dade2, #7fbfff);
+        }
+
+        body.dark-mode .subject-section {
+            border-bottom: 1px solid #5dade2;
+        }
+
+        body.dark-mode .subject-header {
+            background-color: #5dade2;
+        }
+
+        body.dark-mode .subject-header:hover,
+        body.dark-mode .subject-header.active {
+            background-color: #7fbfff;
+        }
+
+        body.dark-mode .subject-details {
+            background-color: #34495e;
+        }
+
+        body.dark-mode .absence-count {
+            color: #ff6b6b;
+        }
+
+        body.dark-mode .absence-date {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .absence-weight {
+            color: #ff6b6b;
+        }
+
+        body.dark-mode .toast {
+            background: linear-gradient(90deg, #34495e, #2c3e50);
+            color: #e0e0e0;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes headerFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 18px;
+            }
+            .nav-btn {
+                font-size: 9px;
+                padding: 3px;
+            }
+            .absence-container {
+                width: 90%;
+                padding: 12px;
+            }
+            .absence-container h2 {
+                font-size: 20px;
+            }
+            .welcome {
+                font-size: 16px;
+            }
+            .toast {
+                font-size: 12px;
+                padding: 8px 16px;
+            }
+            .absence-item {
+                font-size: 12px;
+            }
+            .subject-header {
+                padding: 10px;
+                font-size: 14px;
+            }
+            .absence-count {
+                font-size: 13px;
+            }
+            .absence-date, .absence-weight {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ISET Siliana Parent Portal</h1>
+    </header>
+    <nav>
+        <button class="nav-btn" id="home-btn"><span>🏠</span><span>Home</span></button>
+        <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
+    </nav>
+    <main>
+        <div class="welcome" id="welcome-message">Loading...</div>
+        <div class="absence-container">
+            <h2>Your Child's Absences</h2>
+            <div id="absence-details"></div>
+        </div>
+    </main>
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Firebase Configuration
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAoXhEeGA22chByuIyxjWzmsFsQJSjqZJY",
+                    authDomain: "absence-iset-siliana.firebaseapp.com",
+                    databaseURL: "https://absence-iset-siliana-default-rtdb.europe-west1.firebasedatabase.app",
+                    projectId: "absence-iset-siliana",
+                    storageBucket: "absence-iset-siliana.firebasestorage.app",
+                    messagingSenderId: "519382535146",
+                    appId: "1:519382535146:web:94629d286b19b8c103c093",
+                    measurementId: "G-3Q9F4KP217"
+                };
+                firebase.initializeApp(firebaseConfig);
+                const db = firebase.database();
+
+                // Load dark mode preference from localStorage
+                if (localStorage.getItem('darkMode') === 'enabled') {
+                    document.body.classList.add('dark-mode');
+                    const toggleButton = document.getElementById('dark-mode-toggle');
+                    toggleButton.querySelector('span:first-child').textContent = '🌞';
+                    toggleButton.querySelector('span:last-child').textContent = 'Light Mode';
+                }
+
+                // Extract CIN from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const cin = urlParams.get('cin');
+                console.log('CIN from URL:', cin);
+
+                if (!cin || !/^\d{8}$/.test(cin)) {
+                    showToast('Invalid or missing CIN. Please go back and try again.');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
+                    return;
+                }
+
+                // List of subjects (same as in student.html for consistency)
+                const subjects = [
+                    'Dev. Web et Multimédias 2',
+                    'A. Dev. Web et Multimédias 2',
+                    'Technique d’expression 2',
+                    'UVT3 (2CN)',
+                    'Algo & Programmation',
+                    'Option 2: Atelier Linux',
+                    'Sys. Exploitation',
+                    'Fond Réseaux',
+                    'English for Computing 2',
+                    'A. Système 1',
+                    'Préparation aux métiers',
+                    'Stat & Proba',
+                    'Recherche Opérationnelle',
+                    'A. Programmation'
+                ];
+
+                // Mapping of professor-reported subjects to student page subjects (same as student.html)
+                const subjectMapping = {
+                    'Dev Web': 'Dev. Web et Multimédias 2',
+                    'A. Dev Web': 'A. Dev. Web et Multimédias 2',
+                    'Technique d\'expression': 'Technique d’expression 2',
+                    'UVT3': 'UVT3 (2CN)',
+                    'Algo & Prog': 'Algo & Programmation',
+                    'Atelier Linux': 'Option 2: Atelier Linux',
+                    'Sys Exploitation': 'Sys. Exploitation',
+                    'Fond Reseaux': 'Fond Réseaux',
+                    'English': 'English for Computing 2',
+                    'A. Systeme': 'A. Système 1',
+                    'Prep Metiers': 'Préparation aux métiers',
+                    'Stat Proba': 'Stat & Proba',
+                    'Rech Op': 'Recherche Opérationnelle',
+                    'A. Prog': 'A. Programmation'
+                };
+
+                // Function to normalize strings for comparison
+                function normalizeString(str) {
+                    return str ? str.trim().toLowerCase() : '';
+                }
+
+                // Fetch student details to display welcome message
+                const studentRef = db.ref('students/' + cin);
+                studentRef.once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        const student = snapshot.val();
+                        const fullName = `${student.firstName} ${student.lastName}`;
+                        document.getElementById('welcome-message').textContent = `Absences for ${fullName}`;
+                        console.log(`Welcome message set to: Absences for ${fullName}`);
+                    } else {
+                        showToast('Student not found. Please go back and try again.');
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 3000);
+                    }
+                }, (error) => {
+                    showToast('Error loading student data');
+                    console.error(error);
+                });
+
+                // Function to render absences from professorActions
+                function renderAbsences(absences) {
+                    console.log('Processed absences:', absences); // Debug log
+
+                    const absenceBySubject = {};
+                    subjects.forEach(subject => {
+                        const normalizedSubject = normalizeString(subject);
+                        absenceBySubject[subject] = absences.filter(a => {
+                            const normalizedAbsenceSubject = normalizeString(a.mappedSubject);
+                            return normalizedAbsenceSubject === normalizedSubject && a.status === 'absent';
+                        });
+                    });
+
+                    const absenceDetails = document.getElementById('absence-details');
+                    absenceDetails.innerHTML = ''; // Clear previous content
+
+                    subjects.forEach(subject => {
+                        const sectionDiv = document.createElement('div');
+                        sectionDiv.className = 'subject-section';
+                        const absencesForSubject = absenceBySubject[subject] || [];
+                        const absenceCount = absencesForSubject.reduce((total, a) => total + (a.weight || 0), 0);
+                        sectionDiv.innerHTML = `
+                            <div class="subject-header" data-subject="${subject}">
+                                <span>${subject}</span>
+                            </div>
+                            <div class="subject-details" id="details-${subject.replace(/\s+/g, '-')}">
+                                <div class="absence-count">Absences: ${absenceCount}</div>
+                                ${absencesForSubject.length === 0 ? 
+                                    `<div class="no-absences">No absences recorded for ${subject}</div>` :
+                                    absencesForSubject.map(a => `
+                                        <div class="absence-item">
+                                            <span class="absence-date">Date: ${a.date || 'N/A'}</span>
+                                            <span class="absence-weight">Weight: ${a.weight || 'N/A'}</span>
+                                        </div>
+                                    `).join('')}
+                            </div>
+                        `;
+                        absenceDetails.appendChild(sectionDiv);
+                    });
+
+                    // Add event listeners for collapsible subject headers
+                    document.querySelectorAll('.subject-header').forEach(header => {
+                        header.addEventListener('click', () => {
+                            const subject = header.dataset.subject;
+                            const details = document.getElementById(`details-${subject.replace(/\s+/g, '-')}`);
+                            const isVisible = details.classList.contains('show');
+
+                            document.querySelectorAll('.subject-details').forEach(d => d.classList.remove('show'));
+                            document.querySelectorAll('.subject-header').forEach(h => h.classList.remove('active'));
+
+                            if (!isVisible) {
+                                details.classList.add('show');
+                                header.classList.add('active');
+                            }
+                        });
+                    });
+                }
+
+                // Fetch absences from professorActions
+                const professorActionsRef = db.ref('professorActions');
+                professorActionsRef.on('value', (snapshot) => {
+                    const allActions = [];
+                    snapshot.forEach(professorSnapshot => {
+                        professorSnapshot.forEach(actionSnapshot => {
+                            const action = actionSnapshot.val();
+                            if (action.cin === cin && action.status === 'absent') {
+                                const mappedSubject = subjectMapping[action.subject] || action.subject;
+                                allActions.push({
+                                    ...action,
+                                    mappedSubject: mappedSubject
+                                });
+                            }
+                        });
+                    });
+                    renderAbsences(allActions);
+                }, (error) => {
+                    showToast('Error loading absence data');
+                    console.error(error);
+                });
+
+                // Home button
+                document.getElementById('home-btn').addEventListener('click', () => {
+                    window.location.href = 'index.html';
+                });
+
+                // Dark mode toggle
+                document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+                    document.body.classList.toggle('dark-mode');
+                    const isDarkMode = document.body.classList.contains('dark-mode');
+                    const toggleButton = document.getElementById('dark-mode-toggle');
+                    toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
+                    toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+                    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+                    showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
+                });
+
+                // Toast notification
+                function showToast(message) {
+                    const toast = document.getElementById('toast');
+                    toast.textContent = message;
+                    toast.classList.remove('hidden');
+                    toast.classList.add('show');
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                        toast.classList.add('hidden');
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showToast('Error initializing page');
+            }
+        });
+    </script>
+</body>
+</html>
