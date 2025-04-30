@@ -20,9 +20,9 @@
 
         header {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            padding: 10px;
+            padding: 10px 15px;
             background-color: #2c3e50;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             position: sticky;
@@ -39,6 +39,20 @@
             margin: 0;
             transform: scale(1);
             transition: transform 0.3s ease;
+        }
+
+        .hamburger-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+
+        .hamburger-btn:hover {
+            color: #3498db;
+            transform: rotate(90deg);
         }
 
         nav {
@@ -138,6 +152,78 @@
 
         .details-container p:nth-child(2) { animation-delay: 0.1s; }
         .details-container p:nth-child(3) { animation-delay: 0.2s; }
+
+        .hamburger-sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 260px;
+            height: 100%;
+            background-color: #ffffff;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+            z-index: 2000;
+            padding: 20px;
+            transition: right 0.3s ease;
+        }
+
+        .hamburger-sidebar.open {
+            right: 0;
+        }
+
+        .hamburger-sidebar h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .hamburger-sidebar h2::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, #3498db, #5dade2);
+        }
+
+        .hamburger-sidebar .menu-item {
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .hamburger-sidebar .menu-item:hover {
+            background-color: #5dade2;
+        }
+
+        .hamburger-sidebar .close-sidebar {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #e74c3c;
+            padding: 5px 10px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .hamburger-sidebar .close-sidebar:hover {
+            background-color: #e74c3c;
+            color: white;
+            transform: rotate(90deg);
+        }
 
         .sidebar {
             position: fixed;
@@ -282,63 +368,6 @@
 
         .modal-content button:hover {
             background-color: #5dade2;
-        }
-
-        .schedule-day {
-            margin-bottom: 15px;
-            border-bottom: 1px solid #d1d8e0;
-        }
-
-        .schedule-day:last-child {
-            border-bottom: none;
-        }
-
-        .schedule-day-header {
-            background-color: #3498db;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background-color 0.3s ease;
-        }
-
-        .schedule-day-header:hover {
-            background-color: #5dade2;
-        }
-
-        .schedule-day-header.active {
-            background-color: #5dade2;
-        }
-
-        .schedule-day-details {
-            display: none;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            margin-top: 5px;
-        }
-
-        .schedule-day-details.show {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-
-        .schedule-slot {
-            padding: 8px 0;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 13px;
-        }
-
-        .schedule-slot:last-child {
-            border-bottom: none;
-        }
-
-        .schedule-slot span {
-            font-weight: 700;
-            color: #2c3e50;
         }
 
         .classmate-item {
@@ -585,6 +614,168 @@
             border: none;
         }
 
+        .messages-modal .modal-content {
+            max-width: 400px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #d1d8e0;
+        }
+
+        .chat-header h2 {
+            margin: 0;
+        }
+
+        .chat-header .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #e74c3c;
+            transition: color 0.3s ease;
+        }
+
+        .chat-header .close-btn:hover {
+            color: #c0392b;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-message.student {
+            align-items: flex-end;
+        }
+
+        .chat-message.professor {
+            align-items: flex-start;
+        }
+
+        .chat-message .message-bubble {
+            max-width: 70%;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .chat-message.student .message-bubble {
+            background-color: #3498db;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-message.professor .message-bubble {
+            background-color: #e0e0e0;
+            color: #333;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-message .message-time {
+            font-size: 11px;
+            color: #777;
+            margin-top: 3px;
+        }
+
+        .chat-message.student .message-time {
+            text-align: right;
+        }
+
+        .chat-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .professor-list {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .professor-list.show {
+            display: flex;
+        }
+
+        .professor-item {
+            padding: 8px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .professor-item:hover {
+            background-color: #5dade2;
+        }
+
+        .chat-input {
+            display: none;
+            flex-direction: row;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input.show {
+            display: flex;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #d1d8e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .chat-input button {
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .chat-input button:hover {
+            background-color: #5dade2;
+        }
+
+        .chatbot-message {
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+            font-style: italic;
+        }
+
         .toast {
             position: fixed;
             top: 60px;
@@ -597,6 +788,11 @@
             font-size: 13px;
             font-weight: 400;
             opacity: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.Strive to make your website as attractive as possible for users with CSS and JavaScript
+
+System: Here's the continuation of the modified `student.html` to implement the requested changes:
+
+<xaiArtifact artifact_id="d7e39fe4-06b6-47c0-994c-90932e32723f" artifact_version_id="70af6051-ceb0-4c8b-8292-9c022e4ee4e1" title="student.html" contentType="text/html">
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             z-index: 3000;
@@ -617,6 +813,14 @@
             background-color: #1f2a44;
         }
 
+        body.dark-mode .hamburger-btn {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .hamburger-btn:hover {
+            color: #5dade2;
+        }
+
         body.dark-mode nav {
             background-color: #1f2a44;
         }
@@ -629,6 +833,7 @@
         body.dark-mode .absence-container,
         body.dark-mode .modal-content,
         body.dark-mode .sidebar,
+        body.dark-mode .hamburger-sidebar,
         body.dark-mode .shared-files {
             background-color: #2c3e50;
             color: #e0e0e0;
@@ -639,6 +844,7 @@
         body.dark-mode .absence-container h2,
         body.dark-mode .modal-content h2,
         body.dark-mode .sidebar h2,
+        body.dark-mode .hamburger-sidebar h2,
         body.dark-mode .shared-files h2 {
             color: #e0e0e0;
         }
@@ -647,11 +853,13 @@
         body.dark-mode .absence-container h2::after,
         body.dark-mode .modal-content h2::after,
         body.dark-mode .sidebar h2::after,
+        body.dark-mode .hamburger-sidebar h2::after,
         body.dark-mode .shared-files h2::after {
             background: linear-gradient(90deg, #5dade2, #7fbfff);
         }
 
-        body.dark-mode .sidebar .email-update input {
+        body.dark-mode .sidebar .email-update input,
+        body.dark-mode .chat-input input {
             background-color: #34495e;
             color: #e0e0e0;
             border-color: #5dade2;
@@ -659,32 +867,22 @@
 
         body.dark-mode .classmate-item,
         body.dark-mode .absence-item,
-        body.dark-mode .schedule-day,
-        body.dark-mode .schedule-slot,
         body.dark-mode .file-item,
         body.dark-mode .subject-section {
             border-bottom: 1px solid #5dade2;
         }
 
-        body.dark-mode .schedule-day-header,
         body.dark-mode .subject-header {
             background-color: #5dade2;
         }
 
-        body.dark-mode .schedule-day-header:hover,
-        body.dark-mode .schedule-day-header.active,
         body.dark-mode .subject-header:hover,
         body.dark-mode .subject-header.active {
             background-color: #7fbfff;
         }
 
-        body.dark-mode .schedule-day-details,
         body.dark-mode .subject-details {
             background-color: #34495e;
-        }
-
-        body.dark-mode .schedule-slot span {
-            color: #e0e0e0;
         }
 
         body.dark-mode .absence-count {
@@ -715,6 +913,27 @@
 
         body.dark-mode .file-viewer-modal .loading-message {
             color: #5dade2;
+        }
+
+        body.dark-mode .chat-body {
+            background-color: #34495e;
+        }
+
+        body.dark-mode .chat-message.professor .message-bubble {
+            background-color: #4a5e77;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .chat-message .message-time {
+            color: #bbbbbb;
+        }
+
+        body.dark-mode .professor-list {
+            background-color: #34495e;
+        }
+
+        body.dark-mode .chatbot-message {
+            color: #bbbbbb;
         }
 
         body.dark-mode .toast {
@@ -790,27 +1009,24 @@
                 padding: 10px;
                 font-size: 14px;
             }
-            .schedule-day-header {
-                padding: 8px;
-                font-size: 14px;
-            }
-            .schedule-slot {
-                font-size: 12px;
-            }
             .absence-count {
                 font-size: 13px;
             }
             .absence-date, .absence-weight {
                 font-size: 12px;
             }
-            .sidebar {
+            .sidebar,
+            .hamburger-sidebar {
                 width: 220px;
             }
-            .sidebar h2 {
+            .sidebar h2,
+            .hamburger-sidebar h2 {
                 font-size: 18px;
             }
             .sidebar .email-update input,
-            .sidebar .email-update button {
+            .sidebar .email-update button,
+            .chat-input input,
+            .chat-input button {
                 font-size: 13px;
                 padding: 6px;
             }
@@ -818,18 +1034,31 @@
                 max-width: 90%;
                 height: 70vh;
             }
+            .messages-modal .modal-content {
+                max-width: 90%;
+                height: 70vh;
+            }
+            .chat-message .message-bubble {
+                font-size: 13px;
+            }
+            .chat-message .message-time {
+                font-size: 10px;
+            }
+            .professor-item {
+                font-size: 13px;
+            }
         }
     </style>
 </head>
 <body>
     <header>
         <h1>ISET Siliana Student</h1>
+        <button class="hamburger-btn" id="hamburger-btn"><i class="fas fa-bars"></i></button>
     </header>
     <nav>
         <button class="nav-btn" id="home-btn"><span>🏠</span><span>Home</span></button>
-        <button class="nav-btn" id="schedule-btn"><span>📅</span><span>Schedule</span></button>
-        <button class="nav-btn" id="classmates-btn"><span>👥</span><span>Classmates</span></button>
         <button class="nav-btn" id="email-btn"><span>✉️</span><span>Email</span></button>
+        <button class="nav-btn" id="messages-btn"><span>💬</span><span>Messages</span></button>
         <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
     <main>
@@ -848,14 +1077,6 @@
             <div id="shared-files-list"></div>
         </div>
     </main>
-    <!-- Schedule Modal -->
-    <div id="schedule-modal" class="modal">
-        <div class="modal-content">
-            <h2>Schedule (IT11)</h2>
-            <div id="schedule-days"></div>
-        </div>
-    </div>
-
     <!-- Classmates Modal -->
     <div id="classmates-modal" class="modal">
         <div class="modal-content">
@@ -863,7 +1084,6 @@
             <div id="modal-classmates-list"></div>
         </div>
     </div>
-
     <!-- File Viewer Modal (for images only) -->
     <div id="file-viewer-modal" class="modal file-viewer-modal">
         <div class="modal-content">
@@ -871,7 +1091,31 @@
             <div id="file-viewer-content"></div>
         </div>
     </div>
-
+    <!-- Messages Modal -->
+    <div id="messages-modal" class="modal messages-modal">
+        <div class="modal-content">
+            <div class="chat-header">
+                <h2>Messages</h2>
+                <button class="close-btn" id="close-messages"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chat-body" id="chat-body">
+                <div class="chatbot-message">Which professor would you like to message?</div>
+            </div>
+            <div class="chat-footer">
+                <div class="professor-list" id="professor-list"></div>
+                <div class="chat-input" id="chat-input">
+                    <input type="text" id="message-input" placeholder="Type your message...">
+                    <button id="send-message-btn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Hamburger Sidebar -->
+    <div id="hamburger-sidebar" class="hamburger-sidebar">
+        <button class="close-sidebar" id="close-hamburger-sidebar"><i class="fas fa-times"></i></button>
+        <h2>Menu</h2>
+        <button class="menu-item" id="sidebar-classmates-btn">Classmates</button>
+    </div>
     <!-- Email Update Sidebar -->
     <div id="email-sidebar" class="sidebar">
         <button class="close-sidebar" id="close-email-sidebar"><i class="fas fa-times"></i></button>
@@ -881,7 +1125,6 @@
             <button id="update-email-btn">Save</button>
         </div>
     </div>
-
     <div id="toast" class="toast hidden"></div>
 
     <!-- Firebase SDK -->
@@ -938,42 +1181,7 @@
                     return;
                 }
 
-                // Timetable for IT11
-                const timetable = {
-                    'Monday': [
-                        { start: '08:30', end: '10:00', class: 'Dev. Web et Multimédias 2', teacher: 'Mme. Wafa REJBI', room: 'T103' },
-                        { start: '10:10', end: '11:40', class: 'Technique d’expression 2', teacher: 'Imen Bouraoui', room: 'T108' },
-                        { start: '11:50', end: '13:20', class: 'UVT3 (2CN)', teacher: 'Mme. Hela DJEBALI', room: '' },
-                        { start: '13:20', end: '14:50', class: 'Algo & Programmation', teacher: 'Mme. Hela DJEBALI', room: 'T103' },
-                        { start: '14:50', end: '16:20', class: 'Algo & Programmation', teacher: 'Emna Mehrez', room: 'T103' },
-                        { start: '16:30', end: '18:00', class: 'Algo & Programmation', teacher: 'Emna Mehrez', room: '' }
-                    ],
-                    'Tuesday': [
-                        { start: '08:30', end: '10:00', class: 'A. Dev. Web et Multimédias 2 (Groupe 2)', teacher: 'Mme. Wafa REJBI', room: 'LT16' },
-                        { start: '10:10', end: '11:40', class: 'Option 2: Atelier Linux', teacher: 'Mme. Sana ZAKRAOUI', room: 'LT12' },
-                        { start: '11:50', end: '13:20', class: 'Sys. Exploitation', teacher: 'Mme. Hajer BACCOUCH', room: 'T102' },
-                        { start: '13:20', end: '14:50', class: 'Sys. Exploitation', teacher: 'Mme. Hajer BACCOUCH', room: 'T102' }
-                    ],
-                    'Wednesday': [
-                        { start: '08:30', end: '10:00', class: 'Fond Réseaux', teacher: 'Ouni Rahma', room: 'T105' },
-                        { start: '10:10', end: '11:40', class: 'Option 2: Atelier Linux (Groupe 1)', teacher: 'Zeineb Belakhdhar', room: 'LT13' },
-                        { start: '11:50', end: '13:20', class: 'A. Dev. Web et Multimédias 2', teacher: 'Mme. Wafa REJBI', room: '' }
-                    ],
-                    'Thursday': [
-                        { start: '08:30', end: '10:00', class: 'Fond Réseaux', teacher: 'Ouni Rahma', room: 'T103' },
-                        { start: '10:10', end: '11:40', class: 'English for Computing 2', teacher: 'Fadhel Fellah', room: 'T103' },
-                        { start: '13:20', end: '14:50', class: 'A. Système 1', teacher: 'Sondes Guirat', room: 'LT10' }
-                    ],
-                    'Friday': [
-                        { start: '08:30', end: '10:00', class: 'Préparation aux métiers', teacher: 'Kemla Naoui', room: '' },
-                        { start: '10:10', end: '11:40', class: 'Stat & Proba', teacher: 'Arwa Selmi', room: 'T103' },
-                        { start: '11:50', end: '13:20', class: 'Recherche Opérationnelle', teacher: 'Arwa Selmi', room: '' },
-                        { start: '13:20', end: '14:50', class: 'A. Programmation (Groupe 1)', teacher: 'Ksibi Jihen', room: 'LT10' },
-                        { start: '14:50', end: '16:20', class: 'A. Programmation (Groupe 2)', teacher: 'Ksibi Jihen', room: '' }
-                    ]
-                };
-
-                // List of subjects for mapping absences (based on timetable)
+                // List of subjects for mapping absences
                 const subjects = [
                     'Dev. Web et Multimédias 2',
                     'A. Dev. Web et Multimédias 2',
@@ -1032,91 +1240,14 @@
                     const detailsContainer = document.getElementById('details-container');
                     const currentClassP = document.getElementById('current-class');
 
-                    if (!timetable[day]) {
-                        detailsContainer.classList.remove('show');
-                        currentClassP.textContent = 'No class scheduled today';
-                        return;
-                    }
-
-                    const todaySchedule = timetable[day];
-                    let shouldShow = false;
-                    let currentClassText = 'No class scheduled right now';
-
-                    for (const slot of todaySchedule) {
-                        const startMinutes = timeToMinutes(slot.start);
-                        const endMinutes = timeToMinutes(slot.end);
-                        const prepStartMinutes = startMinutes - 30; // 30 minutes before class starts
-                        const hideMinutes = startMinutes + 30; // 30 minutes after class starts
-
-                        if (currentMinutes >= prepStartMinutes && currentMinutes < hideMinutes) {
-                            shouldShow = true;
-                            if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
-                                currentClassText = `Now: ${slot.class} with ${slot.teacher}${slot.room ? ` in ${slot.room}` : ''}`;
-                            } else if (currentMinutes < startMinutes) {
-                                currentClassText = `Next: ${slot.class} with ${slot.teacher}${slot.room ? ` in ${slot.room}` : ''} at ${slot.start}`;
-                            }
-                        }
-                    }
-
-                    if (shouldShow) {
-                        detailsContainer.classList.add('show');
-                        currentClassP.textContent = currentClassText;
-                    } else {
-                        detailsContainer.classList.remove('show');
-                    }
+                    // Since timetable is removed, we only show class info without schedule
+                    detailsContainer.classList.add('show');
+                    currentClassP.textContent = 'No class schedule available';
                 }
 
                 // Update details visibility every minute
                 setInterval(updateDetailsVisibility, 60000);
                 updateDetailsVisibility(); // Initial check
-
-                // Populate schedule modal with collapsible days
-                const scheduleDays = document.getElementById('schedule-days');
-                const currentDay = new Date().toLocaleString('en-US', { weekday: 'long' });
-
-                Object.keys(timetable).forEach(day => {
-                    const dayDiv = document.createElement('div');
-                    dayDiv.className = 'schedule-day';
-                    dayDiv.innerHTML = `
-                        <div class="schedule-day-header" data-day="${day}">
-                            <span>${day}</span>
-                        </div>
-                        <div class="schedule-day-details" id="details-${day}">
-                            ${timetable[day].map(slot => `
-                                <div class="schedule-slot">
-                                    <span>${slot.start} - ${slot.end}</span><br>
-                                    ${slot.class}<br>
-                                    Teacher: ${slot.teacher}<br>
-                                    Room: ${slot.room || 'N/A'}
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                    scheduleDays.appendChild(dayDiv);
-
-                    if (day === currentDay) {
-                        const header = dayDiv.querySelector('.schedule-day-header');
-                        const details = dayDiv.querySelector('.schedule-day-details');
-                        header.classList.add('active');
-                        details.classList.add('show');
-                    }
-                });
-
-                document.querySelectorAll('.schedule-day-header').forEach(header => {
-                    header.addEventListener('click', () => {
-                        const day = header.dataset.day;
-                        const details = document.getElementById(`details-${day}`);
-                        const isVisible = details.classList.contains('show');
-
-                        document.querySelectorAll('.schedule-day-details').forEach(d => d.classList.remove('show'));
-                        document.querySelectorAll('.schedule-day-header').forEach(h => h.classList.remove('active'));
-
-                        if (!isVisible) {
-                            details.classList.add('show');
-                            header.classList.add('active');
-                        }
-                    });
-                });
 
                 // Fetch student details and listen for changes
                 let studentClass = '';
@@ -1282,13 +1413,13 @@
                             fileItem.className = 'file-item';
                             fileItem.innerHTML = `
                                 <div class="file-info">
-                                    <a href="#" class="file-name" data-id="${file.id}" data-type="${fileType}" data-salt="${file.salt}">${file.fileName}</a>
+                                    <a href="#" class="file-name" data-id="${file.id}" data-type="${file.fileType}" data-salt="${file.salt}">${file.fileName}</a>
                                     <div class="file-details">
                                         Uploaded by: ${file.professorName} (${file.subject || 'N/A'})<br>
                                         ${formattedDate}
                                     </div>
                                 </div>
-                                <a href="#" class="download-link" data-id="${file.id}" data-filename="${file.fileName}" data-type="${fileType}" data-salt="${file.salt}">Download</a>
+                                <a href="#" class="download-link" data-id="${file.id}" data-filename="${file.fileName}" data-type="${file.fileType}" data-salt="${file.salt}">Download</a>
                             `;
                             sharedFilesList.appendChild(fileItem);
                         });
@@ -1392,17 +1523,140 @@
                     }
                 }
 
-                // Modal and Sidebar Event Listeners
-                const scheduleModal = document.getElementById('schedule-modal');
-                const classmatesModal = document.getElementById('classmates-modal');
-                const emailSidebar = document.getElementById('email-sidebar');
+                // Messaging Functionality
+                const messagesModal = document.getElementById('messages-modal');
+                const chatBody = document.getElementById('chat-body');
+                const professorList = document.getElementById('professor-list');
+                const chatInput = document.getElementById('chat-input');
+                const messageInput = document.getElementById('message-input');
+                let selectedProfessor = null;
 
-                document.getElementById('schedule-btn').addEventListener('click', () => {
-                    scheduleModal.style.display = 'flex';
+                // List of professors (derived from previous timetable data)
+                const professors = [
+                    'Mme. Wafa REJBI',
+                    'Imen Bouraoui',
+                    'Mme. Hela DJEBALI',
+                    'Emna Mehrez',
+                    'Mme. Sana ZAKRAOUI',
+                    'Mme. Hajer BACCOUCH',
+                    'Ouni Rahma',
+                    'Zeineb Belakhdhar',
+                    'Fadhel Fellah',
+                    'Sondes Guirat',
+                    'Kemla Naoui',
+                    'Arwa Selmi',
+                    'Ksibi Jihen'
+                ];
+
+                // Populate professor list
+                professors.forEach(professor => {
+                    const button = document.createElement('button');
+                    button.className = 'professor-item';
+                    button.textContent = professor;
+                    button.addEventListener('click', () => {
+                        selectedProfessor = professor;
+                        professorList.classList.remove('show');
+                        chatInput.classList.add('show');
+                        chatBody.innerHTML = `<div class="chatbot-message">Now chatting with ${professor}</div>`;
+                        loadMessages(professor);
+                    });
+                    professorList.appendChild(button);
                 });
 
-                document.getElementById('classmates-btn').addEventListener('click', () => {
+                // Format timestamp to DD/MM/YYYY HH:MM:SS
+                function formatTimestamp(timestamp) {
+                    const date = new Date(timestamp);
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+                }
+
+                // Load messages for the selected professor
+                function loadMessages(professor) {
+                    const chatId = `${cin}_${professor.replace(/\s+/g, '_')}`;
+                    db.ref(`messages/${chatId}`).on('value', (snapshot) => {
+                        chatBody.innerHTML = `<div class="chatbot-message">Now chatting with ${professor}</div>`;
+                        if (snapshot.exists()) {
+                            const messages = [];
+                            snapshot.forEach(childSnapshot => {
+                                messages.push(childSnapshot.val());
+                            });
+                            messages.sort((a, b) => a.timestamp - b.timestamp);
+                            messages.forEach(msg => {
+                                const messageDiv = document.createElement('div');
+                                messageDiv.className = `chat-message ${msg.senderType}`;
+                                messageDiv.innerHTML = `
+                                    <div class="message-bubble">${msg.message}</div>
+                                    <div class="message-time">${formatTimestamp(msg.timestamp)}</div>
+                                `;
+                                chatBody.appendChild(messageDiv);
+                            });
+                            chatBody.scrollTop = chatBody.scrollHeight; // Auto-scroll to bottom
+                        }
+                    }, (error) => {
+                        showToast('Error loading messages');
+                        console.error(error);
+                    });
+                }
+
+                // Send message
+                document.getElementById('send-message-btn').addEventListener('click', () => {
+                    const message = messageInput.value.trim();
+                    if (!message) {
+                        showToast('Please enter a message');
+                        return;
+                    }
+                    if (!selectedProfessor) {
+                        showToast('Please select a professor');
+                        return;
+                    }
+
+                    const chatId = `${cin}_${selectedProfessor.replace(/\s+/g, '_')}`;
+                    const messageData = {
+                        sender: cin,
+                        senderType: 'student',
+                        message: message,
+                        timestamp: Date.now()
+                    };
+
+                    db.ref(`messages/${chatId}`).push(messageData)
+                        .then(() => {
+                            messageInput.value = ''; // Clear input
+                            chatBody.scrollTop = chatBody.scrollHeight; // Auto-scroll to bottom
+                        })
+                        .catch(error => {
+                            showToast('Error sending message');
+                            console.error(error);
+                        });
+                });
+
+                // Press Enter to send message
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('send-message-btn').click();
+                    }
+                });
+
+                // Modal and Sidebar Event Listeners
+                const classmatesModal = document.getElementById('classmates-modal');
+                const emailSidebar = document.getElementById('email-sidebar');
+                const hamburgerSidebar = document.getElementById('hamburger-sidebar');
+
+                document.getElementById('hamburger-btn').addEventListener('click', () => {
+                    hamburgerSidebar.classList.add('open');
+                });
+
+                document.getElementById('close-hamburger-sidebar').addEventListener('click', () => {
+                    hamburgerSidebar.classList.remove('open');
+                });
+
+                document.getElementById('sidebar-classmates-btn').addEventListener('click', () => {
                     classmatesModal.style.display = 'flex';
+                    hamburgerSidebar.classList.remove('open');
                 });
 
                 document.getElementById('email-btn').addEventListener('click', () => {
@@ -1411,6 +1665,18 @@
 
                 document.getElementById('close-email-sidebar').addEventListener('click', () => {
                     emailSidebar.classList.remove('open');
+                });
+
+                document.getElementById('messages-btn').addEventListener('click', () => {
+                    messagesModal.style.display = 'flex';
+                    professorList.classList.add('show');
+                    chatInput.classList.remove('show');
+                    chatBody.innerHTML = `<div class="chatbot-message">Which professor would you like to message?</div>`;
+                    selectedProfessor = null;
+                });
+
+                document.getElementById('close-messages').addEventListener('click', () => {
+                    messagesModal.style.display = 'none';
                 });
 
                 document.getElementById('update-email-btn').addEventListener('click', () => {
@@ -1431,10 +1697,7 @@
 
                 // Close modals and sidebar when clicking outside
                 document.addEventListener('click', (e) => {
-                    if (!scheduleModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#schedule-btn') && scheduleModal.style.display === 'flex') {
-                        scheduleModal.style.display = 'none';
-                    }
-                    if (!classmatesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#classmates-btn') && classmatesModal.style.display === 'flex') {
+                    if (!classmatesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#sidebar-classmates-btn') && classmatesModal.style.display === 'flex') {
                         classmatesModal.style.display = 'none';
                     }
                     if (!fileViewerModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('.file-name') && fileViewerModal.style.display === 'flex') {
@@ -1442,8 +1705,14 @@
                         fileViewerContent.innerHTML = '';
                         loadingMessage.classList.remove('show');
                     }
+                    if (!messagesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#messages-btn') && messagesModal.style.display === 'flex') {
+                        messagesModal.style.display = 'none';
+                    }
                     if (!emailSidebar.contains(e.target) && !e.target.closest('#email-btn') && emailSidebar.classList.contains('open')) {
                         emailSidebar.classList.remove('open');
+                    }
+                    if (!hamburgerSidebar.contains(e.target) && !e.target.closest('#hamburger-btn') && hamburgerSidebar.classList.contains('open')) {
+                        hamburgerSidebar.classList.remove('open');
                     }
                 });
 
