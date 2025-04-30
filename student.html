@@ -153,78 +153,6 @@
         .details-container p:nth-child(2) { animation-delay: 0.1s; }
         .details-container p:nth-child(3) { animation-delay: 0.2s; }
 
-        .hamburger-sidebar {
-            position: fixed;
-            top: 0;
-            right: -300px;
-            width: 260px;
-            height: 100%;
-            background-color: #ffffff;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.2);
-            z-index: 2000;
-            padding: 20px;
-            transition: right 0.3s ease;
-        }
-
-        .hamburger-sidebar.open {
-            right: 0;
-        }
-
-        .hamburger-sidebar h2 {
-            margin-bottom: 20px;
-            color: #2c3e50;
-            font-size: 20px;
-            font-weight: 700;
-            position: relative;
-        }
-
-        .hamburger-sidebar h2::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 40px;
-            height: 2px;
-            background: linear-gradient(90deg, #3498db, #5dade2);
-        }
-
-        .hamburger-sidebar .menu-item {
-            padding: 10px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-bottom: 10px;
-            text-align: center;
-            transition: background-color 0.3s ease;
-        }
-
-        .hamburger-sidebar .menu-item:hover {
-            background-color: #5dade2;
-        }
-
-        .hamburger-sidebar .close-sidebar {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #e74c3c;
-            padding: 5px 10px;
-            border-radius: 50%;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .hamburger-sidebar .close-sidebar:hover {
-            background-color: #e74c3c;
-            color: white;
-            transform: rotate(90deg);
-        }
-
         .sidebar {
             position: fixed;
             top: 0;
@@ -620,15 +548,21 @@
             border: none;
         }
 
+        .messages-modal {
+            background-color: rgba(0,0,0,0.9);
+        }
+
         .messages-modal .modal-content {
-            max-width: 500px;
-            height: 90vh;
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            max-height: none;
+            border-radius: 0;
+            border: none;
             display: flex;
             flex-direction: column;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-            animation: modalFadeIn 0.5s ease;
+            box-shadow: none;
+            animation: none;
         }
 
         .chat-header {
@@ -640,18 +574,19 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .chat-header .back-btn {
+        .chat-header .close-btn {
             background: none;
             border: none;
-            color: white;
-            font-size: 18px;
+            font-size: 20px;
             cursor: pointer;
-            margin-right: 10px;
-            transition: color 0.3s ease, transform 0.2s ease;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        .chat-header .back-btn:hover {
-            color: #e0e0e0;
+        .chat-header .close-btn:hover {
+            background-color: rgba(255,255,255,0.2);
             transform: scale(1.1);
         }
 
@@ -664,20 +599,6 @@
 
         .chat-header h2::after {
             display: none;
-        }
-
-        .chat-header .close-btn {
-            background: none;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            color: white;
-            transition: color 0.3s ease, transform 0.2s ease;
-        }
-
-        .chat-header .close-btn:hover {
-            color: #e0e0e0;
-            transform: scale(1.1);
         }
 
         .chat-body {
@@ -699,8 +620,33 @@
             align-items: flex-end;
         }
 
-        .chat-message.professor {
+        .chat-message.bot, .chat-message.professor {
             align-items: flex-start;
+        }
+
+        .chat-message .message-sender {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .chat-message.bot .message-sender img,
+        .chat-message.professor .message-sender img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .chat-message .sender-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .chat-message.bot .sender-name {
+            color: #3498db;
         }
 
         .chat-message .message-bubble {
@@ -720,6 +666,7 @@
             border-bottom-right-radius: 5px;
         }
 
+        .chat-message.bot .message-bubble,
         .chat-message.professor .message-bubble {
             background-color: #ffffff;
             color: #333;
@@ -736,6 +683,23 @@
             text-align: right;
         }
 
+        .chat-message .professor-option {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 8px 15px;
+            margin: 5px 0;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .chat-message .professor-option:hover {
+            background-color: #5dade2;
+            transform: scale(1.02);
+        }
+
         .chat-footer {
             padding: 10px;
             background-color: #ffffff;
@@ -743,51 +707,8 @@
             transition: background-color 0.3s ease;
         }
 
-        .professor-list {
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-            padding: 15px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            max-height: 60vh;
-            overflow-y: auto;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        .professor-list.show {
-            display: flex;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .professor-item {
-            display: flex;
-            align-items: center;
-            padding: 14px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 15px;
-            text-align: left;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .professor-item:hover {
-            background-color: #5dade2;
-            transform: scale(1.02);
-        }
-
-        .professor-item i {
-            margin-right: 10px;
-            font-size: 16px;
-        }
-
         .chat-input {
-            display: none;
+            display: flex;
             flex-direction: row;
             align-items: center;
             gap: 10px;
@@ -795,13 +716,6 @@
             background-color: #f9f9f9;
             border-radius: 25px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        .chat-input.show {
-            display: flex;
-            opacity: 1;
-            transform: translateY(0);
         }
 
         .chat-input input {
@@ -833,18 +747,6 @@
         .chat-input button:hover {
             background-color: #5dade2;
             transform: scale(1.1);
-        }
-
-        .chatbot-message {
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 14px;
-            color: #555;
-            font-style: italic;
-            background-color: #e0e0e0;
-            padding: 8px 15px;
-            border-radius: 15px;
-            display: inline-block;
         }
 
         .scroll-to-bottom {
@@ -897,7 +799,6 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* Original Dark Mode Styles (Copied Verbatim from Your Initial Code) */
         body.dark-mode {
             background-color: #121212;
             color: #ffffff;
@@ -917,8 +818,7 @@
         body.dark-mode .absence-container,
         body.dark-mode .modal-content,
         body.dark-mode .shared-files,
-        body.dark-mode .sidebar,
-        body.dark-mode .hamburger-sidebar {
+        body.dark-mode .sidebar {
             background-color: #1e1e1e;
             color: #ffffff;
             border-color: #bb86fc;
@@ -928,8 +828,7 @@
         body.dark-mode .absence-container h2,
         body.dark-mode .modal-content h2,
         body.dark-mode .shared-files h2,
-        body.dark-mode .sidebar h2,
-        body.dark-mode .hamburger-sidebar h2 {
+        body.dark-mode .sidebar h2 {
             color: #ffffff;
         }
 
@@ -937,8 +836,7 @@
         body.dark-mode .absence-container h2::after,
         body.dark-mode .modal-content h2::after,
         body.dark-mode .shared-files h2::after,
-        body.dark-mode .sidebar h2::after,
-        body.dark-mode .hamburger-sidebar h2::after {
+        body.dark-mode .sidebar h2::after {
             background: linear-gradient(90deg, #bb86fc, #03dac6);
         }
 
@@ -998,10 +896,12 @@
             color: #bb86fc;
         }
 
-        /* Dark Mode Styles for Messages Modal (Matching Original Theme) */
+        body.dark-mode .messages-modal {
+            background-color: rgba(0,0,0,0.95);
+        }
+
         body.dark-mode .messages-modal .modal-content {
             background-color: #1e1e1e;
-            border-color: #bb86fc;
         }
 
         body.dark-mode .chat-header {
@@ -1012,16 +912,33 @@
             background-color: #252525;
         }
 
+        body.dark-mode .chat-message.bot .message-bubble,
         body.dark-mode .chat-message.professor .message-bubble {
             background-color: #2c2c2c;
             color: #ffffff;
+        }
+
+        body.dark-mode .chat-message .sender-name {
+            color: #ffffff;
+        }
+
+        body.dark-mode .chat-message.bot .sender-name {
+            color: #bb86fc;
         }
 
         body.dark-mode .chat-message .message-time {
             color: #aaaaaa;
         }
 
-        body.dark-mode .professor-list {
+        body.dark-mode .chat-message .professor-option {
+            background-color: #bb86fc;
+        }
+
+        body.dark-mode .chat-message .professor-option:hover {
+            background-color: #03dac6;
+        }
+
+        body.dark-mode .chat-footer {
             background-color: #1e1e1e;
         }
 
@@ -1032,11 +949,6 @@
         body.dark-mode .chat-input input {
             background-color: #3b3b3b;
             color: #ffffff;
-        }
-
-        body.dark-mode .chatbot-message {
-            background-color: #3b3b3b;
-            color: #aaaaaa;
         }
 
         body.dark-mode .scroll-to-bottom {
@@ -1052,7 +964,6 @@
             color: #ffffff;
         }
 
-        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -1078,11 +989,6 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
         @keyframes messageFadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -1093,7 +999,6 @@
             50% { transform: translateY(-5px); }
         }
 
-        /* Responsive Design */
         @media (max-width: 600px) {
             header h1 {
                 font-size: 18px;
@@ -1141,12 +1046,10 @@
             .absence-date, .absence-weight {
                 font-size: 12px;
             }
-            .sidebar,
-            .hamburger-sidebar {
+            .sidebar {
                 width: 220px;
             }
-            .sidebar h2,
-            .hamburger-sidebar h2 {
+            .sidebar h2 {
                 font-size: 18px;
             }
             .sidebar .email-update input,
@@ -1160,12 +1063,15 @@
                 max-width: 90%;
                 height: 70vh;
             }
-            .messages-modal .modal-content {
-                max-width: 90%;
-                height: 80vh;
-            }
             .chat-header h2 {
                 font-size: 18px;
+            }
+            .chat-message .message-sender img {
+                width: 28px;
+                height: 28px;
+            }
+            .chat-message .sender-name {
+                font-size: 13px;
             }
             .chat-message .message-bubble {
                 font-size: 13px;
@@ -1174,12 +1080,9 @@
             .chat-message .message-time {
                 font-size: 10px;
             }
-            .professor-item {
-                font-size: 14px;
-                padding: 10px;
-            }
-            .professor-item i {
-                font-size: 14px;
+            .chat-message .professor-option {
+                font-size: 13px;
+                padding: 6px 12px;
             }
             .chat-input {
                 padding: 8px;
@@ -1203,7 +1106,7 @@
 <body>
     <header>
         <h1>ISET Siliana Student</h1>
-        <button class="hamburger-btn" id="hamburger-btn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+        <button class="hamburger-btn" id="hamburger-btn" aria-label="Open classmates"><i class="fas fa-bars"></i></button>
     </header>
     <nav>
         <button class="nav-btn" id="home-btn" aria-label="Home"><span>🏠</span><span>Home</span></button>
@@ -1245,15 +1148,13 @@
     <div id="messages-modal" class="modal messages-modal">
         <div class="modal-content">
             <div class="chat-header">
-                <button class="back-btn" id="back-to-professors" aria-label="Back to professor list"><i class="fas fa-arrow-left"></i></button>
                 <h2>Messages</h2>
                 <button class="close-btn" id="close-messages" aria-label="Close messages"><i class="fas fa-times"></i></button>
             </div>
             <div class="chat-body" id="chat-body">
-                <div class="chatbot-message">Which professor would you like to message?</div>
+                <!-- Messages will be dynamically added here -->
             </div>
             <div class="chat-footer">
-                <div class="professor-list" id="professor-list"></div>
                 <div class="chat-input" id="chat-input">
                     <input type="text" id="message-input" placeholder="Type a message..." aria-label="Type a message">
                     <button id="send-message-btn" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
@@ -1261,12 +1162,6 @@
             </div>
             <button class="scroll-to-bottom" id="scroll-to-bottom" aria-label="Scroll to bottom"><i class="fas fa-chevron-down"></i></button>
         </div>
-    </div>
-    <!-- Hamburger Sidebar -->
-    <div id="hamburger-sidebar" class="hamburger-sidebar">
-        <button class="close-sidebar" id="close-hamburger-sidebar" aria-label="Close menu"><i class="fas fa-times"></i></button>
-        <h2>Menu</h2>
-        <button class="menu-item" id="sidebar-classmates-btn" aria-label="View classmates">Classmates</button>
     </div>
     <!-- Email Update Sidebar -->
     <div id="email-sidebar" class="sidebar">
@@ -1312,7 +1207,7 @@
                     }).toString();
                 }
 
-                // Original Dark Mode Toggle Logic (Copied Verbatim from Your Initial Code)
+                // Dark Mode Toggle Logic
                 if (localStorage.getItem('darkMode') === 'enabled') {
                     document.body.classList.add('dark-mode');
                     const toggleButton = document.getElementById('dark-mode-toggle');
@@ -1392,7 +1287,6 @@
                     const detailsContainer = document.getElementById('details-container');
                     const currentClassP = document.getElementById('current-class');
 
-                    // Since timetable is removed, we only show class info without schedule
                     detailsContainer.classList.add('show');
                     currentClassP.textContent = 'No class schedule available';
                 }
@@ -1404,11 +1298,12 @@
                 // Fetch student details and listen for changes
                 let studentClass = '';
                 let classmates = [];
+                let fullName = '';
                 const studentRef = db.ref('students/' + cin);
 
                 // Function to render absences from professorActions
                 function renderAbsences(absences) {
-                    console.log('Processed absences:', absences); // Debug log
+                    console.log('Processed absences:', absences);
 
                     const absenceBySubject = {};
                     subjects.forEach(subject => {
@@ -1422,7 +1317,7 @@
                     });
 
                     const absenceDetails = document.getElementById('absence-details');
-                    absenceDetails.innerHTML = ''; // Clear previous content
+                    absenceDetails.innerHTML = '';
 
                     subjects.forEach(subject => {
                         const sectionDiv = document.createElement('div');
@@ -1454,10 +1349,15 @@
                             const details = document.getElementById(`details-${subject.replace(/\s+/g, '-')}`);
                             const isVisible = details.classList.contains('show');
 
-                            document.querySelectorAll('.subject-details').forEach(d => d.classList.remove('show'));
-                            document.querySelectorAll('.subject-header').forEach(h => h.classList.remove('active'));
-
-                            if (!isVisible) {
+                            // Toggle visibility and active state for the clicked header only
+                            if (isVisible) {
+                                details.classList.remove('show');
+                                header.classList.remove('active');
+                            } else {
+                                // Close all other sections
+                                document.querySelectorAll('.subject-details').forEach(d => d.classList.remove('show'));
+                                document.querySelectorAll('.subject-header').forEach(h => h.classList.remove('active'));
+                                // Open the clicked section
                                 details.classList.add('show');
                                 header.classList.add('active');
                             }
@@ -1491,7 +1391,7 @@
                 studentRef.on('value', (snapshot) => {
                     if (snapshot.exists()) {
                         const student = snapshot.val();
-                        const fullName = `${student.firstName} ${student.lastName}`;
+                        fullName = `${student.firstName} ${student.lastName}`;
                         studentClass = student.class || 'Not specified';
                         document.getElementById('welcome-message').textContent = `Welcome, ${fullName}`;
                         document.getElementById('class-info').textContent = `Class: ${studentClass}`;
@@ -1678,14 +1578,14 @@
                 // Messaging Functionality
                 const messagesModal = document.getElementById('messages-modal');
                 const chatBody = document.getElementById('chat-body');
-                const professorList = document.getElementById('professor-list');
                 const chatInput = document.getElementById('chat-input');
                 const messageInput = document.getElementById('message-input');
                 const scrollToBottomBtn = document.getElementById('scroll-to-bottom');
                 let selectedProfessor = null;
                 let isAtBottom = true;
+                let botName = 'ChatBot';
 
-                // List of professors (derived from previous timetable data)
+                // List of professors
                 const professors = [
                     'Mme. Wafa REJBI',
                     'Imen Bouraoui',
@@ -1702,25 +1602,25 @@
                     'Ksibi Jihen'
                 ];
 
-                // Populate professor list
-                professors.forEach(professor => {
-                    const button = document.createElement('button');
-                    button.className = 'professor-item';
-                    button.innerHTML = `<i class="fas fa-user"></i> ${professor}`;
-                    button.setAttribute('aria-label', `Select ${professor}`);
-                    button.addEventListener('click', () => {
-                        selectedProfessor = professor;
-                        professorList.classList.remove('show');
-                        chatInput.classList.add('show');
-                        chatBody.innerHTML = `<div class="chatbot-message">Now chatting with ${professor}</div>`;
-                        document.getElementById('back-to-professors').style.display = 'block';
-                        loadMessages(professor);
-                        messageInput.focus();
-                    });
-                    professorList.appendChild(button);
-                });
+                // Bad words lists for English, French, and Arabic
+                const badWords = {
+                    english: ['damn', 'hell', 'bitch', 'shit', 'fuck', 'asshole', 'bastard', 'cunt', 'dick', 'piss'],
+                    french: ['merde', 'pute', 'salope', 'con', 'connard', 'enculé', 'bâtard', 'couillon', 'foutre', 'chier'],
+                    arabic: ['كلب', 'حمار', 'خنزير', 'زبالة', 'قحبة', 'شرموطة', 'عاهرة', 'لعنة', 'تبا', 'سخيف']
+                };
 
-                // Format timestamp to DD/MM/YYYY HH:MM:SS
+                // Function to filter bad words
+                function filterBadWords(message) {
+                    let filteredMessage = message;
+                    const allBadWords = [...badWords.english, ...badWords.french, ...badWords.arabic];
+                    allBadWords.forEach(word => {
+                        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                        filteredMessage = filteredMessage.replace(regex, '****');
+                    });
+                    return filteredMessage;
+                }
+
+                // Function to format timestamp
                 function formatTimestamp(timestamp) {
                     const date = new Date(timestamp);
                     const day = String(date.getDate()).padStart(2, '0');
@@ -1732,35 +1632,95 @@
                     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
                 }
 
-                // Load messages for the selected professor
-                function loadMessages(professor) {
-                    const chatId = `${cin}_${professor.replace(/\s+/g, '_')}`;
-                    db.ref(`messages/${chatId}`).on('value', (snapshot) => {
-                        chatBody.innerHTML = `<div class="chatbot-message">Now chatting with ${professor}</div>`;
-                        if (snapshot.exists()) {
-                            const messages = [];
-                            snapshot.forEach(childSnapshot => {
-                                messages.push(childSnapshot.val());
-                            });
-                            messages.sort((a, b) => a.timestamp - b.timestamp);
-                            messages.forEach(msg => {
-                                const messageDiv = document.createElement('div');
-                                messageDiv.className = `chat-message ${msg.senderType}`;
-                                messageDiv.innerHTML = `
-                                    <div class="message-bubble">${msg.message}</div>
-                                    <div class="message-time">${formatTimestamp(msg.timestamp)}</div>
-                                `;
-                                chatBody.appendChild(messageDiv);
-                            });
+                // Function to append a message to the chat
+                function appendMessage(senderType, senderName, message, timestamp, professorOptions = []) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `chat-message ${senderType}`;
+                    const formattedTime = formatTimestamp(timestamp);
+                    let messageContent = `
+                        <div class="message-sender">
+                            <img src="https://via.placeholder.com/32" alt="${senderName}'s profile">
+                            <span class="sender-name">${senderName}</span>
+                        </div>
+                        <div class="message-bubble">${message}</div>
+                        <div class="message-time">${formattedTime}</div>
+                    `;
+                    if (professorOptions.length > 0) {
+                        messageContent += professorOptions.map(prof => `
+                            <button class="professor-option" data-professor="${prof}">${prof}</button>
+                        `).join('');
+                    }
+                    messageDiv.innerHTML = messageContent;
+                    chatBody.appendChild(messageDiv);
+
+                    if (isAtBottom) {
+                        chatBody.scrollTop = chatBody.scrollHeight;
+                    }
+
+                    // Add event listeners to professor option buttons
+                    messageDiv.querySelectorAll('.professor-option').forEach(button => {
+                        button.addEventListener('click', () => {
+                            selectedProfessor = button.dataset.professor;
+                            botName = selectedProfessor;
+                            appendMessage('bot', botName, `You’ve selected ${selectedProfessor} to chat with.`, Date.now());
+                            chatInput.style.display = 'flex';
+                            messageInput.focus();
+                        });
+                    });
+                }
+
+                // Initialize messages modal with welcome message and professor options
+                function initializeMessagesModal() {
+                    chatBody.innerHTML = '';
+                    chatInput.style.display = 'none';
+                    botName = 'ChatBot';
+                    appendMessage('bot', botName, `Hello ${fullName}, which professor would you like to chat with?`, Date.now(), professors);
+                }
+
+                // Send message
+                document.getElementById('send-message-btn').addEventListener('click', () => {
+                    const message = messageInput.value.trim();
+                    if (!message) {
+                        showToast('Please enter a message');
+                        return;
+                    }
+                    if (!selectedProfessor) {
+                        showToast('Please select a professor');
+                        return;
+                    }
+
+                    // Filter bad words
+                    const filteredMessage = filterBadWords(message);
+                    appendMessage('student', `${fullName}`, filteredMessage, Date.now());
+
+                    const chatId = `${cin}_${selectedProfessor.replace(/\s+/g, '_')}`;
+                    const messageData = {
+                        sender: cin,
+                        senderType: 'student',
+                        message: filteredMessage,
+                        timestamp: Date.now()
+                    };
+
+                    db.ref(`messages/${chatId}`).push(messageData)
+                        .then(() => {
+                            messageInput.value = '';
+                            appendMessage('professor', botName, 'Your message has been sent successfully!', Date.now());
                             if (isAtBottom) {
                                 chatBody.scrollTop = chatBody.scrollHeight;
                             }
-                        }
-                    }, (error) => {
-                        showToast('Error loading messages');
-                        console.error(error);
-                    });
-                }
+                        })
+                        .catch(error => {
+                            appendMessage('professor', botName, 'Failed to send your message.', Date.now());
+                            console.error(error);
+                        });
+                });
+
+                // Press Enter to send message
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('send-message-btn').click();
+                    }
+                });
 
                 // Check if user is at the bottom of the chat
                 chatBody.addEventListener('scroll', () => {
@@ -1780,62 +1740,12 @@
                     scrollToBottomBtn.classList.remove('show');
                 });
 
-                // Send message
-                document.getElementById('send-message-btn').addEventListener('click', () => {
-                    const message = messageInput.value.trim();
-                    if (!message) {
-                        showToast('Please enter a message');
-                        return;
-                    }
-                    if (!selectedProfessor) {
-                        showToast('Please select a professor');
-                        return;
-                    }
-
-                    const chatId = `${cin}_${selectedProfessor.replace(/\s+/g, '_')}`;
-                    const messageData = {
-                        sender: cin,
-                        senderType: 'student',
-                        message: message,
-                        timestamp: Date.now()
-                    };
-
-                    db.ref(`messages/${chatId}`).push(messageData)
-                        .then(() => {
-                            messageInput.value = ''; // Clear input
-                            if (isAtBottom) {
-                                chatBody.scrollTop = chatBody.scrollHeight;
-                            }
-                        })
-                        .catch(error => {
-                            showToast('Error sending message');
-                            console.error(error);
-                        });
-                });
-
-                // Press Enter to send message
-                messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        document.getElementById('send-message-btn').click();
-                    }
-                });
-
                 // Modal and Sidebar Event Listeners
                 const classmatesModal = document.getElementById('classmates-modal');
                 const emailSidebar = document.getElementById('email-sidebar');
-                const hamburgerSidebar = document.getElementById('hamburger-sidebar');
 
                 document.getElementById('hamburger-btn').addEventListener('click', () => {
-                    hamburgerSidebar.classList.add('open');
-                });
-
-                document.getElementById('close-hamburger-sidebar').addEventListener('click', () => {
-                    hamburgerSidebar.classList.remove('open');
-                });
-
-                document.getElementById('sidebar-classmates-btn').addEventListener('click', () => {
                     classmatesModal.style.display = 'flex';
-                    hamburgerSidebar.classList.remove('open');
                 });
 
                 document.getElementById('email-btn').addEventListener('click', () => {
@@ -1848,23 +1758,11 @@
 
                 document.getElementById('messages-btn').addEventListener('click', () => {
                     messagesModal.style.display = 'flex';
-                    professorList.classList.add('show');
-                    chatInput.classList.remove('show');
-                    chatBody.innerHTML = `<div class="chatbot-message">Which professor would you like to message?</div>`;
-                    selectedProfessor = null;
-                    document.getElementById('back-to-professors').style.display = 'none';
+                    initializeMessagesModal();
                 });
 
                 document.getElementById('close-messages').addEventListener('click', () => {
                     messagesModal.style.display = 'none';
-                });
-
-                document.getElementById('back-to-professors').addEventListener('click', () => {
-                    professorList.classList.add('show');
-                    chatInput.classList.remove('show');
-                    chatBody.innerHTML = `<div class="chatbot-message">Which professor would you like to message?</div>`;
-                    selectedProfessor = null;
-                    document.getElementById('back-to-professors').style.display = 'none';
                 });
 
                 document.getElementById('update-email-btn').addEventListener('click', () => {
@@ -1883,9 +1781,9 @@
                     });
                 });
 
-                // Close modals and sidebar when clicking outside
+                // Close modals and sidebar when clicking outside (except messages modal)
                 document.addEventListener('click', (e) => {
-                    if (!classmatesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#sidebar-classmates-btn') && classmatesModal.style.display === 'flex') {
+                    if (!classmatesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#hamburger-btn') && classmatesModal.style.display === 'flex') {
                         classmatesModal.style.display = 'none';
                     }
                     if (!fileViewerModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('.file-name') && fileViewerModal.style.display === 'flex') {
@@ -1893,14 +1791,8 @@
                         fileViewerContent.innerHTML = '';
                         loadingMessage.classList.remove('show');
                     }
-                    if (!messagesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#messages-btn') && messagesModal.style.display === 'flex') {
-                        messagesModal.style.display = 'none';
-                    }
                     if (!emailSidebar.contains(e.target) && !e.target.closest('#email-btn') && emailSidebar.classList.contains('open')) {
                         emailSidebar.classList.remove('open');
-                    }
-                    if (!hamburgerSidebar.contains(e.target) && !e.target.closest('#hamburger-btn') && hamburgerSidebar.classList.contains('open')) {
-                        hamburgerSidebar.classList.remove('open');
                     }
                 });
 
@@ -1909,7 +1801,7 @@
                     window.location.href = 'index.html';
                 });
 
-                // Original Dark Mode Toggle Event Listener (Copied Verbatim from Your Initial Code)
+                // Dark Mode Toggle Event Listener
                 document.getElementById('dark-mode-toggle').addEventListener('click', () => {
                     document.body.classList.toggle('dark-mode');
                     const isDarkMode = document.body.classList.contains('dark-mode');
