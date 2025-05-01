@@ -76,7 +76,7 @@
             border: none;
             color: white;
             font-size: 10px;
- fulfils: 5px;
+            padding: 5px;
             cursor: pointer;
             transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
             border-radius: 6px;
@@ -363,7 +363,7 @@
         }
 
         .subject-header {
-            background-color: #bb86fc; /* Purple */
+            background-color: #bb86fc;
             color: white;
             padding: 12px;
             border-radius: 5px;
@@ -381,7 +381,7 @@
         }
 
         .subject-header.active {
-            background-color: #3498db; /* Blue */
+            background-color: #3498db;
         }
 
         .subject-details {
@@ -882,6 +882,18 @@
     <!-- CryptoJS for encryption/decryption -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
+        // Toast notification (moved to top for global access)
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 // Firebase Configuration
@@ -1260,7 +1272,7 @@
                     hamburgerSidebar.classList.remove('open');
                 });
 
-                document.getElementById('sidebar>sidebar-classmates-btn').addEventListener('click', () => {
+                document.getElementById('sidebar-classmates-btn').addEventListener('click', () => {
                     classmatesModal.style.display = 'flex';
                     hamburgerSidebar.classList.remove('open');
                 });
@@ -1330,18 +1342,6 @@
                     localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
                     showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
                 });
-
-                // Toast notification
-                function showToast(message) {
-                    const toast = document.getElementById('toast');
-                    toast.textContent = message;
-                    toast.classList.remove('hidden');
-                    toast.classList.add('show');
-                    setTimeout(() => {
-                        toast.classList.remove('show');
-                        toast.classList.add('hidden');
-                    }, 3000);
-                }
             } catch (error) {
                 showToast('Error initializing page');
             }
