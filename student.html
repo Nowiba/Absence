@@ -198,14 +198,11 @@
             font-size: 14px;
             margin-bottom: 10px;
             text-align: center;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            display: block;
-            width: 100%;
+            transition: background-color 0.3s ease;
         }
 
         .hamburger-sidebar .menu-item:hover {
             background-color: #5dade2;
-            transform: scale(1.05);
         }
 
         .hamburger-sidebar .close-sidebar {
@@ -433,7 +430,7 @@
         }
 
         .subject-header {
-            background-color: #bb86fc;
+            background-color: #3498db;
             color: white;
             padding: 12px;
             border-radius: 5px;
@@ -506,18 +503,6 @@
         }
 
         .shared-files {
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #3498db;
-            width: 90%;
-            max-width: 340px;
-            margin: 15px auto;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            animation: slideUp 0.4s ease;
-        }
-
-        .shared-blocks {
             background-color: #ffffff;
             padding: 15px;
             border-radius: 10px;
@@ -629,132 +614,59 @@
             border: none;
         }
 
-        .messages-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #f5f5f5;
-            z-index: 2000;
-            overflow-y: auto;
-            animation: slideInRight 0.4s ease;
-        }
-
         .messages-modal .modal-content {
-            width: 100%;
-            height: 100%;
-            border-radius: 0;
-            border: none;
-            box-shadow: none;
-            padding: 0;
+            max-width: 400px;
+            height: 80vh;
             display: flex;
             flex-direction: column;
-            background-color: #f5f5f5;
         }
 
         .chat-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            background-color: #2c3e50;
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #d1d8e0;
         }
 
         .chat-header h2 {
             margin: 0;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-        }
-
-        .chat-header .professor-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
         }
 
         .chat-header .close-btn {
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
             color: #e74c3c;
-            transition: color 0.3s ease, transform 0.2s ease;
+            transition: color 0.3s ease;
         }
 
         .chat-header .close-btn:hover {
             color: #c0392b;
-            transform: rotate(90deg);
-        }
-
-        .chat-header .new-chat-btn {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .chat-header .new-chat-btn:hover {
-            background-color: #5dade2;
-            transform: scale(1.05);
         }
 
         .chat-body {
             flex: 1;
-            padding: 15px;
+            padding: 10px;
             overflow-y: auto;
-            background-color: #ffffff;
-            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin: 10px 0;
         }
 
         .chat-message {
             margin-bottom: 15px;
             display: flex;
             flex-direction: column;
-            animation: fadeInMessage 0.3s ease;
         }
 
         .chat-message.student {
             align-items: flex-end;
         }
 
-        .chat-message.professor, .chat-message.bot {
+        .chat-message.professor {
             align-items: flex-start;
-        }
-
-        .chat-message .message-sender {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        .chat-message .sender-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        .chat-message.student .sender-avatar {
-            margin-left: 8px;
-            margin-right: 0;
-        }
-
-        .chat-message .sender-name {
-            font-size: 12px;
-            font-weight: 600;
-            color: #555;
         }
 
         .chat-message .message-bubble {
@@ -763,7 +675,6 @@
             border-radius: 15px;
             font-size: 14px;
             line-height: 1.4;
-            position: relative;
         }
 
         .chat-message.student .message-bubble {
@@ -772,8 +683,7 @@
             border-bottom-right-radius: 5px;
         }
 
-        .chat-message.professor .message-bubble,
-        .chat-message.bot .message-bubble {
+        .chat-message.professor .message-bubble {
             background-color: #e0e0e0;
             color: #333;
             border-bottom-left-radius: 5px;
@@ -783,21 +693,9 @@
             font-size: 11px;
             color: #777;
             margin-top: 3px;
-            cursor: pointer;
         }
 
         .chat-message.student .message-time {
-            text-align: right;
-        }
-
-        .chat-message .message-details {
-            display: none;
-            font-size: 10px;
-            color: #555;
-            margin-top: 2px;
-        }
-
-        .chat-message.student .message-details {
             text-align: right;
         }
 
@@ -805,20 +703,15 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            padding: 15px;
-            background-color: #ffffff;
-            position: sticky;
-            bottom: 0;
         }
 
         .professor-list {
             display: none;
-            flex-wrap: wrap;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
             padding: 10px;
             background-color: #f9f9f9;
             border-radius: 5px;
-            justify-content: space-between;
         }
 
         .professor-list.show {
@@ -826,8 +719,7 @@
         }
 
         .professor-item {
-            flex: 1 1 calc(50% - 10px);
-            padding: 10px;
+            padding: 8px;
             background-color: #3498db;
             color: white;
             border: none;
@@ -835,21 +727,11 @@
             cursor: pointer;
             font-size: 14px;
             text-align: center;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .professor-item img {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
+            transition: background-color 0.3s ease;
         }
 
         .professor-item:hover {
             background-color: #5dade2;
-            transform: scale(1.05);
         }
 
         .chat-input {
@@ -906,6 +788,11 @@
             font-size: 13px;
             font-weight: 400;
             opacity: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.Strive to make your website as attractive as possible for users with CSS and JavaScript
+
+System: Here's the continuation of the modified `student.html` to implement the requested changes:
+
+<xaiArtifact artifact_id="d7e39fe4-06b6-47c0-994c-90932e32723f" artifact_version_id="70af6051-ceb0-4c8b-8292-9c022e4ee4e1" title="student.html" contentType="text/html">
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             z-index: 3000;
@@ -986,7 +873,7 @@
         }
 
         body.dark-mode .subject-header {
-            background-color: #bb86fc;
+            background-color: #5dade2;
         }
 
         body.dark-mode .subject-header:hover,
@@ -1028,20 +915,11 @@
             color: #5dade2;
         }
 
-        body.dark-mode .messages-modal {
-            background-color: #1a1a1a;
-        }
-
-        body.dark-mode .messages-modal .modal-content {
-            background-color: #1a1a1a;
-        }
-
         body.dark-mode .chat-body {
-            background-color: #2c3e50;
+            background-color: #34495e;
         }
 
-        body.dark-mode .chat-message.professor .message-bubble,
-        body.dark-mode .chat-message.bot .message-bubble {
+        body.dark-mode .chat-message.professor .message-bubble {
             background-color: #4a5e77;
             color: #e0e0e0;
         }
@@ -1056,10 +934,6 @@
 
         body.dark-mode .chatbot-message {
             color: #bbbbbb;
-        }
-
-        body.dark-mode .chat-footer {
-            background-color: #2c3e50;
         }
 
         body.dark-mode .toast {
@@ -1091,16 +965,6 @@
         @keyframes headerFadeIn {
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-
-        @keyframes fadeInMessage {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Responsive Design */
@@ -1170,6 +1034,10 @@
                 max-width: 90%;
                 height: 70vh;
             }
+            .messages-modal .modal-content {
+                max-width: 90%;
+                height: 70vh;
+            }
             .chat-message .message-bubble {
                 font-size: 13px;
             }
@@ -1189,6 +1057,7 @@
     </header>
     <nav>
         <button class="nav-btn" id="home-btn"><span>🏠</span><span>Home</span></button>
+        <button class="nav-btn" id="email-btn"><span>✉️</span><span>Email</span></button>
         <button class="nav-btn" id="messages-btn"><span>💬</span><span>Messages</span></button>
         <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
@@ -1215,13 +1084,6 @@
             <div id="modal-classmates-list"></div>
         </div>
     </div>
-    <!-- Uploaded Files Modal -->
-    <div id="uploaded-files-modal" class="modal">
-        <div class="modal-content">
-            <h2>Uploaded Files</h2>
-            <div id="uploaded-files-list"></div>
-        </div>
-    </div>
     <!-- File Viewer Modal (for images only) -->
     <div id="file-viewer-modal" class="modal file-viewer-modal">
         <div class="modal-content">
@@ -1230,23 +1092,14 @@
         </div>
     </div>
     <!-- Messages Modal -->
-    <div id="messages-modal" class="messages-modal">
+    <div id="messages-modal" class="modal messages-modal">
         <div class="modal-content">
             <div class="chat-header">
-                <h2 id="chat-header-title"><img class="professor-avatar" id="chat-header-avatar" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Avatar"> Messages</h2>
-                <div>
-                    <button class="new-chat-btn" id="new-chat-btn">New Chat</button>
-                    <button class="close-btn" id="close-messages"><i class="fas fa-times"></i></button>
-                </div>
+                <h2>Messages</h2>
+                <button class="close-btn" id="close-messages"><i class="fas fa-times"></i></button>
             </div>
             <div class="chat-body" id="chat-body">
-                <div class="chat-message bot">
-                    <div class="message-sender">
-                        <img class="sender-avatar" src="https://cdn.pixabay.com/photo/2018/04/27/11/37/chatbot-3354963_960_720.png" alt="Bot">
-                        <span class="sender-name">ChatBot</span>
-                    </div>
-                    <div class="message-bubble">Hello, which professor would you like to chat with today?</div>
-                </div>
+                <div class="chatbot-message">Which professor would you like to message?</div>
             </div>
             <div class="chat-footer">
                 <div class="professor-list" id="professor-list"></div>
@@ -1261,9 +1114,7 @@
     <div id="hamburger-sidebar" class="hamburger-sidebar">
         <button class="close-sidebar" id="close-hamburger-sidebar"><i class="fas fa-times"></i></button>
         <h2>Menu</h2>
-        <button class="menu-item" id="sidebar-email-btn">Update Email</button>
         <button class="menu-item" id="sidebar-classmates-btn">Classmates</button>
-        <button class="menu-item" id="sidebar-uploaded-files-btn">Uploaded Files</button>
     </div>
     <!-- Email Update Sidebar -->
     <div id="email-sidebar" class="sidebar">
@@ -1366,44 +1217,6 @@
                     'A. Prog': 'A. Programmation'
                 };
 
-                // Professor to Subject Mapping for Avatar Assignment
-                const professorSubjectMap = {
-                    'Mme. Wafa REJBI': 'Dev. Web et Multimédias 2',
-                    'Imen Bouraoui': 'A. Dev. Web et Multimédias 2',
-                    'Mme. Hela DJEBALI': 'Technique d’expression 2',
-                    'Emna Mehrez': 'UVT3 (2CN)',
-                    'Mme. Sana ZAKRAOUI': 'Algo & Programmation',
-                    'Mme. Hajer BACCOUCH': 'Option 2: Atelier Linux',
-                    'Ouni Rahma': 'Sys. Exploitation',
-                    'Zeineb Belakhdhar': 'Fond Réseaux',
-                    'Fadhel Fellah': 'English for Computing 2',
-                    'Sondes Guirat': 'A. Système 1',
-                    'Kemla Naoui': 'Préparation aux métiers',
-                    'Arwa Selmi': 'Stat & Proba',
-                    'Ksibi Jihen': 'Recherche Opérationnelle'
-                };
-
-                // Subject to Avatar Mapping
-                const subjectAvatarMap = {
-                    'Dev. Web et Multimédias 2': 'https://cdn.pixabay.com/photo/2016/12/13/00/13/web-1902895_960_720.png',
-                    'A. Dev. Web et Multimédias 2': 'https://cdn.pixabay.com/photo/2016/12/13/00/13/web-1902895_960_720.png',
-                    'Technique d’expression 2': 'https://cdn.pixabay.com/photo/2017/01/31/14/39/book-2022460_960_720.png',
-                    'UVT3 (2CN)': 'https://cdn.pixabay.com/photo/2017/08/30/07/56/online-2697386_960_720.png',
-                    'Algo & Programmation': 'https://cdn.pixabay.com/photo/2016/11/23/14/45/coding-1853305_960_720.jpg',
-                    'Option 2: Atelier Linux': 'https://cdn.pixabay.com/photo/2015/09/05/23/37/linux-925456_960_720.jpg',
-                    'Sys. Exploitation': 'https://cdn.pixabay.com/photo/2017/01/31/23/42/pc-2028083_960_720.png',
-                    'Fond Réseaux': 'https://cdn.pixabay.com/photo/2016/11/19/14/00/network-1839876_960_720.jpg',
-                    'English for Computing 2': 'https://cdn.pixabay.com/photo/2015/10/31/12/56/language-1015087_960_720.jpg',
-                    'A. Système 1': 'https://cdn.pixabay.com/photo/2017/01/31/23/42/pc-2028083_960_720.png',
-                    'Préparation aux métiers': 'https://cdn.pixabay.com/photo/2016/11/29/12/13/business-1869610_960_720.jpg',
-                    'Stat & Proba': 'https://cdn.pixabay.com/photo/2017/09/04/18/39/math-2713315_960_720.png',
-                    'Recherche Opérationnelle': 'https://cdn.pixabay.com/photo/2017/09/04/18/39/math-2713315_960_720.png',
-                    'A. Programmation': 'https://cdn.pixabay.com/photo/2016/11/23/14/45/coding-1853305_960_720.jpg'
-                };
-
-                // Default student avatar
-                const studentAvatar = 'https://cdn.pixabay.com/photo/2016/11/18/17/46/student-1836282_960_720.jpg';
-
                 // Function to normalize strings for comparison
                 function normalizeString(str) {
                     return str ? str.trim().toLowerCase() : '';
@@ -1427,6 +1240,7 @@
                     const detailsContainer = document.getElementById('details-container');
                     const currentClassP = document.getElementById('current-class');
 
+                    // Since timetable is removed, we only show class info without schedule
                     detailsContainer.classList.add('show');
                     currentClassP.textContent = 'No class schedule available';
                 }
@@ -1438,12 +1252,11 @@
                 // Fetch student details and listen for changes
                 let studentClass = '';
                 let classmates = [];
-                let studentFullName = '';
                 const studentRef = db.ref('students/' + cin);
 
                 // Function to render absences from professorActions
                 function renderAbsences(absences) {
-                    console.log('Processed absences:', absences);
+                    console.log('Processed absences:', absences); // Debug log
 
                     const absenceBySubject = {};
                     subjects.forEach(subject => {
@@ -1457,7 +1270,7 @@
                     });
 
                     const absenceDetails = document.getElementById('absence-details');
-                    absenceDetails.innerHTML = '';
+                    absenceDetails.innerHTML = ''; // Clear previous content
 
                     subjects.forEach(subject => {
                         const sectionDiv = document.createElement('div');
@@ -1484,27 +1297,17 @@
                     });
 
                     document.querySelectorAll('.subject-header').forEach(header => {
-                        let clickCount = 0;
                         header.addEventListener('click', () => {
                             const subject = header.dataset.subject;
                             const details = document.getElementById(`details-${subject.replace(/\s+/g, '-')}`);
                             const isVisible = details.classList.contains('show');
 
                             document.querySelectorAll('.subject-details').forEach(d => d.classList.remove('show'));
-                            document.querySelectorAll('.subject-header').forEach(h => {
-                                h.classList.remove('active');
-                                h.style.backgroundColor = '#bb86fc';
-                            });
+                            document.querySelectorAll('.subject-header').forEach(h => h.classList.remove('active'));
 
-                            clickCount++;
-                            if (!isVisible || clickCount % 2 === 1) {
+                            if (!isVisible) {
                                 details.classList.add('show');
                                 header.classList.add('active');
-                                header.style.backgroundColor = '#5dade2';
-                            } else {
-                                details.classList.remove('show');
-                                header.classList.remove('active');
-                                header.style.backgroundColor = '#bb86fc';
                             }
                         });
                     });
@@ -1536,11 +1339,11 @@
                 studentRef.on('value', (snapshot) => {
                     if (snapshot.exists()) {
                         const student = snapshot.val();
-                        studentFullName = `${student.firstName} ${student.lastName}`;
+                        const fullName = `${student.firstName} ${student.lastName}`;
                         studentClass = student.class || 'Not specified';
-                        document.getElementById('welcome-message').textContent = `Welcome, ${studentFullName}`;
+                        document.getElementById('welcome-message').textContent = `Welcome, ${fullName}`;
                         document.getElementById('class-info').textContent = `Class: ${studentClass}`;
-                        console.log(`Welcome message set to: Welcome, ${studentFullName}`);
+                        console.log(`Welcome message set to: Welcome, ${fullName}`);
 
                         const emailInput = document.getElementById('email-input');
                         if (student.email) {
@@ -1575,14 +1378,12 @@
 
                 // Load shared files (but don't decrypt yet)
                 const sharedFilesList = document.getElementById('shared-files-list');
-                const uploadedFilesList = document.getElementById('uploaded-files-list');
                 const fileViewerModal = document.getElementById('file-viewer-modal');
                 const fileViewerContent = document.getElementById('file-viewer-content');
                 const loadingMessage = document.getElementById('loading-message');
 
                 db.ref('sharedFiles').on('value', (snapshot) => {
                     sharedFilesList.innerHTML = '';
-                    uploadedFilesList.innerHTML = '';
                     const files = [];
                     snapshot.forEach(childSnapshot => {
                         const fileData = childSnapshot.val();
@@ -1591,9 +1392,8 @@
 
                     if (files.length === 0) {
                         sharedFilesList.innerHTML = `<div class="no-files">No files shared yet</div>`;
-                        uploadedFilesList.innerHTML = `<div class="no-files">No files uploaded yet</div>`;
                     } else {
-                        files.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+                        files.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate)); // Sort by upload date (newest first)
                         files.forEach(file => {
                             const uploadDate = new Date(file.uploadDate);
                             const formattedDate = uploadDate.toLocaleDateString('en-GB', {
@@ -1622,7 +1422,6 @@
                                 <a href="#" class="download-link" data-id="${file.id}" data-filename="${file.fileName}" data-type="${file.fileType}" data-salt="${file.salt}">Download</a>
                             `;
                             sharedFilesList.appendChild(fileItem);
-                            uploadedFilesList.appendChild(fileItem.cloneNode(true));
                         });
 
                         // Add event listeners for file name clicks
@@ -1635,6 +1434,7 @@
                                 const isImage = fileType.includes('image/png') || fileType.includes('image/jpeg') || fileType.includes('image/jpg') || fileType.includes('image/gif');
 
                                 if (isImage) {
+                                    // Lazy-load and decrypt image on click
                                     try {
                                         const fileSnapshot = await db.ref(`sharedFiles/${fileId}`).once('value');
                                         const fileData = fileSnapshot.val();
@@ -1647,6 +1447,7 @@
                                         }
                                         const base64String = `data:${fileType};base64,${decryptedBase64}`;
 
+                                        // Show image in modal
                                         fileViewerContent.innerHTML = '';
                                         loadingMessage.classList.add('show');
                                         fileViewerModal.style.display = 'flex';
@@ -1659,6 +1460,7 @@
                                         showToast(`Error loading image: ${error.message}`);
                                     }
                                 } else {
+                                    // For non-image files, trigger download
                                     const downloadLink = link.parentElement.nextElementSibling;
                                     downloadLink.click();
                                 }
@@ -1686,6 +1488,7 @@
                                     }
                                     const base64String = `data:${fileType};base64,${decryptedBase64}`;
 
+                                    // Trigger download
                                     const downloadAnchor = document.createElement('a');
                                     downloadAnchor.href = base64String;
                                     downloadAnchor.download = fileName;
@@ -1726,12 +1529,9 @@
                 const professorList = document.getElementById('professor-list');
                 const chatInput = document.getElementById('chat-input');
                 const messageInput = document.getElementById('message-input');
-                const chatHeaderTitle = document.getElementById('chat-header-title');
-                const chatHeaderAvatar = document.getElementById('chat-header-avatar');
                 let selectedProfessor = null;
-                let lastChatId = null;
 
-                // List of professors
+                // List of professors (derived from previous timetable data)
                 const professors = [
                     'Mme. Wafa REJBI',
                     'Imen Bouraoui',
@@ -1748,34 +1548,23 @@
                     'Ksibi Jihen'
                 ];
 
-                // Bad words lists (simplified for demonstration)
-                const badWords = {
-                    english: ['damn', 'hell', 'shit', 'fuck', 'bitch', 'asshole'],
-                    french: ['merde', 'putain', 'con', 'salope', 'connard', 'foutre'],
-                    arabic: ['كلب', 'حمار', 'زفت', 'قحبة', 'خرا', 'نيك']
-                };
-
-                function filterBadWords(message) {
-                    let filteredMessage = message;
-                    Object.values(badWords).flat().forEach(word => {
-                        const regex = new RegExp(`\\b${word}\\b`, 'gi');
-                        filteredMessage = filteredMessage.replace(regex, '****');
+                // Populate professor list
+                professors.forEach(professor => {
+                    const button = document.createElement('button');
+                    button.className = 'professor-item';
+                    button.textContent = professor;
+                    button.addEventListener('click', () => {
+                        selectedProfessor = professor;
+                        professorList.classList.remove('show');
+                        chatInput.classList.add('show');
+                        chatBody.innerHTML = `<div class="chatbot-message">Now chatting with ${professor}</div>`;
+                        loadMessages(professor);
                     });
-                    return filteredMessage;
-                }
+                    professorList.appendChild(button);
+                });
 
-                // Create sound effect for sending messages
-                const sendSound = new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_6d2b1f2f1e.mp3');
-
-                // Format timestamp functions
-                function formatShortTimestamp(timestamp) {
-                    const date = new Date(timestamp);
-                    const hours = String(date.getHours()).padStart(2, '0');
-                    const minutes = String(date.getMinutes()).padStart(2, '0');
-                    return `${hours}:${minutes}`;
-                }
-
-                function formatFullTimestamp(timestamp) {
+                // Format timestamp to DD/MM/YYYY HH:MM:SS
+                function formatTimestamp(timestamp) {
                     const date = new Date(timestamp);
                     const day = String(date.getDate()).padStart(2, '0');
                     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1786,111 +1575,32 @@
                     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
                 }
 
-                // Populate professor list
-                professors.forEach(professor => {
-                    const subject = professorSubjectMap[professor] || 'Unknown';
-                    const avatar = subjectAvatarMap[subject] || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-                    const button = document.createElement('button');
-                    button.className = 'professor-item';
-                    button.innerHTML = `
-                        <img src="${avatar}" alt="${professor}">
-                        <span>${professor}</span>
-                    `;
-                    button.addEventListener('click', () => {
-                        selectedProfessor = professor;
-                        lastChatId = `${cin}_${professor.replace(/\s+/g, '_')}`;
-                        professorList.classList.remove('show');
-                        chatInput.classList.add('show');
-                        chatHeaderTitle.innerHTML = `<img class="professor-avatar" src="${avatar}" alt="${professor}"> ${professor}`;
-                        chatHeaderAvatar.src = avatar;
-
-                        // Add bot message for professor selection
-                        const botMessage = {
-                            senderType: 'bot',
-                            message: `You’ve selected ${professor} to chat with.`,
-                            timestamp: Date.now(),
-                            avatar: 'https://cdn.pixabay.com/photo/2018/04/27/11/37/chatbot-3354963_960_720.png',
-                            senderName: 'ChatBot'
-                        };
-                        db.ref(`messages/${lastChatId}`).push(botMessage);
-
-                        loadMessages(lastChatId);
-                    });
-                    professorList.appendChild(button);
-                });
-
-                // Load messages for the selected chat
-                function loadMessages(chatId) {
+                // Load messages for the selected professor
+                function loadMessages(professor) {
+                    const chatId = `${cin}_${professor.replace(/\s+/g, '_')}`;
                     db.ref(`messages/${chatId}`).on('value', (snapshot) => {
-                        chatBody.innerHTML = '';
+                        chatBody.innerHTML = `<div class="chatbot-message">Now chatting with ${professor}</div>`;
                         if (snapshot.exists()) {
                             const messages = [];
                             snapshot.forEach(childSnapshot => {
-                                const msg = childSnapshot.val();
-                                msg.key = childSnapshot.key;
-                                messages.push(msg);
+                                messages.push(childSnapshot.val());
                             });
                             messages.sort((a, b) => a.timestamp - b.timestamp);
                             messages.forEach(msg => {
                                 const messageDiv = document.createElement('div');
                                 messageDiv.className = `chat-message ${msg.senderType}`;
-                                const timeDisplay = msg.seenTimestamp ? `Seen at ${formatShortTimestamp(msg.seenTimestamp)}` : formatShortTimestamp(msg.timestamp);
-                                const details = msg.seenTimestamp 
-                                    ? `Sent: ${formatFullTimestamp(msg.timestamp)}<br>Seen: ${formatFullTimestamp(msg.seenTimestamp)}`
-                                    : `Sent: ${formatFullTimestamp(msg.timestamp)}`;
-                                const avatar = msg.senderType === 'student' ? studentAvatar : (msg.avatar || subjectAvatarMap[professorSubjectMap[msg.senderName]] || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png');
                                 messageDiv.innerHTML = `
-                                    <div class="message-sender">
-                                        <img class="sender-avatar" src="${avatar}" alt="${msg.senderName}">
-                                        <span class="sender-name">${msg.senderName}</span>
-                                    </div>
                                     <div class="message-bubble">${msg.message}</div>
-                                    <div class="message-time">${timeDisplay}</div>
-                                    <div class="message-details">${details}</div>
+                                    <div class="message-time">${formatTimestamp(msg.timestamp)}</div>
                                 `;
-
-                                // Long press to show details
-                                let pressTimer;
-                                messageDiv.addEventListener('mousedown', () => {
-                                    pressTimer = setTimeout(() => {
-                                        messageDiv.querySelector('.message-details').style.display = 'block';
-                                    }, 2000);
-                                });
-                                messageDiv.addEventListener('mouseup', () => clearTimeout(pressTimer));
-                                messageDiv.addEventListener('mouseleave', () => clearTimeout(pressTimer));
-
                                 chatBody.appendChild(messageDiv);
                             });
-                            chatBody.scrollTop = chatBody.scrollHeight;
-                        } else {
-                            chatBody.innerHTML = `
-                                <div class="chat-message bot">
-                                    <div class="message-sender">
-                                        <img class="sender-avatar" src="https://cdn.pixabay.com/photo/2018/04/27/11/37/chatbot-3354963_960_720.png" alt="ChatBot">
-                                        <span class="sender-name">ChatBot</span>
-                                    </div>
-                                    <div class="message-bubble">Hello ${studentFullName}, which professor would you like to chat with today?</div>
-                                </div>
-                            `;
+                            chatBody.scrollTop = chatBody.scrollHeight; // Auto-scroll to bottom
                         }
                     }, (error) => {
                         showToast('Error loading messages');
                         console.error(error);
                     });
-
-                    // Simulate professor seeing the message (for demo purposes, after 5 seconds)
-                    setTimeout(() => {
-                        db.ref(`messages/${chatId}`).once('value', (snapshot) => {
-                            snapshot.forEach(childSnapshot => {
-                                const msg = childSnapshot.val();
-                                if (msg.senderType === 'student' && !msg.seenTimestamp) {
-                                    db.ref(`messages/${chatId}/${childSnapshot.key}`).update({
-                                        seenTimestamp: Date.now()
-                                    });
-                                }
-                            });
-                        });
-                    }, 5000);
                 }
 
                 // Send message
@@ -1905,45 +1615,22 @@
                         return;
                     }
 
-                    const filteredMessage = filterBadWords(message);
                     const chatId = `${cin}_${selectedProfessor.replace(/\s+/g, '_')}`;
                     const messageData = {
                         sender: cin,
                         senderType: 'student',
-                        message: filteredMessage,
-                        timestamp: Date.now(),
-                        avatar: studentAvatar,
-                        senderName: studentFullName
+                        message: message,
+                        timestamp: Date.now()
                     };
 
                     db.ref(`messages/${chatId}`).push(messageData)
                         .then(() => {
-                            messageInput.value = '';
-                            chatBody.scrollTop = chatBody.scrollHeight;
-                            sendSound.play();
-
-                            // Add bot response
-                            const botMessage = {
-                                senderType: 'bot',
-                                message: 'Your message was sent successfully!',
-                                timestamp: Date.now(),
-                                avatar: 'https://cdn.pixabay.com/photo/2018/04/27/11/37/chatbot-3354963_960_720.png',
-                                senderName: selectedProfessor
-                            };
-                            db.ref(`messages/${chatId}`).push(botMessage);
+                            messageInput.value = ''; // Clear input
+                            chatBody.scrollTop = chatBody.scrollHeight; // Auto-scroll to bottom
                         })
                         .catch(error => {
-                            showToast('Failed to send your message.');
+                            showToast('Error sending message');
                             console.error(error);
-
-                            const botMessage = {
-                                senderType: 'bot',
-                                message: 'Failed to send your message.',
-                                timestamp: Date.now(),
-                                avatar: 'https://cdn.pixabay.com/photo/2018/04/27/11/37/chatbot-3354963_960_720.png',
-                                senderName: selectedProfessor
-                            };
-                            db.ref(`messages/${chatId}`).push(botMessage);
                         });
                 });
 
@@ -1954,32 +1641,8 @@
                     }
                 });
 
-                // New Chat Button
-                document.getElementById('new-chat-btn').addEventListener('click', () => {
-                    selectedProfessor = null;
-                    lastChatId = null;
-                    professorList.classList.add('show');
-                    chatInput.classList.remove('show');
-                    chatHeaderTitle.innerHTML = `<img class="professor-avatar" src="https://cdn.pixabay.com/photo/2018/04/27/11/37/chatbot-3354963_960_720.png" alt="ChatBot"> Messages`;
-                    chatHeaderAvatar.src = 'https://cdn.pixabay.com/photo/2018/04/27/11/37/chatbot-3354963_960_720.png';
-                    chatBody.innerHTML = `
-                        <div class="chat-message bot">
-                            <div class="message-sender">
-                                <img class="sender-avatar" src="https://cdn.pixabay.com/photo/2018/04/27/11/37/chatbot-3354963_960_720.png" alt="ChatBot">
-                                <span class="sender-name">ChatBot</span>
-                            </div>
-                            <div class="message-bubble">Hello ${studentFullName}, which professor would you like to chat with today?</div>
-                        </div>
-                    `;
-                    // Detach any previous listeners to avoid duplicate messages
-                    if (lastChatId) {
-                        db.ref(`messages/${lastChatId}`).off();
-                    }
-                });
-
                 // Modal and Sidebar Event Listeners
                 const classmatesModal = document.getElementById('classmates-modal');
-                const uploadedFilesModal = document.getElementById('uploaded-files-modal');
                 const emailSidebar = document.getElementById('email-sidebar');
                 const hamburgerSidebar = document.getElementById('hamburger-sidebar');
 
@@ -1991,161 +1654,98 @@
                     hamburgerSidebar.classList.remove('open');
                 });
 
-                document.getElementById('sidebar-email-btn').addEventListener('click', () => {
-                    emailSidebar.classList.add('open');
-                    hamburgerSidebar.classList.remove('open');
-                });
-
                 document.getElementById('sidebar-classmates-btn').addEventListener('click', () => {
                     classmatesModal.style.display = 'flex';
                     hamburgerSidebar.classList.remove('open');
                 });
 
-                document.getElementById('sidebar-uploaded-files-btn').addEventListener('click', () => {
-                    uploadedFilesModal.style.display = 'flex';
-                    hamburgerSidebar.classList.remove('open');
+                document.getElementById('email-btn').addEventListener('click', () => {
+                    emailSidebar.classList.add('open');
                 });
 
-                document.getElementById('messages-btn').addEventListener('click', () => {
-                    messagesModal.style.display = 'block';
-                    if (lastChatId) {
-                        selectedProfessor = lastChatId.split('_').slice(1).join(' ');
-                        const avatar = subjectAvatarMap[professorSubjectMap[selectedProfessor]] || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-                        chatHeaderTitle.innerHTML = `<img class="professor-avatar" src="${avatar}" alt="${selectedProfessor}"> ${selectedProfessor}`;
-                        chatHeaderAvatar.src = avatar;
-                        professorList.classList.remove('show');
-                        chatInput.classList.add('show');
-                        loadMessages(lastChatId);
-                    } else {
-                        chatHeaderTitle.innerHTML = `<img class="professor-avatar" src="https://cdn.pixabay.com/photo/2018/04/27/11/37/chatbot-3354963_960_720.png" alt="ChatBot"> Messages`;
-                        chatHeaderAvatar.src = 'https://cdn.pixabay.com/photo/2018/04/27/11/37/chatbot-3354963_960_720.png';
-                        chatBody.innerHTML = `
-                            <div class="chat-message bot">
-                                <div class="message-sender">
-                                    <img class="sender-avatar" src="https://cdn.pixabay.com/photo/2018/04/27/11/37/chatbot-3354963_960_720.png" alt="ChatBot">
-                                    <span class="sender-name">ChatBot</span>
-                                </div>
-                                <div class="message-bubble">Hello ${studentFullName}, which professor would you like to chat with today?</div>
-                            </div>
-                        `;
-                        professorList.classList.add('show');
-                        chatInput.classList.remove('show');
-                    }
-                });
-
-                document.getElementById('close-messages').addEventListener('click', () => {
-                    messagesModal.style.display = 'none';
-                    if (lastChatId) {
-                        db.ref(`messages/${lastChatId}`).off(); // Detach listener to prevent memory leaks
-                    }
-                });
-
-                // Close modals when clicking outside
-                classmatesModal.addEventListener('click', (e) => {
-                    if (e.target === classmatesModal) {
-                        classmatesModal.style.display = 'none';
-                    }
-                });
-                                uploadedFilesModal.addEventListener('click', (e) => {
-                    if (e.target === uploadedFilesModal) {
-                        uploadedFilesModal.style.display = 'none';
-                    }
-                });
-
-                fileViewerModal.addEventListener('click', (e) => {
-                    if (e.target === fileViewerModal) {
-                        fileViewerModal.style.display = 'none';
-                        fileViewerContent.innerHTML = '';
-                    }
-                });
-
-                // Email Update Functionality
                 document.getElementById('close-email-sidebar').addEventListener('click', () => {
                     emailSidebar.classList.remove('open');
                 });
 
-                document.getElementById('update-email-btn').addEventListener('click', () => {
-                    const email = document.getElementById('email-input').value.trim();
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-                    if (!email) {
-                        showToast('Please enter an email address');
-                        return;
-                    }
-                    if (!emailRegex.test(email)) {
-                        showToast('Please enter a valid email address');
-                        return;
-                    }
-
-                    db.ref(`students/${cin}`).update({ email })
-                        .then(() => {
-                            showToast('Email updated successfully');
-                            emailSidebar.classList.remove('open');
-                        })
-                        .catch(error => {
-                            showToast('Failed to update email');
-                            console.error(error);
-                        });
+                document.getElementById('messages-btn').addEventListener('click', () => {
+                    messagesModal.style.display = 'flex';
+                    professorList.classList.add('show');
+                    chatInput.classList.remove('show');
+                    chatBody.innerHTML = `<div class="chatbot-message">Which professor would you like to message?</div>`;
+                    selectedProfessor = null;
                 });
 
-                // Dark Mode Toggle
+                document.getElementById('close-messages').addEventListener('click', () => {
+                    messagesModal.style.display = 'none';
+                });
+
+                document.getElementById('update-email-btn').addEventListener('click', () => {
+                    const emailInput = document.getElementById('email-input');
+                    const email = emailInput.value.trim();
+                    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        showToast('Please enter a valid email');
+                        return;
+                    }
+                    db.ref('students/' + cin).update({ email }).then(() => {
+                        showToast('Email updated successfully');
+                        emailSidebar.classList.remove('open');
+                    }).catch(error => {
+                        showToast('Error updating email');
+                        console.error(error);
+                    });
+                });
+
+                // Close modals and sidebar when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!classmatesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#sidebar-classmates-btn') && classmatesModal.style.display === 'flex') {
+                        classmatesModal.style.display = 'none';
+                    }
+                    if (!fileViewerModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('.file-name') && fileViewerModal.style.display === 'flex') {
+                        fileViewerModal.style.display = 'none';
+                        fileViewerContent.innerHTML = '';
+                        loadingMessage.classList.remove('show');
+                    }
+                    if (!messagesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#messages-btn') && messagesModal.style.display === 'flex') {
+                        messagesModal.style.display = 'none';
+                    }
+                    if (!emailSidebar.contains(e.target) && !e.target.closest('#email-btn') && emailSidebar.classList.contains('open')) {
+                        emailSidebar.classList.remove('open');
+                    }
+                    if (!hamburgerSidebar.contains(e.target) && !e.target.closest('#hamburger-btn') && hamburgerSidebar.classList.contains('open')) {
+                        hamburgerSidebar.classList.remove('open');
+                    }
+                });
+
+                // Home button
+                document.getElementById('home-btn').addEventListener('click', () => {
+                    window.location.href = 'index.html';
+                });
+
+                // Dark mode toggle
                 document.getElementById('dark-mode-toggle').addEventListener('click', () => {
                     document.body.classList.toggle('dark-mode');
                     const isDarkMode = document.body.classList.contains('dark-mode');
-                    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
                     const toggleButton = document.getElementById('dark-mode-toggle');
                     toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
                     toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
-                    showToast(isDarkMode ? 'Dark Mode Enabled' : 'Light Mode Enabled');
+                    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+                    showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
                 });
 
-                // Home Button
-                document.getElementById('home-btn').addEventListener('click', () => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    showToast('Returned to Home');
-                });
-
-                // Toast Notification Function
+                // Toast notification
                 function showToast(message) {
                     const toast = document.getElementById('toast');
                     toast.textContent = message;
+                    toast.classList.remove('hidden');
                     toast.classList.add('show');
                     setTimeout(() => {
                         toast.classList.remove('show');
+                        toast.classList.add('hidden');
                     }, 3000);
                 }
-
-                // Prevent context menu on long press for certain elements (optional, improves UX on mobile)
-                document.addEventListener('contextmenu', (e) => {
-                    if (e.target.closest('.chat-message') || e.target.closest('.nav-btn')) {
-                        e.preventDefault();
-                    }
-                });
-
-                // Handle back/forward navigation to ensure modals are closed
-                window.addEventListener('popstate', () => {
-                    messagesModal.style.display = 'none';
-                    classmatesModal.style.display = 'none';
-                    uploadedFilesModal.style.display = 'none';
-                    fileViewerModal.style.display = 'none';
-                    emailSidebar.classList.remove('open');
-                    hamburgerSidebar.classList.remove('open');
-                    if (lastChatId) {
-                        db.ref(`messages/${lastChatId}`).off();
-                    }
-                });
-
-                // Prevent accidental page refresh on mobile
-                window.addEventListener('beforeunload', (e) => {
-                    if (messagesModal.style.display === 'block' && messageInput.value.trim()) {
-                        e.preventDefault();
-                        e.returnValue = 'You have unsent messages. Are you sure you want to leave?';
-                    }
-                });
-
             } catch (error) {
                 console.error('Initialization error:', error);
-                showToast('An error occurred while loading the app');
+                showToast('Error initializing page');
             }
         });
     </script>
