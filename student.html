@@ -80,6 +80,7 @@
             cursor: pointer;
             transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
             border-radius: 6px;
+            position: relative;
         }
 
         .nav-btn:hover, .nav-btn:active {
@@ -91,6 +92,19 @@
         .nav-btn span {
             margin-top: 2px;
             transition: transform 0.2s ease;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            display: none;
         }
 
         main {
@@ -721,6 +735,10 @@
             color: #ffffff;
         }
 
+        body.dark-mode .notification-badge {
+            background-color: #ff5555;
+        }
+
         /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -810,6 +828,10 @@
             .email-modal .modal-content {
                 max-width: 90%;
             }
+            .notification-badge {
+                padding: 3px 6px;
+                font-size: 9px;
+            }
         }
     </style>
 </head>
@@ -820,7 +842,10 @@
     </header>
     <nav>
         <button class="nav-btn" id="home-btn" aria-label="Home"><span>🏠</span><span>Home</span></button>
-        <button class="nav-btn" id="messages-btn" aria-label="Messages"><span>💬</span><span>Messages</span></button>
+        <button class="nav-btn" id="messages-btn" aria-label="Messages">
+            <span>💬</span><span>Messages</span>
+            <span class="notification-badge" id="notification-badge">0</span>
+        </button>
         <button class="nav-btn" id="dark-mode-toggle" aria-label="Toggle dark mode"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
     <main>
@@ -940,6 +965,16 @@
                     }, 3000);
                     return;
                 }
+
+                // Notification Badge
+                const notificationBadge = document.getElementById('notification-badge');
+                db.ref(`notifications/${cin}/unseenCount`).on('value', (snapshot) => {
+                    const count = snapshot.val() || 0;
+                    notificationBadge.textContent = count;
+                    notificationBadge.style.display = count > 0 ? 'block' : 'none';
+                }, () => {
+                    showToast('Error loading notifications.');
+                });
 
                 // Subjects list
                 const subjects = [
@@ -1094,6 +1129,8 @@
                         const emailInput = document.getElementById('email-input');
                         if (student.email) {
                             emailInput.value = student.email;
+                        } else {
+                            document.getElementById('email-modal').style.display = 'flex';
                         }
 
                         // Load classmates
