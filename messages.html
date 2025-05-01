@@ -22,7 +22,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 15px;
-            background-color: #2c3e50;
+            background: linear-gradient(90deg, #2c3e50, #34495e);
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             position: sticky;
             top: 0;
@@ -44,11 +44,38 @@
             font-size: 18px;
             cursor: pointer;
             transition: color 0.3s ease, transform 0.2s ease;
+            position: relative;
         }
 
         .back-btn:hover, .new-chat-btn:hover {
             color: #bb86fc;
             transform: scale(1.1);
+        }
+
+        .back-btn:focus, .new-chat-btn:focus {
+            outline: 2px solid #bb86fc;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .back-btn:hover .tooltip, .new-chat-btn:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
         }
 
         main {
@@ -59,25 +86,16 @@
         }
 
         .chat-header {
-            display: flex;
-            align-items: center;
             padding: 10px 15px;
             background: linear-gradient(90deg, #3498db, #5dade2);
             color: white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .chat-header img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
         .chat-header h2 {
             margin: 0;
             font-size: 18px;
-            flex: 1;
+            text-align: center;
         }
 
         .chat-body {
@@ -92,6 +110,7 @@
             margin-bottom: 15px;
             display: flex;
             align-items: flex-start;
+            animation: fadeIn 0.3s ease;
         }
 
         .chat-message.student {
@@ -107,6 +126,8 @@
             height: 32px;
             border-radius: 50%;
             margin: 0 10px;
+            object-fit: cover;
+            loading: lazy;
         }
 
         .message-content {
@@ -121,6 +142,7 @@
             line-height: 1.4;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             position: relative;
+            cursor: pointer;
         }
 
         .chat-message.student .message-bubble {
@@ -174,6 +196,7 @@
             cursor: pointer;
             font-size: 13px;
             transition: background-color 0.3s ease, transform 0.2s ease;
+            position: relative;
         }
 
         .professor-button img {
@@ -181,11 +204,21 @@
             height: 24px;
             border-radius: 50%;
             margin-right: 8px;
+            object-fit: cover;
+            loading: lazy;
         }
 
         .professor-button:hover {
             background-color: #5dade2;
             transform: scale(1.05);
+        }
+
+        .professor-button:focus {
+            outline: 2px solid #bb86fc;
+        }
+
+        .professor-button .tooltip {
+            top: -30px;
         }
 
         .chat-input {
@@ -226,11 +259,20 @@
             align-items: center;
             justify-content: center;
             transition: background-color 0.3s ease, transform 0.2s ease;
+            position: relative;
         }
 
         .chat-input button:hover {
             background-color: #03dac6;
             transform: scale(1.1);
+        }
+
+        .chat-input button:focus {
+            outline: 2px solid #bb86fc;
+        }
+
+        .chat-input button .tooltip {
+            top: -40px;
         }
 
         .scroll-to-bottom {
@@ -388,6 +430,8 @@
             height: 30px;
             border-radius: 50%;
             margin-right: 10px;
+            object-fit: cover;
+            loading: lazy;
         }
 
         .new-chat-button {
@@ -415,7 +459,7 @@
         }
 
         body.dark-mode header {
-            background-color: #1e1e1e;
+            background: linear-gradient(90deg, #1e1e1e, #2c2c2c);
         }
 
         body.dark-mode .chat-header {
@@ -481,10 +525,14 @@
             to { opacity: 1; transform: scale(1); }
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 600px) {
             header h1 { font-size: 18px; }
             .chat-header h2 { font-size: 16px; }
-            .chat-header img { width: 36px; height: 36px; }
             .chat-message img { width: 28px; height: 28px; }
             .message-bubble { font-size: 13px; padding: 8px 12px; }
             .message-time { font-size: 10px; }
@@ -501,20 +549,28 @@
 </head>
 <body>
     <header>
-        <button class="back-btn" id="back-btn" aria-label="Back to home"><i class="fas fa-arrow-left"></i></button>
+        <button class="back-btn" id="back-btn" aria-label="Back to home" title="Back to home">
+            <i class="fas fa-arrow-left"></i>
+            <span class="tooltip">Back to Student Page</span>
+        </button>
         <h1>Messages</h1>
-        <button class="new-chat-btn" id="new-chat-btn" aria-label="New chat"><i class="fas fa-plus"></i></button>
+        <button class="new-chat-btn" id="new-chat-btn" aria-label="New chat" title="New chat">
+            <i class="fas fa-plus"></i>
+            <span class="tooltip">Start a New Chat or View History</span>
+        </button>
     </header>
     <main>
         <div class="chat-header" id="chat-header">
-            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" alt="Bot">
-            <h2>Chat Bot</h2>
+            <h2 id="chat-title">Select a Professor</h2>
         </div>
         <div class="chat-body" id="chat-body"></div>
         <div class="chat-footer">
             <div class="chat-input" id="chat-input">
                 <input type="text" id="message-input" placeholder="Type a message..." aria-label="Type a message">
-                <button id="send-message-btn" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+                <button id="send-message-btn" aria-label="Send message" title="Send message">
+                    <i class="fas fa-paper-plane"></i>
+                    <span class="tooltip">Click or Press Enter to Send</span>
+                </button>
             </div>
         </div>
         <button class="scroll-to-bottom" id="scroll-to-bottom" aria-label="Scroll to bottom"><i class="fas fa-chevron-down"></i></button>
@@ -577,50 +633,36 @@
                 const cin = urlParams.get('cin');
                 if (!cin || !/^\d{8}$/.test(cin)) {
                     showToast('Invalid or missing CIN. Please log in again.');
-                    setTimeout(() => window.location.href = 'index.html', 3000);
+                    setTimeout(() => window.location.href = 'student.html', 3000);
                     return;
                 }
 
-                // Profanity Filter
-                const badWords = {
-                    english: ['damn', 'hell', 'bastard', 'idiot', 'stupid', 'fool'],
-                    french: ['merde', 'con', 'idiot', 'stupide', 'imbécile', 'salopard'],
-                    arabic: ['كلب', 'حمار', 'غبي', 'جاهل', 'مقرف'],
-                    tunisian: ['حيوان', 'بهيم', 'غبي', 'قليل الادب', 'رخيس']
-                };
+                // Images
+                const professorImage = 'https://via.placeholder.com/100?text=ISET+Siliana'; // Low-quality ISET Siliana logo (~10KB)
+                const botImage = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3'; // Circuit board
+                const studentImage = 'https://cdn.pixabay.com/photo/2016/03/31/15/19/chip-1293069_1280.png'; // Microchip
 
-                function filterBadWords(message) {
-                    let filtered = message;
-                    Object.values(badWords).flat().forEach(word => {
-                        const regex = new RegExp(`\\b${word}\\b`, 'gi');
-                        filtered = filtered.replace(regex, '*****');
-                    });
-                    return filtered;
-                }
-
-                // Professors with Subjects and Images
+                // Professors
                 const professors = [
-                    { name: 'Mme. Wafa REJBI', subject: 'Dev. Web et Multimédias 2', image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2' },
-                    { name: 'Imen Bouraoui', subject: 'Technique d’expression 2', image: 'https://images.unsplash.com/photo-1593529467220-9d721ceb9a78' },
-                    { name: 'Mme. Hela DJEBALI', subject: 'UVT3 (2CN)', image: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd' },
-                    { name: 'Emna Mehrez', subject: 'Algo & Programmation', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c' },
-                    { name: 'Mme. Sana ZAKRAOUI', subject: 'Option 2: Atelier Linux', image: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e' },
-                    { name: 'Mme. Hajer BACCOUCH', subject: 'Sys. Exploitation', image: 'https://images.unsplash.com/photo-1599566150163-29194dca5112' },
-                    { name: 'Ouni Rahma', subject: 'Fond Réseaux', image: 'https://images.unsplash.com/photo-1573495804008-7c2f3b35a1e1' },
-                    { name: 'Zeineb Belakhdhar', subject: 'English for Computing 2', image: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159' },
-                    { name: 'Fadhel Fellah', subject: 'A. Système 1', image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0' },
-                    { name: 'Sondes Guirat', subject: 'Préparation aux métiers', image: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d' },
-                    { name: 'Kemla Naoui', subject: 'Stat & Proba', image: 'https://images.unsplash.com/photo-1599566219227-2efe0c9b7f5f' },
-                    { name: 'Arwa Selmi', subject: 'Recherche Opérationnelle', image: 'https://images.unsplash.com/photo-1573496358961-3b9f5b7e4c63' },
-                    { name: 'Ksibi Jihen', subject: 'A. Programmation', image: 'https://images.unsplash.com/photo-1599566150163-29194dca5112' }
+                    { name: 'Mme. Wafa REJBI', subject: 'Dev. Web et Multimédias 2', image: professorImage },
+                    { name: 'Imen Bouraoui', subject: 'Technique d’expression 2', image: professorImage },
+                    { name: 'Mme. Hela DJEBALI', subject: 'UVT3 (2CN)', image: professorImage },
+                    { name: 'Emna Mehrez', subject: 'Algo & Programmation', image: professorImage },
+                    { name: 'Mme. Sana ZAKRAOUI', subject: 'Option 2: Atelier Linux', image: professorImage },
+                    { name: 'Mme. Hajer BACCOUCH', subject: 'Sys. Exploitation', image: professorImage },
+                    { name: 'Ouni Rahma', subject: 'Fond Réseaux', image: professorImage },
+                    { name: 'Zeineb Belakhdhar', subject: 'English for Computing 2', image: professorImage },
+                    { name: 'Fadhel Fellah', subject: 'A. Système 1', image: professorImage },
+                    { name: 'Sondes Guirat', subject: 'Préparation aux métiers', image: professorImage },
+                    { name: 'Kemla Naoui', subject: 'Stat & Proba', image: professorImage },
+                    { name: 'Arwa Selmi', subject: 'Recherche Opérationnelle', image: professorImage },
+                    { name: 'Ksibi Jihen', subject: 'A. Programmation', image: professorImage }
                 ];
-
-                const studentImage = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde';
-                const botImage = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c';
 
                 // Elements
                 const chatBody = document.getElementById('chat-body');
                 const chatHeader = document.getElementById('chat-header');
+                const chatTitle = document.getElementById('chat-title');
                 const chatInput = document.getElementById('chat-input');
                 const messageInput = document.getElementById('message-input');
                 const scrollToBottomBtn = document.getElementById('scroll-to-bottom');
@@ -635,6 +677,7 @@
                     if (snapshot.exists()) {
                         const student = snapshot.val();
                         studentName = `${student.firstName} ${student.lastName}`;
+                        sessionStorage.setItem(`student_${cin}`, JSON.stringify(student));
                         if (!student.email) {
                             emailModal.classList.add('show');
                         } else {
@@ -642,10 +685,10 @@
                         }
                     } else {
                         showToast('Student not found. Please log in again.');
-                        setTimeout(() => window.location.href = 'index.html', 3000);
+                        setTimeout(() => window.location.href = 'student.html', 3000);
                     }
                 }).catch(() => {
-                    showToast('Error checking student data');
+                    showToast('Error checking student data. Please try again.');
                 });
 
                 // Email Update
@@ -661,11 +704,13 @@
                         emailModal.classList.remove('show');
                         initializeChat();
                     }).catch(() => {
-                        showToast('Error registering email');
+                        showToast('Error registering email. Please try again.');
                     });
                 });
 
                 function initializeChat() {
+                    // Clear Notifications
+                    db.ref(`notifications/${cin}/unseenCount`).set(0);
                     // Load Chat History or Start New
                     const chatId = urlParams.get('chatId');
                     if (chatId) {
@@ -681,9 +726,10 @@
                 }
 
                 function showProfessorSelection() {
+                    chatTitle.textContent = 'Select a Professor';
                     chatBody.innerHTML = `
                         <div class="chat-message bot">
-                            <img src="${botImage}" alt="Bot">
+                            <img src="${botImage}" alt="ISET Assistant">
                             <div class="message-content">
                                 <div class="message-bubble">Hello, ${studentName}! Which professor would you like to chat with?</div>
                                 <div class="message-time">${formatShortTime(Date.now())}</div>
@@ -696,7 +742,11 @@
                     professors.forEach((professor, index) => {
                         const button = document.createElement('button');
                         button.className = 'professor-button';
-                        button.innerHTML = `<img src="${professor.image}" alt="${professor.name}">${professor.name}`;
+                        button.innerHTML = `
+                            <img src="${professor.image}" alt="${professor.name}">
+                            ${professor.name}
+                            <span class="tooltip">Click to select ${professor.name}</span>
+                        `;
                         button.style.width = '45%';
                         button.style.margin = index < 7 ? '0 0 10px 0' : '0';
                         button.addEventListener('click', () => {
@@ -710,13 +760,10 @@
 
                 function startChat(professor) {
                     const chatId = `${cin}_${professor.name.replace(/\s+/g, '_')}`;
-                    chatHeader.innerHTML = `
-                        <img src="${professor.image}" alt="${professor.name}">
-                        <h2>${professor.name}</h2>
-                    `;
+                    chatTitle.textContent = `Chat with ${professor.name}`;
                     chatBody.innerHTML = `
                         <div class="chat-message bot">
-                            <img src="${botImage}" alt="Bot">
+                            <img src="${botImage}" alt="ISET Assistant">
                             <div class="message-content">
                                 <div class="message-bubble">You've selected ${professor.name} to chat with!</div>
                                 <div class="message-time">${formatShortTime(Date.now())}</div>
@@ -746,7 +793,7 @@
                     db.ref(`messages/${chatId}`).on('value', (snapshot) => {
                         chatBody.innerHTML = `
                             <div class="chat-message bot">
-                                <img src="${botImage}" alt="Bot">
+                                <img src="${botImage}" alt="ISET Assistant">
                                 <div class="message-content">
                                     <div class="message-bubble">You've selected ${selectedProfessor.name} to chat with!</div>
                                     <div class="message-time">${formatShortTime(Date.now())}</div>
@@ -761,16 +808,24 @@
                             messages.sort((a, b) => a.timestamp - b.timestamp);
                             messages.forEach(msg => {
                                 const isStudent = msg.senderType === 'student';
+                                const isProfessor = msg.senderType === 'professor';
                                 const messageDiv = document.createElement('div');
                                 messageDiv.className = `chat-message ${msg.senderType}`;
                                 messageDiv.innerHTML = `
-                                    <img src="${isStudent ? studentImage : selectedProfessor.image}" alt="${msg.senderType}">
+                                    <img src="${isStudent ? studentImage : isProfessor ? professorImage : botImage}" alt="${msg.senderType}">
                                     <div class="message-content">
                                         <div class="message-bubble">${msg.message}</div>
                                         <div class="message-time">${formatShortTime(msg.timestamp)}</div>
                                         ${isStudent ? `<div class="message-status">${msg.seen ? 'Seen' : 'Sent'}</div>` : ''}
                                     </div>
                                 `;
+                                messageDiv.addEventListener('contextmenu', (e) => {
+                                    e.preventDefault();
+                                    messageDiv.querySelector('.message-time').textContent = formatFullTime(msg.timestamp);
+                                    setTimeout(() => {
+                                        messageDiv.querySelector('.message-time').textContent = formatShortTime(msg.timestamp);
+                                    }, 3000);
+                                });
                                 messageDiv.addEventListener('mousedown', (e) => {
                                     const start = Date.now();
                                     const timer = setTimeout(() => {
@@ -788,14 +843,14 @@
                             }
                             // Mark messages as seen
                             messages.forEach(msg => {
-                                if (msg.senderType === 'student' && !msg.seen) {
+                                if ((msg.senderType === 'student' || msg.senderType === 'professor') && !msg.seen) {
                                     db.ref(`messages/${chatId}/${msg.id}`).update({ seen: true });
                                 }
                             });
                         }
                         chatBody.scrollTop = chatBody.scrollHeight;
                     }, () => {
-                        showToast('Error loading messages');
+                        showToast('Error loading messages. Please try again.');
                     });
                 }
 
@@ -810,12 +865,11 @@
                         showToast('Please select a professor');
                         return;
                     }
-                    const filteredMessage = filterBadWords(message);
                     const chatId = `${cin}_${selectedProfessor.name.replace(/\s+/g, '_')}`;
                     const messageData = {
                         sender: cin,
                         senderType: 'student',
-                        message: filteredMessage,
+                        message: message,
                         timestamp: Date.now(),
                         seen: false
                     };
@@ -834,7 +888,7 @@
                             }
                         })
                         .catch(() => {
-                            showToast('Error sending message');
+                            showToast('Error sending message. Please try again.');
                         });
                 });
 
@@ -894,6 +948,8 @@
                                 }
                             });
                         }
+                    }).catch(() => {
+                        showToast('Error loading chat history.');
                     });
                 }
 
@@ -907,12 +963,23 @@
                     }
                 });
 
+                // Keyboard Navigation
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        if (emailModal.classList.contains('show')) {
+                            showToast('Please register an email to continue');
+                        } else if (chatHistoryModal.classList.contains('show')) {
+                            chatHistoryModal.classList.remove('show');
+                        }
+                    }
+                });
+
                 // Back Button
                 document.getElementById('back-btn').addEventListener('click', () => {
-                    window.location.href = `index.html?cin=${cin}`;
+                    window.location.href = `student.html?cin=${cin}`;
                 });
             } catch (error) {
-                showToast('Error initializing page');
+                showToast('Error initializing page. Please try again.');
             }
         });
     </script>
