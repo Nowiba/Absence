@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISET Siliana - Messages</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: headerFadeIn 0.5s ease-in;
+        }
+
+        header h1 {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .back-btn, .new-chat-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+
+        .back-btn:hover, .new-chat-btn:hover {
+            color: #bb86fc;
+            transform: scale(1.1);
+        }
+
+        main {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 60px);
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: linear-gradient(90deg, #3498db, #5dade2);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .chat-header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .chat-header h2 {
+            margin: 0;
+            font-size: 18px;
+            flex: 1;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #ffffff;
+            position: relative;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .chat-message.student {
+            justify-content: flex-end;
+        }
+
+        .chat-message.bot, .chat-message.professor {
+            justify-content: flex-start;
+        }
+
+        .chat-message img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin: 0 10px;
+        }
+
+        .message-content {
+            max-width: 70%;
+            position: relative;
+        }
+
+        .message-bubble {
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .chat-message.student .message-bubble {
+            background-color: #bb86fc;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-message.bot .message-bubble, .chat-message.professor .message-bubble {
+            background-color: #e0e0e0;
+            color: #333;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #777;
+            margin-top: 5px;
+        }
+
+        .chat-message.student .message-time {
+            text-align: right;
+        }
+
+        .message-status {
+            font-size: 10px;
+            color: #3498db;
+            margin-top: 2px;
+        }
+
+        .chat-message.student .message-status {
+            text-align: right;
+        }
+
+        .professor-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .professor-button {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .professor-button img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .professor-button:hover {
+            background-color: #5dade2;
+            transform: scale(1.05);
+        }
+
+        .chat-input {
+            display: none;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #d1d8e0;
+        }
+
+        .chat-input.show {
+            display: flex;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: #ffffff;
+            outline: none;
+        }
+
+        .chat-input button {
+            padding: 10px;
+            background-color: #bb86fc;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .chat-input button:hover {
+            background-color: #03dac6;
+            transform: scale(1.1);
+        }
+
+        .scroll-to-bottom {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: #bb86fc;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .scroll-to-bottom.show {
+            opacity: 1;
+        }
+
+        .toast {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50px);
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            opacity: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 3000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .email-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .email-modal.show {
+            display: flex;
+        }
+
+        .email-modal .modal-content {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #bb86fc;
+            width: 90%;
+            max-width: 340px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        .email-modal h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .email-modal .email-update {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .email-modal input {
+            padding: 8px;
+            border: 1px solid #d1d8e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .email-modal button {
+            padding: 8px;
+            background-color: #bb86fc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .email-modal button:hover {
+            background-color: #03dac6;
+        }
+
+        .chat-history-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-history-modal.show {
+            display: flex;
+        }
+
+        .chat-history-modal .modal-content {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #bb86fc;
+            width: 90%;
+            max-width: 340px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .chat-history-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #d1d8e0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .chat-history-item:hover {
+            background-color: #f0f2f5;
+        }
+
+        .chat-history-item img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .new-chat-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .new-chat-button:hover {
+            background-color: #5dade2;
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        body.dark-mode header {
+            background-color: #1e1e1e;
+        }
+
+        body.dark-mode .chat-header {
+            background: linear-gradient(90deg, #bb86fc, #03dac6);
+        }
+
+        body.dark-mode .chat-body {
+            background-color: #1e1e1e;
+        }
+
+        body.dark-mode .chat-message.bot .message-bubble,
+        body.dark-mode .chat-message.professor .message-bubble {
+            background-color: #2c2c2c;
+            color: #ffffff;
+        }
+
+        body.dark-mode .message-time {
+            color: #aaaaaa;
+        }
+
+        body.dark-mode .chat-input {
+            background-color: #1e1e1e;
+            border-top: 1px solid #bb86fc;
+        }
+
+        body.dark-mode .chat-input input {
+            background-color: #2c2c2c;
+            color: #ffffff;
+        }
+
+        body.dark-mode .email-modal .modal-content,
+        body.dark-mode .chat-history-modal .modal-content {
+            background-color: #1e1e1e;
+            border-color: #bb86fc;
+        }
+
+        body.dark-mode .email-modal input {
+            background-color: #2c2c2c;
+            color: #ffffff;
+            border-color: #bb86fc;
+        }
+
+        body.dark-mode .chat-history-item {
+            border-bottom: 1px solid #bb86fc;
+        }
+
+        body.dark-mode .chat-history-item:hover {
+            background-color: #2c2c2c;
+        }
+
+        body.dark-mode .toast {
+            background: linear-gradient(90deg, #1e1e1e, #2c2c2c);
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes headerFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 18px; }
+            .chat-header h2 { font-size: 16px; }
+            .chat-header img { width: 36px; height: 36px; }
+            .chat-message img { width: 28px; height: 28px; }
+            .message-bubble { font-size: 13px; padding: 8px 12px; }
+            .message-time { font-size: 10px; }
+            .professor-button { font-size: 12px; padding: 6px 10px; }
+            .professor-button img { width: 20px; height: 20px; }
+            .chat-input input { font-size: 13px; }
+            .chat-input button { width: 36px; height: 36px; }
+            .scroll-to-bottom { width: 36px; height: 36px; }
+            .email-modal .modal-content,
+            .chat-history-modal .modal-content { max-width: 90%; }
+            .chat-history-item { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="back-btn" id="back-btn" aria-label="Back to home"><i class="fas fa-arrow-left"></i></button>
+        <h1>Messages</h1>
+        <button class="new-chat-btn" id="new-chat-btn" aria-label="New chat"><i class="fas fa-plus"></i></button>
+    </header>
+    <main>
+        <div class="chat-header" id="chat-header">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" alt="Bot">
+            <h2>Chat Bot</h2>
+        </div>
+        <div class="chat-body" id="chat-body"></div>
+        <div class="chat-footer">
+            <div class="chat-input" id="chat-input">
+                <input type="text" id="message-input" placeholder="Type a message..." aria-label="Type a message">
+                <button id="send-message-btn" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+        <button class="scroll-to-bottom" id="scroll-to-bottom" aria-label="Scroll to bottom"><i class="fas fa-chevron-down"></i></button>
+    </main>
+    <div id="toast" class="toast hidden"></div>
+    <div id="email-modal" class="email-modal">
+        <div class="modal-content">
+            <h2>Register Your Email</h2>
+            <div class="email-update">
+                <input type="email" id="email-input" placeholder="Enter your email" aria-label="Enter your email">
+                <button id="update-email-btn" aria-label="Save email">Save</button>
+            </div>
+        </div>
+    </div>
+    <div id="chat-history-modal" class="chat-history-modal">
+        <div class="modal-content">
+            <h2>Chat History</h2>
+            <button class="new-chat-button" id="start-new-chat">Start New Chat</button>
+            <div id="chat-history-list"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Firebase Configuration
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAoXhEeGA22chByuIyxjWzmsFsQJSjqZJY",
+                    authDomain: "absence-iset-siliana.firebaseapp.com",
+                    databaseURL: "https://absence-iset-siliana-default-rtdb.europe-west1.firebasedatabase.app",
+                    projectId: "absence-iset-siliana",
+                    storageBucket: "absence-iset-siliana.firebasestorage.app",
+                    messagingSenderId: "519382535146",
+                    appId: "1:519382535146:web:94629d286b19b8c103c093",
+                    measurementId: "G-3Q9F4KP217"
+                };
+                firebase.initializeApp(firebaseConfig);
+                const db = firebase.database();
+
+                // Dark Mode
+                if (localStorage.getItem('darkMode') === 'enabled') {
+                    document.body.classList.add('dark-mode');
+                }
+
+                // Extract CIN
+                const urlParams = new URLSearchParams(window.location.search);
+                const cin = urlParams.get('cin');
+                if (!cin || !/^\d{8}$/.test(cin)) {
+                    showToast('Invalid or missing CIN. Please log in again.');
+                    setTimeout(() => window.location.href = 'index.html', 3000);
+                    return;
+                }
+
+                // Profanity Filter
+                const badWords = {
+                    english: ['damn', 'hell', 'bastard', 'idiot', 'stupid', 'fool'],
+                    french: ['merde', 'con', 'idiot', 'stupide', 'imbécile', 'salopard'],
+                    arabic: ['كلب', 'حمار', 'غبي', 'جاهل', 'مقرف'],
+                    tunisian: ['حيوان', 'بهيم', 'غبي', 'قليل الادب', 'رخيس']
+                };
+
+                function filterBadWords(message) {
+                    let filtered = message;
+                    Object.values(badWords).flat().forEach(word => {
+                        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                        filtered = filtered.replace(regex, '*****');
+                    });
+                    return filtered;
+                }
+
+                // Professors with Subjects and Images
+                const professors = [
+                    { name: 'Mme. Wafa REJBI', subject: 'Dev. Web et Multimédias 2', image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2' },
+                    { name: 'Imen Bouraoui', subject: 'Technique d’expression 2', image: 'https://images.unsplash.com/photo-1593529467220-9d721ceb9a78' },
+                    { name: 'Mme. Hela DJEBALI', subject: 'UVT3 (2CN)', image: 'https://images.unsplash.com/photo-1580894732444-8ecded7900cd' },
+                    { name: 'Emna Mehrez', subject: 'Algo & Programmation', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c' },
+                    { name: 'Mme. Sana ZAKRAOUI', subject: 'Option 2: Atelier Linux', image: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e' },
+                    { name: 'Mme. Hajer BACCOUCH', subject: 'Sys. Exploitation', image: 'https://images.unsplash.com/photo-1599566150163-29194dca5112' },
+                    { name: 'Ouni Rahma', subject: 'Fond Réseaux', image: 'https://images.unsplash.com/photo-1573495804008-7c2f3b35a1e1' },
+                    { name: 'Zeineb Belakhdhar', subject: 'English for Computing 2', image: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159' },
+                    { name: 'Fadhel Fellah', subject: 'A. Système 1', image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0' },
+                    { name: 'Sondes Guirat', subject: 'Préparation aux métiers', image: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d' },
+                    { name: 'Kemla Naoui', subject: 'Stat & Proba', image: 'https://images.unsplash.com/photo-1599566219227-2efe0c9b7f5f' },
+                    { name: 'Arwa Selmi', subject: 'Recherche Opérationnelle', image: 'https://images.unsplash.com/photo-1573496358961-3b9f5b7e4c63' },
+                    { name: 'Ksibi Jihen', subject: 'A. Programmation', image: 'https://images.unsplash.com/photo-1599566150163-29194dca5112' }
+                ];
+
+                const studentImage = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde';
+                const botImage = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c';
+
+                // Elements
+                const chatBody = document.getElementById('chat-body');
+                const chatHeader = document.getElementById('chat-header');
+                const chatInput = document.getElementById('chat-input');
+                const messageInput = document.getElementById('message-input');
+                const scrollToBottomBtn = document.getElementById('scroll-to-bottom');
+                const emailModal = document.getElementById('email-modal');
+                const chatHistoryModal = document.getElementById('chat-history-modal');
+                let selectedProfessor = null;
+                let isAtBottom = true;
+                let studentName = '';
+
+                // Check Email
+                db.ref(`students/${cin}`).once('value').then(snapshot => {
+                    if (snapshot.exists()) {
+                        const student = snapshot.val();
+                        studentName = `${student.firstName} ${student.lastName}`;
+                        if (!student.email) {
+                            emailModal.classList.add('show');
+                        } else {
+                            initializeChat();
+                        }
+                    } else {
+                        showToast('Student not found. Please log in again.');
+                        setTimeout(() => window.location.href = 'index.html', 3000);
+                    }
+                }).catch(() => {
+                    showToast('Error checking student data');
+                });
+
+                // Email Update
+                document.getElementById('update-email-btn').addEventListener('click', () => {
+                    const emailInput = document.getElementById('email-input');
+                    const email = emailInput.value.trim();
+                    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        showToast('Please enter a valid email');
+                        return;
+                    }
+                    db.ref(`students/${cin}`).update({ email }).then(() => {
+                        showToast('Email registered successfully');
+                        emailModal.classList.remove('show');
+                        initializeChat();
+                    }).catch(() => {
+                        showToast('Error registering email');
+                    });
+                });
+
+                function initializeChat() {
+                    // Load Chat History or Start New
+                    const chatId = urlParams.get('chatId');
+                    if (chatId) {
+                        selectedProfessor = professors.find(p => `${cin}_${p.name.replace(/\s+/g, '_')}` === chatId);
+                        if (selectedProfessor) {
+                            startChat(selectedProfessor);
+                        } else {
+                            showProfessorSelection();
+                        }
+                    } else {
+                        showProfessorSelection();
+                    }
+                }
+
+                function showProfessorSelection() {
+                    chatBody.innerHTML = `
+                        <div class="chat-message bot">
+                            <img src="${botImage}" alt="Bot">
+                            <div class="message-content">
+                                <div class="message-bubble">Hello, ${studentName}! Which professor would you like to chat with?</div>
+                                <div class="message-time">${formatShortTime(Date.now())}</div>
+                            </div>
+                        </div>
+                        <div class="professor-selection" id="professor-selection"></div>
+                    `;
+                    chatInput.classList.remove('show');
+                    const selectionDiv = document.getElementById('professor-selection');
+                    professors.forEach((professor, index) => {
+                        const button = document.createElement('button');
+                        button.className = 'professor-button';
+                        button.innerHTML = `<img src="${professor.image}" alt="${professor.name}">${professor.name}`;
+                        button.style.width = '45%';
+                        button.style.margin = index < 7 ? '0 0 10px 0' : '0';
+                        button.addEventListener('click', () => {
+                            selectedProfessor = professor;
+                            startChat(professor);
+                        });
+                        selectionDiv.appendChild(button);
+                    });
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }
+
+                function startChat(professor) {
+                    const chatId = `${cin}_${professor.name.replace(/\s+/g, '_')}`;
+                    chatHeader.innerHTML = `
+                        <img src="${professor.image}" alt="${professor.name}">
+                        <h2>${professor.name}</h2>
+                    `;
+                    chatBody.innerHTML = `
+                        <div class="chat-message bot">
+                            <img src="${botImage}" alt="Bot">
+                            <div class="message-content">
+                                <div class="message-bubble">You've selected ${professor.name} to chat with!</div>
+                                <div class="message-time">${formatShortTime(Date.now())}</div>
+                            </div>
+                        </div>
+                    `;
+                    chatInput.classList.add('show');
+                    loadMessages(chatId);
+                    // Update Chat History
+                    db.ref(`chatHistory/${cin}/${chatId}`).set({
+                        professor: professor.name,
+                        lastMessage: Date.now()
+                    });
+                }
+
+                function formatShortTime(timestamp) {
+                    const date = new Date(timestamp);
+                    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+                }
+
+                function formatFullTime(timestamp) {
+                    const date = new Date(timestamp);
+                    return `${date.toLocaleDateString('en-GB')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+                }
+
+                function loadMessages(chatId) {
+                    db.ref(`messages/${chatId}`).on('value', (snapshot) => {
+                        chatBody.innerHTML = `
+                            <div class="chat-message bot">
+                                <img src="${botImage}" alt="Bot">
+                                <div class="message-content">
+                                    <div class="message-bubble">You've selected ${selectedProfessor.name} to chat with!</div>
+                                    <div class="message-time">${formatShortTime(Date.now())}</div>
+                                </div>
+                            </div>
+                        `;
+                        if (snapshot.exists()) {
+                            const messages = [];
+                            snapshot.forEach(childSnapshot => {
+                                messages.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                            });
+                            messages.sort((a, b) => a.timestamp - b.timestamp);
+                            messages.forEach(msg => {
+                                const isStudent = msg.senderType === 'student';
+                                const messageDiv = document.createElement('div');
+                                messageDiv.className = `chat-message ${msg.senderType}`;
+                                messageDiv.innerHTML = `
+                                    <img src="${isStudent ? studentImage : selectedProfessor.image}" alt="${msg.senderType}">
+                                    <div class="message-content">
+                                        <div class="message-bubble">${msg.message}</div>
+                                        <div class="message-time">${formatShortTime(msg.timestamp)}</div>
+                                        ${isStudent ? `<div class="message-status">${msg.seen ? 'Seen' : 'Sent'}</div>` : ''}
+                                    </div>
+                                `;
+                                messageDiv.addEventListener('mousedown', (e) => {
+                                    const start = Date.now();
+                                    const timer = setTimeout(() => {
+                                        messageDiv.querySelector('.message-time').textContent = formatFullTime(msg.timestamp);
+                                    }, 2000);
+                                    document.addEventListener('mouseup', () => {
+                                        clearTimeout(timer);
+                                        messageDiv.querySelector('.message-time').textContent = formatShortTime(msg.timestamp);
+                                    }, { once: true });
+                                });
+                                chatBody.appendChild(messageDiv);
+                            });
+                            if (isAtBottom) {
+                                chatBody.scrollTop = chatBody.scrollHeight;
+                            }
+                            // Mark messages as seen
+                            messages.forEach(msg => {
+                                if (msg.senderType === 'student' && !msg.seen) {
+                                    db.ref(`messages/${chatId}/${msg.id}`).update({ seen: true });
+                                }
+                            });
+                        }
+                        chatBody.scrollTop = chatBody.scrollHeight;
+                    }, () => {
+                        showToast('Error loading messages');
+                    });
+                }
+
+                // Send Message
+                document.getElementById('send-message-btn').addEventListener('click', () => {
+                    const message = messageInput.value.trim();
+                    if (!message) {
+                        showToast('Please enter a message');
+                        return;
+                    }
+                    if (!selectedProfessor) {
+                        showToast('Please select a professor');
+                        return;
+                    }
+                    const filteredMessage = filterBadWords(message);
+                    const chatId = `${cin}_${selectedProfessor.name.replace(/\s+/g, '_')}`;
+                    const messageData = {
+                        sender: cin,
+                        senderType: 'student',
+                        message: filteredMessage,
+                        timestamp: Date.now(),
+                        seen: false
+                    };
+                    db.ref(`messages/${chatId}`).push(messageData)
+                        .then(() => {
+                            messageInput.value = '';
+                            const botReply = {
+                                sender: 'bot',
+                                senderType: 'bot',
+                                message: 'Your message was sent successfully!',
+                                timestamp: Date.now()
+                            };
+                            db.ref(`messages/${chatId}`).push(botReply);
+                            if (isAtBottom) {
+                                chatBody.scrollTop = chatBody.scrollHeight;
+                            }
+                        })
+                        .catch(() => {
+                            showToast('Error sending message');
+                        });
+                });
+
+                // Enter Key to Send
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('send-message-btn').click();
+                    }
+                });
+
+                // Scroll Handling
+                chatBody.addEventListener('scroll', () => {
+                    isAtBottom = chatBody.scrollHeight - chatBody.scrollTop <= chatBody.clientHeight + 10;
+                    scrollToBottomBtn.classList.toggle('show', !isAtBottom);
+                });
+
+                scrollToBottomBtn.addEventListener('click', () => {
+                    chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: 'smooth' });
+                    isAtBottom = true;
+                    scrollToBottomBtn.classList.remove('show');
+                });
+
+                // Chat History
+                document.getElementById('new-chat-btn').addEventListener('click', () => {
+                    chatHistoryModal.classList.add('show');
+                    loadChatHistory();
+                });
+
+                document.getElementById('start-new-chat').addEventListener('click', () => {
+                    chatHistoryModal.classList.remove('show');
+                    selectedProfessor = null;
+                    showProfessorSelection();
+                });
+
+                function loadChatHistory() {
+                    const historyList = document.getElementById('chat-history-list');
+                    historyList.innerHTML = '';
+                    db.ref(`chatHistory/${cin}`).once('value').then(snapshot => {
+                        if (snapshot.exists()) {
+                            snapshot.forEach(childSnapshot => {
+                                const chat = childSnapshot.val();
+                                const chatId = childSnapshot.key;
+                                const professor = professors.find(p => `${cin}_${p.name.replace(/\s+/g, '_')}` === chatId);
+                                if (professor) {
+                                    const item = document.createElement('div');
+                                    item.className = 'chat-history-item';
+                                    item.innerHTML = `
+                                        <img src="${professor.image}" alt="${professor.name}">
+                                        <span>${professor.name}</span>
+                                    `;
+                                    item.addEventListener('click', () => {
+                                        chatHistoryModal.classList.remove('show');
+                                        selectedProfessor = professor;
+                                        startChat(professor);
+                                    });
+                                    historyList.appendChild(item);
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Close Modals
+                document.addEventListener('click', (e) => {
+                    if (!emailModal.querySelector('.modal-content').contains(e.target) && emailModal.classList.contains('show')) {
+                        showToast('Please register an email to continue');
+                    }
+                    if (!chatHistoryModal.querySelector('.modal-content').contains(e.target) && chatHistoryModal.classList.contains('show') && !e.target.closest('#new-chat-btn')) {
+                        chatHistoryModal.classList.remove('show');
+                    }
+                });
+
+                // Back Button
+                document.getElementById('back-btn').addEventListener('click', () => {
+                    window.location.href = `index.html?cin=${cin}`;
+                });
+            } catch (error) {
+                showToast('Error initializing page');
+            }
+        });
+    </script>
+</body>
+</html>
