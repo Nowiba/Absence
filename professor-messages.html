@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professor Messages - ISET Siliana</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f7fafc;
+    }
+    .dark body {
+      background-color: #2d3748;
+      color: #e2e8f0;
+    }
+    .chat-header {
+      background: linear-gradient(to right, #3182ce, #63b3ed);
+      color: white;
+    }
+    .message-bubble {
+      max-width: 70%;
+      padding: 8px 12px;
+      margin: 4px 8px;
+      border-radius: 12px;
+      word-wrap: break-word;
+    }
+    .student-message {
+      background-color: #e2e8f0;
+      margin-left: auto;
+      border-bottom-right-radius: 0;
+    }
+    .professor-message {
+      background-color: #3182ce;
+      color: white;
+      margin-right: auto;
+      border-bottom-left-radius: 0;
+    }
+    .seen-indicator {
+      font-size: 10px;
+      color: #718096;
+      margin-left: 8px;
+    }
+    .scroll-to-bottom {
+      position: absolute;
+      bottom: 80px;
+      right: 20px;
+      background-color: #3182ce;
+      color: white;
+      border-radius: 50%;
+      padding: 8px;
+      cursor: pointer;
+      display: none;
+    }
+    .scroll-to-bottom.show {
+      display: block;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .loading-spinner {
+      display: none;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3182ce;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .notification-badge {
+      background-color: #e53e3e;
+      color: white;
+      border-radius: 9999px;
+      padding: 2px 6px;
+      font-size: 12px;
+      position: absolute;
+      top: -5px;
+      right: -5px;
+    }
+    .error-message {
+      display: none;
+      background-color: #f56565;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="loadingSpinner" class="loading-spinner"></div>
+  <div id="errorMessage" class="error-message"></div>
+  <div class="container mx-auto p-4 max-w-4xl">
+    <!-- Header -->
+    <div class="chat-header p-4 rounded-t-lg flex justify-between items-center">
+      <h1 class="text-xl font-bold">Messages</h1>
+      <button id="backBtn" class="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-100">Back to Dashboard</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="bg-white dark:bg-gray-800 rounded-b-lg shadow-lg">
+      <div class="flex">
+        <!-- Student List -->
+        <div id="studentList" class="w-1/3 border-r dark:border-gray-700 p-4 max-h-[500px] overflow-y-auto">
+          <h2 class="text-lg font-semibold mb-4">Students (IT11)</h2>
+          <!-- Student items will be populated here -->
+        </div>
+
+        <!-- Chat Area -->
+        <div id="chatArea" class="w-2/3 p-4 flex flex-col relative">
+          <h2 id="chatTitle" class="text-lg font-semibold mb-4">Select a student to start chatting</h2>
+          <div id="messageList" class="flex-1 overflow-y-auto max-h-[400px] mb-4"></div>
+          <div id="scrollToBottom" class="scroll-to-bottom">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+          </div>
+          <div id="messageInputArea" class="flex items-center mt-4 hidden">
+            <input id="messageInput" type="text" class="flex-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white" placeholder="Type your message...">
+            <button id="sendBtn" class="ml-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Import Firebase SDK
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { getDatabase, ref, onValue, set, push, update, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+    // Firebase Configuration (Replace with your actual Firebase project details)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    let app, auth, db;
+    let isInitialized = false;
+    try {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getDatabase(app);
+      isInitialized = true;
+    } catch (error) {
+      console.error('Firebase initialization failed:', error);
+      showError('Failed to initialize Firebase. Please check your configuration and try again.');
+    }
+
+    // Proceed only if Firebase is initialized
+    if (!isInitialized) {
+      showError('Application cannot proceed without Firebase. Please contact support.');
+      return; // This return is safe as it's inside a block
+    }
+
+    // DOM Elements
+    const backBtn = document.getElementById('backBtn');
+    const studentList = document.getElementById('studentList');
+    const chatTitle = document.getElementById('chatTitle');
+    const messageList = document.getElementById('messageList');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const messageInputArea = document.getElementById('messageInputArea');
+    const scrollToBottom = document.getElementById('scrollToBottom');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const errorMessage = document.getElementById('errorMessage');
+
+    let currentChatId = null;
+    let professorEmail = null;
+    let isAtBottom = true;
+
+    // Check Authentication and Get Professor Email
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        professorEmail = user.email;
+        loadStudents();
+      } else {
+        showError('You are not authenticated. Redirecting to login...');
+        setTimeout(() => window.location.href = 'login.html', 2000);
+      }
+    });
+
+    // Back Button
+    backBtn.addEventListener('click', () => {
+      window.location.href = `professor.html?email=${encodeURIComponent(professorEmail)}`;
+    });
+
+    // Load Students
+    async function loadStudents() {
+      showLoading(true);
+      try {
+        const studentsRef = ref(db, 'students');
+        onValue(studentsRef, snapshot => {
+          const students = snapshot.val();
+          studentList.innerHTML = '<h2 class="text-lg font-semibold mb-4">Students (IT11)</h2>';
+          for (const cin in students) {
+            if (students[cin].class === 'IT11') {
+              const studentName = `${students[cin].firstName} ${students[cin].lastName}`;
+              const studentItem = document.createElement('div');
+              studentItem.className = 'p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer relative';
+              studentItem.innerHTML = `${studentName}<span id="badge-${cin}" class="notification-badge hidden">0</span>`;
+              studentItem.addEventListener('click', () => loadChat(cin, studentName));
+              studentList.appendChild(studentItem);
+              loadNotificationCount(cin);
+            }
+          }
+        }, { onlyOnce: true });
+      } catch (error) {
+        console.error('Error loading students:', error);
+        showError('Failed to load students. Please try again.');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Load Notification Count
+    function loadNotificationCount(cin) {
+      const notificationRef = ref(db, `notifications/${professorEmail}/${cin}/unseenCount`);
+      onValue(notificationRef, snapshot => {
+        const count = snapshot.val() || 0;
+        const badge = document.getElementById(`badge-${cin}`);
+        if (badge) {
+          badge.textContent = count;
+          badge.className = `notification-badge ${count > 0 ? '' : 'hidden'}`;
+        }
+      });
+    }
+
+    // Load Chat
+    async function loadChat(cin, studentName) {
+      showLoading(true);
+      try {
+        currentChatId = `${cin}_${professorEmail.split('@')[0]}`;
+        chatTitle.textContent = `Chat with ${studentName}`;
+        messageInputArea.className = 'flex items-center mt-4';
+        messageList.innerHTML = '';
+        await set(ref(db, `notifications/${professorEmail}/${cin}/unseenCount`), 0);
+        const messagesRef = ref(db, `messages/${currentChatId}`);
+        onValue(messagesRef, snapshot => {
+          messageList.innerHTML = '';
+          const messages = snapshot.val();
+          if (messages) {
+            for (const msgId in messages) {
+              const msg = messages[msgId];
+              const messageDiv = document.createElement('div');
+              messageDiv.className = `message-bubble ${msg.senderType === 'professor' ? 'professor-message' : 'student-message'}`;
+              messageDiv.innerHTML = `
+                <span>${msg.message}</span>
+                <div class="seen-indicator">${msg.seen ? 'Seen' : ''}</div>
+              `;
+              messageList.appendChild(messageDiv);
+            }
+            updateScroll();
+          }
+        });
+      } catch (error) {
+        console.error('Error loading chat:', error);
+        showError('Failed to load chat. Please try again.');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Send Message
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    async function sendMessage() {
+      const message = messageInput.value.trim();
+      if (!message) {
+        showError('Please enter a message.');
+        return;
+      }
+      if (!currentChatId) {
+        showError('Please select a student to chat with.');
+        return;
+      }
+      showLoading(true);
+      try {
+        const timestamp = Date.now();
+        const messagesRef = ref(db, `messages/${currentChatId}`);
+        const newMessageRef = push(messagesRef);
+        await set(newMessageRef, {
+          sender: professorEmail,
+          senderType: 'professor',
+          message,
+          timestamp,
+          seen: false
+        });
+        await set(ref(db, `chatHistory/${currentChatId.split('_')[0]}/${currentChatId}`), {
+          lastMessage: timestamp,
+          professor: professorEmail.split('@')[0]
+        });
+        await runTransaction(ref(db, `notifications/${currentChatId.split('_')[0]}/${currentChatId}/unseenCount`), count => (count || 0) + 1);
+        messageInput.value = '';
+        scrollToBottom.className = 'scroll-to-bottom';
+      } catch (error) {
+        console.error('Error sending message:', error);
+        showError('Failed to send message. Please try again.');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Scroll Handling
+    messageList.addEventListener('scroll', () => {
+      isAtBottom = messageList.scrollTop + messageList.clientHeight >= messageList.scrollHeight - 10;
+      scrollToBottom.className = `scroll-to-bottom ${isAtBottom ? '' : 'show'}`;
+    });
+
+    scrollToBottom.addEventListener('click', () => {
+      messageList.scrollTop = messageList.scrollHeight;
+    });
+
+    function updateScroll() {
+      if (isAtBottom) {
+        messageList.scrollTop = messageList.scrollHeight;
+      } else {
+        scrollToBottom.className = 'scroll-to-bottom show';
+      }
+    }
+
+    // Loading Spinner
+    function showLoading(show) {
+      loadingSpinner.style.display = show ? 'block' : 'none';
+    }
+
+    // Error Message
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      setTimeout(() => {
+        errorMessage.style.display = 'none';
+      }, 5000);
+    }
+
+    // Dark Mode
+    onValue(ref(db, 'settings/darkMode'), snapshot => {
+      if (snapshot.val() === 'enabled') {
+        document.body.classList.add('dark');
+      }
+    }, { onlyOnce: true });
+  </script>
+</body>
+</html>
