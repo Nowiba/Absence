@@ -94,19 +94,6 @@
             transition: transform 0.2s ease;
         }
 
-        .notification-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: #e74c3c;
-            color: white;
-            border-radius: 50%;
-            padding: 4px 8px;
-            font-size: 10px;
-            font-weight: bold;
-            display: none;
-        }
-
         main {
             padding: 15px;
             animation: fadeIn 0.5s ease-in;
@@ -432,6 +419,7 @@
         .absence-weight {
             color: #e74c3c;
             font-weight: 500;
+ malos
         }
 
         .absence-count {
@@ -735,10 +723,6 @@
             color: #ffffff;
         }
 
-        body.dark-mode .notification-badge {
-            background-color: #ff5555;
-        }
-
         /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -828,10 +812,6 @@
             .email-modal .modal-content {
                 max-width: 90%;
             }
-            .notification-badge {
-                padding: 3px 6px;
-                font-size: 9px;
-            }
         }
     </style>
 </head>
@@ -842,10 +822,7 @@
     </header>
     <nav>
         <button class="nav-btn" id="home-btn" aria-label="Home"><span>🏠</span><span>Home</span></button>
-        <button class="nav-btn" id="messages-btn" aria-label="Messages">
-            <span>💬</span><span>Messages</span>
-            <span class="notification-badge" id="notification-badge">0</span>
-        </button>
+        <button class="nav-btn" id="files-btn" aria-label="Shared Files"><span>📁</span><span>Shared Files</span></button>
         <button class="nav-btn" id="dark-mode-toggle" aria-label="Toggle dark mode"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
     <main>
@@ -897,7 +874,6 @@
         <h2>Menu</h2>
         <button class="menu-item" id="sidebar-classmates-btn" aria-label="View classmates"><i class="fas fa-users"></i>Classmates</button>
         <button class="menu-item" id="sidebar-email-btn" aria-label="Update email"><i class="fas fa-envelope"></i>Email</button>
-        <button class="menu-item" id="sidebar-files-btn" aria-label="View shared files"><i class="fas fa-file-alt"></i>Shared Files</button>
     </div>
     <div id="toast" class="toast hidden"></div>
 
@@ -907,7 +883,7 @@
     <!-- CryptoJS for encryption/decryption -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        // Toast notification (moved to top for global access)
+        // Toast notification
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -954,10 +930,12 @@
                     toggleButton.querySelector('span:last-child').textContent = 'Light Mode';
                 }
 
-                // Extract CIN from URL
+                // Extract CIN and token from URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const cin = urlParams.get('cin');
+                const token = urlParams.get('token');
 
+                // Validate CIN and token
                 if (!cin || !/^\d{8}$/.test(cin)) {
                     showToast('Invalid or missing CIN. Please log in again.');
                     setTimeout(() => {
@@ -966,254 +944,311 @@
                     return;
                 }
 
-                // Notification Badge
-                const notificationBadge = document.getElementById('notification-badge');
-                db.ref(`notifications/${cin}/unseenCount`).on('value', (snapshot) => {
-                    const count = snapshot.val() || 0;
-                    notificationBadge.textContent = count;
-                    notificationBadge.style.display = count > 0 ? 'block' : 'none';
-                }, () => {
-                    showToast('Error loading notifications.');
-                });
-
-                // Subjects list
-                const subjects = [
-                    'Dev. Web et Multimédias 2',
-                    'A. Dev. Web et Multimédias 2',
-                    'Technique d’expression 2',
-                    'UVT3 (2CN)',
-                    'Algo & Programmation',
-                    'Option 2: Atelier Linux',
-                    'Sys. Exploitation',
-                    'Fond Réseaux',
-                    'English for Computing 2',
-                    'A. Système 1',
-                    'Préparation aux métiers',
-                    'Stat & Proba',
-                    'Recherche Opérationnelle',
-                    'A. Programmation'
-                ];
-
-                // Subject mapping
-                const subjectMapping = {
-                    'Dev Web': 'Dev. Web et Multimédias 2',
-                    'A. Dev Web': 'A. Dev. Web et Multimédias 2',
-                    'Technique d\'expression': 'Technique d’expression 2',
-                    'UVT3': 'UVT3 (2CN)',
-                    'Algo & Prog': 'Algo & Programmation',
-                    'Atelier Linux': 'Option 2: Atelier Linux',
-                    'Sys Exploitation': 'Sys. Exploitation',
-                    'Fond Reseaux': 'Fond Réseaux',
-                    'English': 'English for Computing 2',
-                    'A. Systeme': 'A. Système 1',
-                    'Prep Metiers': 'Préparation aux métiers',
-                    'Stat Proba': 'Stat & Proba',
-                    'Rech Op': 'Recherche Opérationnelle',
-                    'A. Prog': 'A. Programmation'
-                };
-
-                // Normalize string
-                function normalizeString(str) {
-                    return str ? str.trim().toLowerCase() : '';
+                if (!token) {
+                    showToast('Access denied. Please log in first.');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
+                    return;
                 }
 
-                // Convert time to minutes
-                function timeToMinutes(timeStr) {
-                    const [hours, minutes] = timeStr.split(':').map(Number);
-                    return hours * 60 + minutes;
-                }
-
-                // Update details visibility
-                function updateDetailsVisibility() {
-                    const now = new Date();
-                    const detailsContainer = document.getElementById('details-container');
-                    const currentClassP = document.getElementById('current-class');
-                    detailsContainer.classList.add('show');
-                    currentClassP.textContent = 'No class schedule available';
-                }
-
-                setInterval(updateDetailsVisibility, 60000);
-                updateDetailsVisibility();
-
-                // Fetch student details
-                let studentClass = '';
-                let classmates = [];
-                const studentRef = db.ref('students/' + cin);
-
-                // Render absences
-                function renderAbsences(absences) {
-                    const absenceBySubject = {};
-                    subjects.forEach(subject => {
-                        const normalizedSubject = normalizeString(subject);
-                        absenceBySubject[subject] = absences.filter(a => {
-                            const normalizedAbsenceSubject = normalizeString(a.mappedSubject);
-                            const normalizedStudentClass = normalizeString(studentClass);
-                            return normalizedAbsenceSubject === normalizedSubject &&
-                                   a.status === 'absent';
-                        });
-                    });
-
-                    const absenceDetails = document.getElementById('absence-details');
-                    absenceDetails.innerHTML = '';
-
-                    subjects.forEach(subject => {
-                        const sectionDiv = document.createElement('div');
-                        sectionDiv.className = 'subject-section';
-                        const absencesForSubject = absenceBySubject[subject] || [];
-                        const absenceCount = absencesForSubject.reduce((total, a) => total + (a.weight || 0), 0);
-                        sectionDiv.innerHTML = `
-                            <div class="subject-header" data-subject="${subject}">
-                                <span>${subject}</span>
-                            </div>
-                            <div class="subject-details" id="details-${subject.replace(/\s+/g, '-')}">
-                                <div class="absence-count">Absences: ${absenceCount}</div>
-                                ${absencesForSubject.length === 0 ? 
-                                    `<div class="no-absences">No absences recorded for ${subject}</div>` :
-                                    absencesForSubject.map(a => `
-                                        <div class="absence-item">
-                                            <span class="absence-date">Date: ${a.date || 'N/A'}</span>
-                                            <span class="absence-weight">Weight: ${a.weight || 'N/A'}</span>
-                                        </div>
-                                    `).join('')}
-                            </div>
-                        `;
-                        absenceDetails.appendChild(sectionDiv);
-                    });
-
-                    document.querySelectorAll('.subject-header').forEach(header => {
-                        header.addEventListener('click', () => {
-                            const subject = header.dataset.subject;
-                            const details = document.getElementById(`details-${subject.replace(/\s+/g, '-')}`);
-                            const isVisible = details.classList.contains('show');
-
-                            document.querySelectorAll('.subject-details').forEach(d => d.classList.remove('show'));
-                            document.querySelectorAll('.subject-header').forEach(h => h.classList.remove('active'));
-
-                            if (!isVisible) {
-                                details.classList.add('show');
-                                header.classList.add('active');
-                            }
-                        });
-                    });
-                }
-
-                // Fetch absences
-                const professorActionsRef = db.ref('professorActions');
-                professorActionsRef.on('value', (snapshot) => {
-                    const allActions = [];
-                    snapshot.forEach(professorSnapshot => {
-                        professorSnapshot.forEach(actionSnapshot => {
-                            const action = actionSnapshot.val();
-                            if (action.cin === cin && action.status === 'absent') {
-                                const mappedSubject = subjectMapping[action.subject] || action.subject;
-                                allActions.push({
-                                    ...action,
-                                    mappedSubject: mappedSubject
-                                });
-                            }
-                        });
-                    });
-                    renderAbsences(allActions);
-                }, (error) => {
-                    showToast('Error loading absence data');
-                });
-
-                // Listen for student data
-                studentRef.on('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        const student = snapshot.val();
-                        const fullName = `${student.firstName} ${student.lastName}`;
-                        studentClass = student.class || 'Not specified';
-                        document.getElementById('welcome-message').textContent = `Welcome, ${fullName}`;
-                        document.getElementById('class-info').textContent = `Class: ${studentClass}`;
-                        const emailInput = document.getElementById('email-input');
-                        if (student.email) {
-                            emailInput.value = student.email;
-                        } else {
-                            document.getElementById('email-modal').style.display = 'flex';
-                        }
-
-                        // Load classmates
-                        db.ref('students').once('value').then((snapshot) => {
-                            classmates = [];
-                            snapshot.forEach(childSnapshot => {
-                                const s = childSnapshot.val();
-                                const sCin = childSnapshot.key;
-                                if (s.class === studentClass && sCin !== cin) {
-                                    classmates.push({ cin: sCin, firstName: s.firstName, lastName: s.lastName });
-                                }
-                            });
-                            renderClassmates();
-                        }).catch(error => {
-                            showToast('Error loading classmates');
-                        });
-                    } else {
-                        showToast('Student not found. Please log in again.');
+                // Validate token
+                db.ref(`loginTokens/${cin}/${token}`).once('value').then((snapshot) => {
+                    const tokenData = snapshot.val();
+                    if (!tokenData || tokenData.expires < Date.now()) {
+                        showToast('Invalid or expired token. Please log in again.');
                         setTimeout(() => {
                             window.location.href = 'index.html';
                         }, 3000);
+                        return;
                     }
-                }, (error) => {
-                    showToast('Error loading student data');
+                    // Token is valid, proceed with page initialization
+                    initializePage();
+                    // Clean up token after use
+                    db.ref(`loginTokens/${cin}/${token}`).remove();
+                }).catch(() => {
+                    showToast('Error validating access. Please log in again.');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
                 });
 
-                // Load shared files
-                const sharedFilesList = document.getElementById('shared-files-list');
-                const fileViewerModal = document.getElementById('file-viewer-modal');
-                const fileViewerContent = document.getElementById('file-viewer-content');
-                const loadingMessage = document.getElementById('loading-message');
+                function initializePage() {
+                    // Subjects list
+                    const subjects = [
+                        'Dev. Web et Multimédias 2',
+                        'A. Dev. Web et Multimédias 2',
+                        'Technique d’expression 2',
+                        'UVT3 (2CN)',
+                        'Algo & Programmation',
+                        'Option 2: Atelier Linux',
+                        'Sys. Exploitation',
+                        'Fond Réseaux',
+                        'English for Computing 2',
+                        'A. Système 1',
+                        'Préparation aux métiers',
+                        'Stat & Proba',
+                        'Recherche Opérationnelle',
+                        'A. Programmation'
+                    ];
 
-                db.ref('sharedFiles').on('value', (snapshot) => {
-                    sharedFilesList.innerHTML = '';
-                    const files = [];
-                    snapshot.forEach(childSnapshot => {
-                        const fileData = childSnapshot.val();
-                        files.push({ id: childSnapshot.key, ...fileData });
-                    });
+                    // Subject mapping
+                    const subjectMapping = {
+                        'Dev Web': 'Dev. Web et Multimédias 2',
+                        'A. Dev Web': 'A. Dev. Web et Multimédias 2',
+                        'Technique d\'expression': 'Technique d’expression 2',
+                        'UVT3': 'UVT3 (2CN)',
+                        'Algo & Prog': 'Algo & Programmation',
+                        'Atelier Linux': 'Option 2: Atelier Linux',
+                        'Sys Exploitation': 'Sys. Exploitation',
+                        'Fond Reseaux': 'Fond Réseaux',
+                        'English': 'English for Computing 2',
+                        'A. Systeme': 'A. Système 1',
+                        'Prep Metiers': 'Préparation aux métiers',
+                        'Stat Proba': 'Stat & Proba',
+                        'Rech Op': 'Recherche Opérationnelle',
+                        'A. Prog': 'A. Programmation'
+                    };
 
-                    if (files.length === 0) {
-                        sharedFilesList.innerHTML = `<div class="no-files">No files shared yet</div>`;
-                    } else {
-                        files.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
-                        files.forEach(file => {
-                            const uploadDate = new Date(file.uploadDate);
-                            const formattedDate = uploadDate.toLocaleDateString('en-GB', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric'
-                            }) + ', ' + uploadDate.toLocaleTimeString('en-US', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                hour12: true
+                    // Normalize string
+                    function normalizeString(str) {
+                        return str ? str.trim().toLowerCase() : '';
+                    }
+
+                    // Convert time to minutes
+                    function timeToMinutes(timeStr) {
+                        const [hours, minutes] = timeStr.split(':').map(Number);
+                        return hours * 60 + minutes;
+                    }
+
+                    // Update details visibility
+                    function updateDetailsVisibility() {
+                        const now = new Date();
+                        const detailsContainer = document.getElementById('details-container');
+                        const currentClassP = document.getElementById('current-class');
+                        detailsContainer.classList.add('show');
+                        currentClassP.textContent = 'No class schedule available';
+                    }
+
+                    setInterval(updateDetailsVisibility, 60000);
+                    updateDetailsVisibility();
+
+                    // Fetch student details
+                    let studentClass = '';
+                    let classmates = [];
+                    const studentRef = db.ref('students/' + cin);
+
+                    // Render absences
+                    function renderAbsences(absences) {
+                        const absenceBySubject = {};
+                        subjects.forEach(subject => {
+                            const normalizedSubject = normalizeString(subject);
+                            absenceBySubject[subject] = absences.filter(a => {
+                                const normalizedAbsenceSubject = normalizeString(a.mappedSubject);
+                                const normalizedStudentClass = normalizeString(studentClass);
+                                return normalizedAbsenceSubject === normalizedSubject &&
+                                       a.status === 'absent';
                             });
-
-                            const fileType = file.fileType.toLowerCase();
-                            const isImage = fileType.includes('image/png') || fileType.includes('image/jpeg') || fileType.includes('image/jpg') || fileType.includes('image/gif');
-
-                            const fileItem = document.createElement('div');
-                            fileItem.className = 'file-item';
-                            fileItem.innerHTML = `
-                                <div class="file-info">
-                                    <a href="#" class="file-name" data-id="${file.id}" data-type="${file.fileType}" data-salt="${file.salt}">${file.fileName}</a>
-                                    <div class="file-details">
-                                        Uploaded by: ${file.professorName} (${file.subject || 'N/A'})<br>
-                                        ${formattedDate}
-                                    </div>
-                                </div>
-                                <a href="#" class="download-link" data-id="${file.id}" data-filename="${file.fileName}" data-type="${file.fileType}" data-salt="${file.salt}">Download</a>
-                            `;
-                            sharedFilesList.appendChild(fileItem);
                         });
 
-                        document.querySelectorAll('.file-name').forEach(link => {
-                            link.addEventListener('click', async (e) => {
-                                e.preventDefault();
-                                const fileId = link.dataset.id;
-                                const fileType = link.dataset.type.toLowerCase();
-                                const salt = link.dataset.salt;
+                        const absenceDetails = document.getElementById('absence-details');
+                        absenceDetails.innerHTML = '';
+
+                        subjects.forEach(subject => {
+                            const sectionDiv = document.createElement('div');
+                            sectionDiv.className = 'subject-section';
+                            const absencesForSubject = absenceBySubject[subject] || [];
+                            const absenceCount = absencesForSubject.reduce((total, a) => total + (a.weight || 0), 0);
+                            sectionDiv.innerHTML = `
+                                <div class="subject-header" data-subject="${subject}">
+                                    <span>${subject}</span>
+                                </div>
+                                <div class="subject-details" id="details-${subject.replace(/\s+/g, '-')}">
+                                    <div class="absence-count">Absences: ${absenceCount}</div>
+                                    ${absencesForSubject.length === 0 ? 
+                                        `<div class="no-absences">No absences recorded for ${subject}</div>` :
+                                        absencesForSubject.map(a => `
+                                            <div class="absence-item">
+                                                <span class="absence-date">Date: ${a.date || 'N/A'}</span>
+                                                <span class="absence-weight">Weight: ${a.weight || 'N/A'}</span>
+                                            </div>
+                                        `).join('')}
+                                </div>
+                            `;
+                            absenceDetails.appendChild(sectionDiv);
+                        });
+
+                        document.querySelectorAll('.subject-header').forEach(header => {
+                            header.addEventListener('click', () => {
+                                const subject = header.dataset.subject;
+                                const details = document.getElementById(`details-${subject.replace(/\s+/g, '-')}`);
+                                const isVisible = details.classList.contains('show');
+
+                                document.querySelectorAll('.subject-details').forEach(d => d.classList.remove('show'));
+                                document.querySelectorAll('.subject-header').forEach(h => h.classList.remove('active'));
+
+                                if (!isVisible) {
+                                    details.classList.add('show');
+                                    header.classList.add('active');
+                                }
+                            });
+                        });
+                    }
+
+                    // Fetch absences
+                    const professorActionsRef = db.ref('professorActions');
+                    professorActionsRef.on('value', (snapshot) => {
+                        const allActions = [];
+                        snapshot.forEach(professorSnapshot => {
+                            professorSnapshot.forEach(actionSnapshot => {
+                                const action = actionSnapshot.val();
+                                if (action.cin === cin && action.status === 'absent') {
+                                    const mappedSubject = subjectMapping[action.subject] || action.subject;
+                                    allActions.push({
+                                        ...action,
+                                        mappedSubject: mappedSubject
+                                    });
+                                }
+                            });
+                        });
+                        renderAbsences(allActions);
+                    }, (error) => {
+                        showToast('Error loading absence data');
+                    });
+
+                    // Listen for student data
+                    studentRef.on('value', (snapshot) => {
+                        if (snapshot.exists()) {
+                            const student = snapshot.val();
+                            const fullName = `${student.firstName} ${student.lastName}`;
+                            studentClass = student.class || 'Not specified';
+                            document.getElementById('welcome-message').textContent = `Welcome, ${fullName}`;
+                            document.getElementById('class-info').textContent = `Class: ${studentClass}`;
+                            const emailInput = document.getElementById('email-input');
+                            if (student.email) {
+                                emailInput.value = student.email;
+                            } else {
+                                document.getElementById('email-modal').style.display = 'flex';
+                            }
+
+                            // Load classmates
+                            db.ref('students').once('value').then((snapshot) => {
+                                classmates = [];
+                                snapshot.forEach(childSnapshot => {
+                                    const s = childSnapshot.val();
+                                    const sCin = childSnapshot.key;
+                                    if (s.class === studentClass && sCin !== cin) {
+                                        classmates.push({ cin: sCin, firstName: s.firstName, lastName: s.lastName });
+                                    }
+                                });
+                                renderClassmates();
+                            }).catch(error => {
+                                showToast('Error loading classmates');
+                            });
+                        } else {
+                            showToast('Student not found. Please log in again.');
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 3000);
+                        }
+                    }, (error) => {
+                        showToast('Error loading student data');
+                    });
+
+                    // Load shared files
+                    const sharedFilesList = document.getElementById('shared-files-list');
+                    const fileViewerModal = document.getElementById('file-viewer-modal');
+                    const fileViewerContent = document.getElementById('file-viewer-content');
+                    const loadingMessage = document.getElementById('loading-message');
+
+                    db.ref('sharedFiles').on('value', (snapshot) => {
+                        sharedFilesList.innerHTML = '';
+                        const files = [];
+                        snapshot.forEach(childSnapshot => {
+                            const fileData = childSnapshot.val();
+                            files.push({ id: childSnapshot.key, ...fileData });
+                        });
+
+                        if (files.length === 0) {
+                            sharedFilesList.innerHTML = `<div class="no-files">No files shared yet</div>`;
+                        } else {
+                            files.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+                            files.forEach(file => {
+                                const uploadDate = new Date(file.uploadDate);
+                                const formattedDate = uploadDate.toLocaleDateString('en-GB', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                }) + ', ' + uploadDate.toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
+                                });
+
+                                const fileType = file.fileType.toLowerCase();
                                 const isImage = fileType.includes('image/png') || fileType.includes('image/jpeg') || fileType.includes('image/jpg') || fileType.includes('image/gif');
 
-                                if (isImage) {
+                                const fileItem = document.createElement('div');
+                                fileItem.className = 'file-item';
+                                fileItem.innerHTML = `
+                                    <div class="file-info">
+                                        <a href="#" class="file-name" data-id="${file.id}" data-type="${file.fileType}" data-salt="${file.salt}">${file.fileName}</a>
+                                        <div class="file-details">
+                                            Uploaded by: ${file.professorName} (${file.subject || 'N/A'})<br>
+                                            ${formattedDate}
+                                        </div>
+                                    </div>
+                                    <a href="#" class="download-link" data-id="${file.id}" data-filename="${file.fileName}" data-type="${file.fileType}" data-salt="${file.salt}">Download</a>
+                                `;
+                                sharedFilesList.appendChild(fileItem);
+                            });
+
+                            document.querySelectorAll('.file-name').forEach(link => {
+                                link.addEventListener('click', async (e) => {
+                                    e.preventDefault();
+                                    const fileId = link.dataset.id;
+                                    const fileType = link.dataset.type.toLowerCase();
+                                    const salt = link.dataset.salt;
+                                    const isImage = fileType.includes('image/png') || fileType.includes('image/jpeg') || fileType.includes('image/jpg') || fileType.includes('image/gif');
+
+                                    if (isImage) {
+                                        try {
+                                            const fileSnapshot = await db.ref(`sharedFiles/${fileId}`).once('value');
+                                            const fileData = fileSnapshot.val();
+                                            const encryptedData = fileData.chunks.join('');
+                                            const key = deriveKey(salt);
+                                            const decrypted = CryptoJS.AES.decrypt(encryptedData, key);
+                                            const decryptedBase64 = decrypted.toString(CryptoJS.enc.Base64);
+                                            if (!decryptedBase64) {
+                                                throw new Error('Decryption resulted in empty data');
+                                            }
+                                            const base64String = `data:${fileType};base64,${decryptedBase64}`;
+
+                                            fileViewerContent.innerHTML = '';
+                                            loadingMessage.classList.add('show');
+                                            fileViewerModal.style.display = 'flex';
+                                            setTimeout(() => {
+                                                fileViewerContent.innerHTML = `<img src="${base64String}" alt="File preview">`;
+                                                loadingMessage.classList.remove('show');
+                                            }, 500);
+                                        } catch (error) {
+                                            showToast(`Error loading image: ${error.message}`);
+                                        }
+                                    } else {
+                                        const downloadLink = link.parentElement.nextElementSibling;
+                                        downloadLink.click();
+                                    }
+                                });
+                            });
+
+                            document.querySelectorAll('.download-link').forEach(link => {
+                                link.addEventListener('click', async (e) => {
+                                    e.preventDefault();
+                                    const fileId = link.dataset.id;
+                                    const fileName = link.dataset.filename;
+                                    const fileType = link.dataset.type;
+                                    const salt = link.dataset.salt;
+
                                     try {
                                         const fileSnapshot = await db.ref(`sharedFiles/${fileId}`).once('value');
                                         const fileData = fileSnapshot.val();
@@ -1226,159 +1261,118 @@
                                         }
                                         const base64String = `data:${fileType};base64,${decryptedBase64}`;
 
-                                        fileViewerContent.innerHTML = '';
-                                        loadingMessage.classList.add('show');
-                                        fileViewerModal.style.display = 'flex';
-                                        setTimeout(() => {
-                                            fileViewerContent.innerHTML = `<img src="${base64String}" alt="File preview">`;
-                                            loadingMessage.classList.remove('show');
-                                        }, 500);
+                                        const downloadAnchor = document.createElement('a');
+                                        downloadAnchor.href = base64String;
+                                        downloadAnchor.download = fileName;
+                                        document.body.appendChild(downloadAnchor);
+                                        downloadAnchor.click();
+                                        document.body.removeChild(downloadAnchor);
                                     } catch (error) {
-                                        showToast(`Error loading image: ${error.message}`);
+                                        showToast(`Error downloading file: ${error.message}`);
                                     }
-                                } else {
-                                    const downloadLink = link.parentElement.nextElementSibling;
-                                    downloadLink.click();
-                                }
+                                });
                             });
-                        });
-
-                        document.querySelectorAll('.download-link').forEach(link => {
-                            link.addEventListener('click', async (e) => {
-                                e.preventDefault();
-                                const fileId = link.dataset.id;
-                                const fileName = link.dataset.filename;
-                                const fileType = link.dataset.type;
-                                const salt = link.dataset.salt;
-
-                                try {
-                                    const fileSnapshot = await db.ref(`sharedFiles/${fileId}`).once('value');
-                                    const fileData = fileSnapshot.val();
-                                    const encryptedData = fileData.chunks.join('');
-                                    const key = deriveKey(salt);
-                                    const decrypted = CryptoJS.AES.decrypt(encryptedData, key);
-                                    const decryptedBase64 = decrypted.toString(CryptoJS.enc.Base64);
-                                    if (!decryptedBase64) {
-                                        throw new Error('Decryption resulted in empty data');
-                                    }
-                                    const base64String = `data:${fileType};base64,${decryptedBase64}`;
-
-                                    const downloadAnchor = document.createElement('a');
-                                    downloadAnchor.href = base64String;
-                                    downloadAnchor.download = fileName;
-                                    document.body.appendChild(downloadAnchor);
-                                    downloadAnchor.click();
-                                    document.body.removeChild(downloadAnchor);
-                                } catch (error) {
-                                    showToast(`Error downloading file: ${error.message}`);
-                                }
-                            });
-                        });
-                    }
-                }, (error) => {
-                    showToast('Error loading shared files');
-                });
-
-                // Render classmates
-                function renderClassmates() {
-                    const modalClassmatesList = document.getElementById('modal-classmates-list');
-                    modalClassmatesList.innerHTML = '';
-                    if (classmates.length === 0) {
-                        modalClassmatesList.innerHTML = `<div class="no-classmates">No classmates found</div>`;
-                    } else {
-                        classmates.forEach(classmate => {
-                            const item = document.createElement('div');
-                            item.className = 'classmate-item';
-                            item.innerHTML = `Name: ${classmate.firstName} ${classmate.lastName}`;
-                            modalClassmatesList.appendChild(item);
-                        });
-                    }
-                }
-
-                // Event Listeners
-                const classmatesModal = document.getElementById('classmates-modal');
-                const emailModal = document.getElementById('email-modal');
-                const filesModal = document.getElementById('files-modal');
-                const hamburgerSidebar = document.getElementById('hamburger-sidebar');
-
-                document.getElementById('hamburger-btn').addEventListener('click', () => {
-                    hamburgerSidebar.classList.add('open');
-                });
-
-                document.getElementById('close-hamburger-sidebar').addEventListener('click', () => {
-                    hamburgerSidebar.classList.remove('open');
-                });
-
-                document.getElementById('sidebar-classmates-btn').addEventListener('click', () => {
-                    classmatesModal.style.display = 'flex';
-                    hamburgerSidebar.classList.remove('open');
-                });
-
-                document.getElementById('sidebar-email-btn').addEventListener('click', () => {
-                    emailModal.style.display = 'flex';
-                    hamburgerSidebar.classList.remove('open');
-                });
-
-                document.getElementById('sidebar-files-btn').addEventListener('click', () => {
-                    filesModal.style.display = 'flex';
-                    hamburgerSidebar.classList.remove('open');
-                });
-
-                document.getElementById('messages-btn').addEventListener('click', () => {
-                    window.location.href = `messages.html?cin=${cin}`;
-                });
-
-                document.getElementById('update-email-btn').addEventListener('click', () => {
-                    const emailInput = document.getElementById('email-input');
-                    const email = emailInput.value.trim();
-                    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                        showToast('Please enter a valid email');
-                        return;
-                    }
-                    db.ref('students/' + cin).update({ email }).then(() => {
-                        showToast('Email updated successfully');
-                        emailModal.style.display = 'none';
-                    }).catch(error => {
-                        showToast('Error updating email');
+                        }
+                    }, (error) => {
+                        showToast('Error loading shared files');
                     });
-                });
 
-                // Close modals when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!classmatesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#sidebar-classmates-btn') && classmatesModal.style.display === 'flex') {
-                        classmatesModal.style.display = 'none';
+                    // Render classmates
+                    function renderClassmates() {
+                        const modalClassmatesList = document.getElementById('modal-classmates-list');
+                        modalClassmatesList.innerHTML = '';
+                        if (classmates.length === 0) {
+                            modalClassmatesList.innerHTML = `<div class="no-classmates">No classmates found</div>`;
+                        } else {
+                            classmates.forEach(classmate => {
+                                const item = document.createElement('div');
+                                item.className = 'classmate-item';
+                                item.innerHTML = `Name: ${classmate.firstName} ${classmate.lastName}`;
+                                modalClassmatesList.appendChild(item);
+                            });
+                        }
                     }
-                    if (!fileViewerModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('.file-name') && fileViewerModal.style.display === 'flex') {
-                        fileViewerModal.style.display = 'none';
-                        fileViewerContent.innerHTML = '';
-                        loadingMessage.classList.remove('show');
-                    }
-                    if (!emailModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#sidebar-email-btn') && emailModal.style.display === 'flex') {
-                        emailModal.style.display = 'none';
-                    }
-                    if (!filesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#sidebar-files-btn') && filesModal.style.display === 'flex') {
-                        filesModal.style.display = 'none';
-                    }
-                    if (!hamburgerSidebar.contains(e.target) && !e.target.closest('#hamburger-btn') && hamburgerSidebar.classList.contains('open')) {
+
+                    // Event Listeners
+                    const classmatesModal = document.getElementById('classmates-modal');
+                    const emailModal = document.getElementById('email-modal');
+                    const filesModal = document.getElementById('files-modal');
+                    const hamburgerSidebar = document.getElementById('hamburger-sidebar');
+
+                    document.getElementById('hamburger-btn').addEventListener('click', () => {
+                        hamburgerSidebar.classList.add('open');
+                    });
+
+                    document.getElementById('close-hamburger-sidebar').addEventListener('click', () => {
                         hamburgerSidebar.classList.remove('open');
-                    }
-                });
+                    });
 
-                // Home button
-                document.getElementById('home-btn').addEventListener('click', () => {
-                    window.location.href = 'index.html';
-                });
+                    document.getElementById('sidebar-classmates-btn').addEventListener('click', () => {
+                        classmatesModal.style.display = 'flex';
+                        hamburgerSidebar.classList.remove('open');
+                    });
 
-                // Dark Mode Toggle
-                document.getElementById('dark-mode-toggle').addEventListener('click', () => {
-                    document.body.classList.toggle('dark-mode');
-                    const isDarkMode = document.body.classList.contains('dark-mode');
-                    const toggleButton = document.getElementById('dark-mode-toggle');
-                    toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
-                    toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
-                    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
-                    showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
-                });
+                    document.getElementById('sidebar-email-btn').addEventListener('click', () => {
+                        emailModal.style.display = 'flex';
+                        hamburgerSidebar.classList.remove('open');
+                    });
+
+                    document.getElementById('files-btn').addEventListener('click', () => {
+                        filesModal.style.display = 'flex';
+                    });
+
+                    document.getElementById('update-email-btn').addEventListener('click', () => {
+                        const emailInput = document.getElementById('email-input');
+                        const email = emailInput.value.trim();
+                        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                            showToast('Please enter a valid email');
+                            return;
+                        }
+                        db.ref('students/' + cin).update({ email }).then(() => {
+                            showToast('Email updated successfully');
+                            emailModal.style.display = 'none';
+                        }).catch(error => {
+                            showToast('Error updating email');
+                        });
+                    });
+
+                    // Close modals when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (!classmatesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#sidebar-classmates-btn') && classmatesModal.style.display === 'flex') {
+                            classmatesModal.style.display = 'none';
+                        }
+                        if (!fileViewerModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('.file-name') && !e.target.closest('#files-btn') && fileViewerModal.style.display === 'flex') {
+                            fileViewerModal.style.display = 'none';
+                            fileViewerContent.innerHTML = '';
+                            loadingMessage.classList.remove('show');
+                        }
+                        if (!emailModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#sidebar-email-btn') && emailModal.style.display === 'flex') {
+                            emailModal.style.display = 'none';
+                        }
+                        if (!filesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#files-btn') && !e.target.closest('.file-name') && filesModal.style.display === 'flex') {
+                            filesModal.style.display = 'none';
+                        }
+                        if (!hamburgerSidebar.contains(e.target) && !e.target.closest('#hamburger-btn') && hamburgerSidebar.classList.contains('open')) {
+                            hamburgerSidebar.classList.remove('open');
+                        }
+                    });
+
+                    // Home button
+                    document.getElementById('home-btn').addEventListener('click', () => {
+                        window.location.href = 'index.html';
+                    });
+
+                    // Dark Mode Toggle
+                    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+                        document.body.classList.toggle('dark-mode');
+                        const isDarkMode = document.body.classList.contains('dark-mode');
+                        const toggleButton = document. getElementById('dark-mode-toggle');
+                        toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
+                        toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+                        localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+                        showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
+                    });
+                }
             } catch (error) {
                 showToast('Error initializing page');
             }
