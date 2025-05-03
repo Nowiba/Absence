@@ -598,11 +598,29 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             z-index: 3000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .toast.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
+        }
+
+        .toast button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s ease;
+        }
+
+        .toast button:hover {
+            background-color: #5dade2;
         }
 
         /* Dark Mode Styles */
@@ -883,9 +901,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         // Toast notification
-        function showToast(message, duration = 3000) {
+        function showToast(message, duration = 6000) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
+            toast.innerHTML = `${message} <button onclick="window.location.href='index.html'">Return to Login</button>`;
             toast.classList.remove('hidden');
             toast.classList.add('show');
             setTimeout(() => {
@@ -935,22 +953,37 @@
                 const token = urlParams.get('token');
 
                 // Log parameters for debugging
-                console.log('CIN:', cin, 'Token:', token);
+                console.log('CIN:', cin);
+                console.log('Token:', token);
+                console.log('Referrer:', document.referrer);
+
+                // Check referrer to ensure navigation from index.html
+                const expectedOrigin = window.location.origin;
+                const referrer = document.referrer;
+                const isValidReferrer = referrer && new URL(referrer).origin === expectedOrigin;
+
+                if (!isValidReferrer) {
+                    showToast('Access denied. Please log in first.');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 6000);
+                    return;
+                }
 
                 // Validate CIN and token
                 if (!cin || !/^\d{8}$/.test(cin)) {
-                    showToast('Invalid or missing CIN. Please log in again.', 5000);
+                    showToast('Invalid or missing CIN. Please log in again.');
                     setTimeout(() => {
                         window.location.href = 'index.html';
-                    }, 5000);
+                    }, 6000);
                     return;
                 }
 
                 if (!token) {
-                    showToast('Access denied. Please log in first.', 5000);
+                    showToast('Access denied. Please log in first.');
                     setTimeout(() => {
                         window.location.href = 'index.html';
-                    }, 5000);
+                    }, 6000);
                     return;
                 }
 
@@ -963,10 +996,10 @@
                                 console.log(`Retrying token validation (${retryCount + 1}/${maxRetries})`);
                                 setTimeout(() => validateToken(retryCount + 1), 1000);
                             } else {
-                                showToast('Invalid or expired token. Please log in again.', 5000);
+                                showToast('Invalid or expired token. Please log in again.');
                                 setTimeout(() => {
                                     window.location.href = 'index.html';
-                                }, 5000);
+                                }, 6000);
                             }
                             return;
                         }
@@ -979,10 +1012,10 @@
                             console.log(`Retrying token validation (${retryCount + 1}/${maxRetries})`);
                             setTimeout(() => validateToken(retryCount + 1), 1000);
                         } else {
-                            showToast('Error validating access. Please try again.', 5000);
+                            showToast('Error validating access. Please try again.');
                             setTimeout(() => {
                                 window.location.href = 'index.html';
-                            }, 5000);
+                            }, 6000);
                         }
                     });
                 }
@@ -1162,10 +1195,10 @@
                                 showToast('Error loading classmates');
                             });
                         } else {
-                            showToast('Student not found. Please log in again.', 5000);
+                            showToast('Student not found. Please log in again.');
                             setTimeout(() => {
                                 window.location.href = 'index.html';
-                            }, 5000);
+                            }, 6000);
                         }
                     }, (error) => {
                         showToast('Error loading student data');
@@ -1391,10 +1424,10 @@
                 }
             } catch (error) {
                 console.error('Initialization error:', error);
-                showToast('Error initializing page. Please try again.', 5000);
+                showToast('Error initializing page. Please try again.');
                 setTimeout(() => {
                     window.location.href = 'index.html';
-                }, 5000);
+                }, 6000);
             }
         });
     </script>
