@@ -894,6 +894,13 @@
                     });
                 }
 
+                // Generate secure token
+                function generateToken() {
+                    const array = new Uint8Array(16);
+                    crypto.getRandomValues(array);
+                    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+                }
+
                 // Student Login
                 console.log('Attaching student login event listener');
                 document.getElementById('student-login').addEventListener('click', async () => {
@@ -965,10 +972,17 @@
                             return;
                         }
 
+                        // Generate and store token
+                        const token = generateToken();
+                        const tokenRef = db.ref(`loginTokens/${cin}/${token}`);
+                        await tokenRef.set({
+                            expires: Date.now() + 5 * 60 * 1000 // 5 minutes
+                        });
+
                         document.getElementById('student-modal').classList.remove('show');
                         setTimeout(() => {
                             document.getElementById('student-modal').classList.add('hidden');
-                            window.location.href = `student.html?cin=${cin}`;
+                            window.location.href = `student.html?cin=${cin}&token=${token}`;
                         }, 300);
                         showToast('Login successful! Welcome!');
                     } catch (error) {
@@ -1184,7 +1198,7 @@
                         showToast('Sign up successful! Please log in.');
                     } catch (error) {
                         console.error('Error during sign up:', error);
-                        showToast('An error occurred during sign up. filter_nonePlease try again.');
+                        showToast('An error occurred during sign up. Please try again.');
                     }
                 });
 
