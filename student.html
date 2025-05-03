@@ -901,11 +901,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         // Toast notification
-        function showToast(message, duration = 6000, showLoginButton = false) {
+        function showToast(message, duration = 6000) {
             const toast = document.getElementById('toast');
-            toast.innerHTML = showLoginButton ? 
-                `${message} <button onclick="window.location.href='index.html'">Return to Login</button>` : 
-                message;
+            toast.innerHTML = `${message} <button onclick="window.location.href='index.html'">Return to Login</button>`;
             toast.classList.remove('hidden');
             toast.classList.add('show');
             setTimeout(() => {
@@ -965,7 +963,7 @@
                 const isValidReferrer = referrer && new URL(referrer).origin === expectedOrigin;
 
                 if (!isValidReferrer) {
-                    showToast('Access denied. Please log in first.', 6000, true);
+                    showToast('Access denied. Please log in first.');
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 6000);
@@ -974,7 +972,7 @@
 
                 // Validate CIN and token
                 if (!cin || !/^\d{8}$/.test(cin)) {
-                    showToast('Invalid or missing CIN. Please log in again.', 6000, true);
+                    showToast('Invalid or missing CIN. Please log in again.');
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 6000);
@@ -982,7 +980,7 @@
                 }
 
                 if (!token) {
-                    showToast('Access denied. Please log in first.', 6000, true);
+                    showToast('Access denied. Please log in first.');
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 6000);
@@ -998,7 +996,7 @@
                                 console.log(`Retrying token validation (${retryCount + 1}/${maxRetries})`);
                                 setTimeout(() => validateToken(retryCount + 1), 1000);
                             } else {
-                                showToast('Invalid or expired token. Please log in again.', 6000, true);
+                                showToast('Invalid or expired token. Please log in again.');
                                 setTimeout(() => {
                                     window.location.href = 'index.html';
                                 }, 6000);
@@ -1014,7 +1012,7 @@
                             console.log(`Retrying token validation (${retryCount + 1}/${maxRetries})`);
                             setTimeout(() => validateToken(retryCount + 1), 1000);
                         } else {
-                            showToast('Error validating access. Please try again.', 6000, true);
+                            showToast('Error validating access. Please try again.');
                             setTimeout(() => {
                                 window.location.href = 'index.html';
                             }, 6000);
@@ -1197,13 +1195,13 @@
                                 showToast('Error loading classmates');
                             });
                         } else {
-                            showToast('Student not found. Please log in again.', 6000, true);
+                            showToast('Student not found. Please log in again.');
                             setTimeout(() => {
                                 window.location.href = 'index.html';
                             }, 6000);
                         }
                     }, (error) => {
-                        showToast('Error loading student data', 6000, true);
+                        showToast('Error loading student data');
                     });
 
                     // Load shared files
@@ -1426,7 +1424,7 @@
                 }
             } catch (error) {
                 console.error('Initialization error:', error);
-                showToast('Error initializing page. Please try again.', 6000, true);
+                showToast('Error initializing page. Please try again.');
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 6000);
