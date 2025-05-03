@@ -419,7 +419,6 @@
         .absence-weight {
             color: #e74c3c;
             font-weight: 500;
- malos
         }
 
         .absence-count {
@@ -884,7 +883,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         // Toast notification
-        function showToast(message) {
+        function showToast(message, duration = 3000) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.remove('hidden');
@@ -892,7 +891,7 @@
             setTimeout(() => {
                 toast.classList.remove('show');
                 toast.classList.add('hidden');
-            }, 3000);
+            }, duration);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -935,45 +934,62 @@
                 const cin = urlParams.get('cin');
                 const token = urlParams.get('token');
 
+                // Log parameters for debugging
+                console.log('CIN:', cin, 'Token:', token);
+
                 // Validate CIN and token
                 if (!cin || !/^\d{8}$/.test(cin)) {
-                    showToast('Invalid or missing CIN. Please log in again.');
+                    showToast('Invalid or missing CIN. Please log in again.', 5000);
                     setTimeout(() => {
                         window.location.href = 'index.html';
-                    }, 3000);
+                    }, 5000);
                     return;
                 }
 
                 if (!token) {
-                    showToast('Access denied. Please log in first.');
+                    showToast('Access denied. Please log in first.', 5000);
                     setTimeout(() => {
                         window.location.href = 'index.html';
-                    }, 3000);
+                    }, 5000);
                     return;
                 }
 
-                // Validate token
-                db.ref(`loginTokens/${cin}/${token}`).once('value').then((snapshot) => {
-                    const tokenData = snapshot.val();
-                    if (!tokenData || tokenData.expires < Date.now()) {
-                        showToast('Invalid or expired token. Please log in again.');
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 3000);
-                        return;
-                    }
-                    // Token is valid, proceed with page initialization
-                    initializePage();
-                    // Clean up token after use
-                    db.ref(`loginTokens/${cin}/${token}`).remove();
-                }).catch(() => {
-                    showToast('Error validating access. Please log in again.');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 3000);
-                });
+                // Validate token with retry mechanism
+                function validateToken(retryCount = 0, maxRetries = 2) {
+                    db.ref(`loginTokens/${cin}/${token}`).once('value').then((snapshot) => {
+                        const tokenData = snapshot.val();
+                        if (!tokenData || tokenData.expires < Date.now()) {
+                            if (retryCount < maxRetries) {
+                                console.log(`Retrying token validation (${retryCount + 1}/${maxRetries})`);
+                                setTimeout(() => validateToken(retryCount + 1), 1000);
+                            } else {
+                                showToast('Invalid or expired token. Please log in again.', 5000);
+                                setTimeout(() => {
+                                    window.location.href = 'index.html';
+                                }, 5000);
+                            }
+                            return;
+                        }
+                        // Token is valid, clean up and proceed
+                        db.ref(`loginTokens/${cin}/${token}`).remove();
+                        initializePage(cin);
+                    }).catch((error) => {
+                        console.error('Token validation error:', error);
+                        if (retryCount < maxRetries) {
+                            console.log(`Retrying token validation (${retryCount + 1}/${maxRetries})`);
+                            setTimeout(() => validateToken(retryCount + 1), 1000);
+                        } else {
+                            showToast('Error validating access. Please try again.', 5000);
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 5000);
+                        }
+                    });
+                }
 
-                function initializePage() {
+                validateToken();
+
+                function initializePage(cin) {
                     // Subjects list
                     const subjects = [
                         'Dev. Web et Multimédias 2',
@@ -1146,10 +1162,10 @@
                                 showToast('Error loading classmates');
                             });
                         } else {
-                            showToast('Student not found. Please log in again.');
+                            showToast('Student not found. Please log in again.', 5000);
                             setTimeout(() => {
                                 window.location.href = 'index.html';
-                            }, 3000);
+                            }, 5000);
                         }
                     }, (error) => {
                         showToast('Error loading student data');
@@ -1366,7 +1382,7 @@
                     document.getElementById('dark-mode-toggle').addEventListener('click', () => {
                         document.body.classList.toggle('dark-mode');
                         const isDarkMode = document.body.classList.contains('dark-mode');
-                        const toggleButton = document. getElementById('dark-mode-toggle');
+                        const toggleButton = document.getElementById('dark-mode-toggle');
                         toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
                         toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
                         localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
@@ -1374,7 +1390,11 @@
                     });
                 }
             } catch (error) {
-                showToast('Error initializing page');
+                console.error('Initialization error:', error);
+                showToast('Error initializing page. Please try again.', 5000);
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 5000);
             }
         });
     </script>
