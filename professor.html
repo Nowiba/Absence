@@ -25,7 +25,7 @@
 
         header {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             padding: 16px;
             background: linear-gradient(135deg, #2c3e50, #34495e);
@@ -529,52 +529,6 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        .message-item {
-            margin-bottom: 12px;
-        }
-
-        .message-bubble {
-            padding: 10px;
-            background: #e2e8f0;
-            border-radius: 12px;
-            display: inline-block;
-            font-size: 14px;
-        }
-
-        .message-time {
-            font-size: 12px;
-            color: #718096;
-            margin-top: 4px;
-        }
-
-        #message-input-section {
-            display: flex;
-            gap: 10px;
-            margin-top: 12px;
-        }
-
-        #professor-message-input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        #send-reply-btn {
-            padding: 10px 20px;
-            background: #3182ce;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        #send-reply-btn:hover {
-            background: #63b3ed;
-        }
-
         body.dark-mode {
             background: #1a202c;
             color: #e2e8f0;
@@ -658,21 +612,6 @@
 
         body.dark-mode .schedule-table td {
             border-color: #4a5568;
-        }
-
-        body.dark-mode .message-bubble {
-            background: #4a5568;
-            color: #e2e8f0;
-        }
-
-        body.dark-mode .message-time {
-            color: #a0aec0;
-        }
-
-        body.dark-mode #professor-message-input {
-            background: #4a5568;
-            color: #e2e8f0;
-            border-color: #5dade2;
         }
 
         @keyframes headerSlideIn {
@@ -785,11 +724,10 @@
 <body oncopy="return false" oncut="return false" onpaste="return false">
     <header>
         <h1>ISET Siliana Professor</h1>
+        <button class="hamburger-btn" id="hamburger-btn">☰</button>
     </header>
     <div id="welcome-phrase" class="welcome-phrase">Loading...</div>
     <nav>
-        <button class="hamburger-btn" id="hamburger-btn">☰</button>
-        <button class="nav-btn" id="messages-btn"><span>💬</span><span>Messages</span></button>
         <button class="nav-btn" id="home-btn"><span>🏠</span><span>Home</span></button>
         <button class="nav-btn" id="share-files-btn"><span>📤</span><span>Share Files</span></button>
         <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
@@ -861,15 +799,6 @@
             <div id="students"></div>
         </div>
 
-        <div id="messages-section" class="student-list" style="display: none;">
-            <h2>Student Messages</h2>
-            <div id="message-list"></div>
-            <div id="message-input-section" style="display: none;">
-                <input type="text" id="professor-message-input" placeholder="Type a reply..." aria-label="Type a reply">
-                <button id="send-reply-btn" aria-label="Send reply">Send</button>
-            </div>
-        </div>
-
         <button id="collective-absent" class="collective-btn">Collective Absent</button>
     </main>
     <div id="toast" class="toast hidden"></div>
@@ -917,12 +846,6 @@
                 const filesSection = document.getElementById('files-section');
                 const absencesHistory = document.getElementById('absences-history');
                 const filesHistory = document.getElementById('files-history');
-                const messagesSection = document.getElementById('messages-section');
-                const messageList = document.getElementById('message-list');
-                const messageInputSection = document.getElementById('message-input-section');
-                const professorMessageInput = document.getElementById('professor-message-input');
-                const sendReplyBtn = document.getElementById('send-reply-btn');
-                const messagesBtn = document.getElementById('messages-btn');
                 const hamburgerBtn = document.getElementById('hamburger-btn');
                 const sidebar = document.getElementById('sidebar');
                 const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -937,7 +860,6 @@
                 let professorEmail = '';
                 let currentSubject = '';
                 let professorKey = null;
-                let selectedStudentCin = null;
 
                 const ENCRYPTION_KEY = 'securePassphrase123';
 
@@ -1557,99 +1479,6 @@
                         console.error(error);
                     });
                 }
-
-                function formatShortTime(timestamp) {
-                    const date = new Date(timestamp);
-                    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-                }
-
-                function loadMessages(chatId) {
-                    messageList.innerHTML = '';
-                    db.ref(`messages/${chatId}`).on('value', (snapshot) => {
-                        if (snapshot.exists()) {
-                            const messages = [];
-                            snapshot.forEach(childSnapshot => {
-                                messages.push({ id: childSnapshot.key, ...childSnapshot.val() });
-                            });
-                            messages.sort((a, b) => a.timestamp - b.timestamp);
-
-                            messages.forEach(msg => {
-                                const isStudent = msg.senderType === 'student';
-                                const messageDiv = document.createElement('div');
-                                messageDiv.className = 'message-item';
-                                messageDiv.innerHTML = `
-                                    <div class="message-content">
-                                        <div class="message-bubble">${msg.message}</div>
-                                        <div class="message-time">${formatShortTime(msg.timestamp)} - ${isStudent ? 'Student' : 'Professor'}</div>
-                                    </div>
-                                `;
-                                messageList.appendChild(messageDiv);
-                            });
-                            messageList.scrollTop = messageList.scrollHeight;
-                        }
-                    }, (error) => {
-                        showToast('Error loading messages');
-                        console.error(error);
-                    });
-                }
-
-                messagesBtn.addEventListener('click', () => {
-                    document.querySelectorAll('.current-schedule, .student-list, .collective-btn').forEach(el => el.style.display = 'none');
-                    messagesSection.style.display = 'block';
-
-                    db.ref('students').once('value').then((snapshot) => {
-                        messageList.innerHTML = '';
-                        snapshot.forEach(childSnapshot => {
-                            const student = childSnapshot.val();
-                            if (student.class === 'IT11') {
-                                const chatId = `${childSnapshot.key}_${professorName.replace(/\s+/g, '_')}`;
-                                const studentItem = document.createElement('div');
-                                studentItem.className = 'student-item';
-                                studentItem.dataset.cin = childSnapshot.key;
-                                studentItem.innerHTML = `
-                                    <div class="student-info">
-                                        <div class="student-name" data-cin="${childSnapshot.key}">
-                                            ${student.firstName} ${student.lastName}
-                                        </div>
-                                    </div>
-                                `;
-                                studentItem.addEventListener('click', () => {
-                                    selectedStudentCin = childSnapshot.key;
-                                    messageInputSection.style.display = 'flex';
-                                    loadMessages(chatId);
-                                });
-                                messageList.appendChild(studentItem);
-                            }
-                        });
-                    }).catch(error => {
-                        showToast('Error loading students');
-                        console.error(error);
-                    });
-                });
-
-                sendReplyBtn.addEventListener('click', () => {
-                    if (!selectedStudentCin || !professorMessageInput.value.trim()) {
-                        showToast('Please select a student and enter a message');
-                        return;
-                    }
-                    const chatId = `${selectedStudentCin}_${professorName.replace(/\s+/g, '_')}`;
-                    const messageData = {
-                        sender: professorEmail,
-                        senderType: 'professor',
-                        message: professorMessageInput.value.trim(),
-                        timestamp: Date.now(),
-                        seen: false
-                    };
-                    db.ref(`messages/${chatId}`).push(messageData)
-                        .then(() => {
-                            professorMessageInput.value = '';
-                            showToast('Message sent');
-                        })
-                        .catch((error) => {
-                            showToast('Error sending message');
-                            console.error(error);
-                        });
-                });
 
                 hamburgerBtn.addEventListener('click', () => {
                     sidebar.classList.toggle('open');
