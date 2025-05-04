@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>ISET Siliana Attendance</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <style>
-        /* Ensure full viewport height and initial background */
         html, body {
             margin: 0;
             padding: 0;
@@ -317,44 +321,23 @@
             box-sizing: border-box;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.05s; /* Start at 50ms */
+            animation-delay: 0.05s;
         }
 
-        /* Staggered delays for inputs/selects/labels, reduced to milliseconds */
         .modal-content input:nth-child(2), .modal-content select:nth-child(2),
-        .modal-content label:nth-child(2) {
-            animation-delay: 0.06s; /* 60ms */
-        }
-
+        .modal-content label:nth-child(2) { animation-delay: 0.06s; }
         .modal-content input:nth-child(3), .modal-content select:nth-child(3),
-        .modal-content label:nth-child(3) {
-            animation-delay: 0.07s; /* 70ms */
-        }
-
+        .modal-content label:nth-child(3) { animation-delay: 0.07s; }
         .modal-content input:nth-child(4), .modal-content select:nth-child(4),
-        .modal-content label:nth-child(4) {
-            animation-delay: 0.08s; /* 80ms */
-        }
-
+        .modal-content label:nth-child(4) { animation-delay: 0.08s; }
         .modal-content input:nth-child(5), .modal-content select:nth-child(5),
-        .modal-content label:nth-child(5) {
-            animation-delay: 0.09s; /* 90ms */
-        }
-
+        .modal-content label:nth-child(5) { animation-delay: 0.09s; }
         .modal-content input:nth-child(6), .modal-content select:nth-child(6),
-        .modal-content label:nth-child(6) {
-            animation-delay: 0.10s; /* 100ms */
-        }
-
+        .modal-content label:nth-child(6) { animation-delay: 0.10s; }
         .modal-content input:nth-child(7), .modal-content select:nth-child(7),
-        .modal-content label:nth-child(7) {
-            animation-delay: 0.11s; /* 110ms */
-        }
-
+        .modal-content label:nth-child(7) { animation-delay: 0.11s; }
         .modal-content input:nth-child(8), .modal-content select:nth-child(8),
-        .modal-content label:nth-child(8) {
-            animation-delay: 0.12s; /* 120ms */
-        }
+        .modal-content label:nth-child(8) { animation-delay: 0.12s; }
 
         body.dark-mode .modal-content input,
         body.dark-mode .modal-content select {
@@ -388,7 +371,7 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.13s; /* 130ms for main buttons like "Sign Up", "Login" */
+            animation-delay: 0.13s;
         }
 
         body.dark-mode .modal-content button {
@@ -417,7 +400,7 @@
             transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
             animation: inputFadeIn 0.3s ease forwards;
-            animation-delay: 0.14s; /* 140ms for action buttons like "Sign Up", "Forgot Password?" */
+            animation-delay: 0.14s;
         }
 
         .modal-content .action-btn.signup {
@@ -458,7 +441,7 @@
             font-size: 15px;
             border-radius: 8px;
             transition: all 0.3s ease;
-            animation-delay: 0.13s; /* Same as main buttons */
+            animation-delay: 0.13s;
         }
 
         .modal-content .button-group button:first-child {
@@ -554,9 +537,7 @@
     </style>
 </head>
 <body>
-    <!-- Apply dark mode immediately after body is available -->
     <script>
-        // Apply dark mode based on localStorage
         (function() {
             const darkMode = localStorage.getItem('darkMode');
             if (darkMode === 'enabled') {
@@ -573,44 +554,42 @@
     <div id="admin-sidebar" class="sidebar">
         <div class="sidebar-content">
             <h2>Admin Login</h2>
-            <input type="email" id="admin-email" placeholder="Email">
-            <input type="password" id="admin-password" placeholder="Password">
-            <button id="admin-login">Login</button>
+            <input type="email" id="admin-email" placeholder="Email" aria-label="Admin email">
+            <input type="password" id="admin-password" placeholder="Password" aria-label="Admin password">
+            <button id="admin-login" aria-label="Login as admin">Login</button>
         </div>
     </div>
     <nav>
-        <button class="nav-btn" id="student-btn" onclick="showModal('student-modal')"><span>🎓</span><span>Student</span></button>
-        <button class="nav-btn" id="professor-btn" onclick="showModal('professor-modal')"><span>👨‍🏫</span><span>Professor</span></button>
-        <button class="nav-btn" id="parents-btn" onclick="showModal('parents-modal')"><span>👪</span><span>Parents</span></button>
-        <button class="nav-btn" id="dark-mode-toggle"><span>🌙</span><span>Dark Mode</span></button>
+        <button class="nav-btn" id="student-btn" onclick="showModal('student-modal')" aria-label="Student login"><span>🎓</span><span>Student</span></button>
+        <button class="nav-btn" id="professor-btn" onclick="showModal('professor-modal')" aria-label="Professor login"><span>👨‍🏫</span><span>Professor</span></button>
+        <button class="nav-btn" id="parents-btn" onclick="showModal('parents-modal')" aria-label="Parent access"><span>👪</span><span>Parents</span></button>
+        <button class="nav-btn" id="dark-mode-toggle" aria-label="Toggle dark mode"><span>🌙</span><span>Dark Mode</span></button>
     </nav>
     <main>
-        <!-- Student Login Modal -->
         <div id="student-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Student Login</h2>
-                <input type="text" id="cin-input" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <input type="password" id="password-input" placeholder="Enter 6-digit password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <button id="student-login">Login</button>
-                <button class="action-btn signup" id="signup-link">Sign Up</button>
-                <button class="action-btn forgot" id="forgot-password-link">Forgot Password?</button>
+                <input type="text" id="cin-input" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="Student CIN">
+                <input type="password" id="password-input" placeholder="Enter 6-digit password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="Student password">
+                <button id="student-login" aria-label="Login as student">Login</button>
+                <button class="action-btn signup" id="signup-link" aria-label="Sign up">Sign Up</button>
+                <button class="action-btn forgot" id="forgot-password-link" aria-label="Forgot password">Forgot Password?</button>
             </div>
         </div>
-        <!-- Student Signup Modal -->
         <div id="signup-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Student Sign Up</h2>
-                <input type="text" id="signup-name-input" placeholder="Enter First and Last Name (max 25 letters)" maxlength="25" onkeypress="return (event.charCode !=8 && ((event.charCode >= 65 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122) || event.charCode == 32))">
-                <input type="text" id="signup-cin-input" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <input type="password" id="signup-password-input" placeholder="Set 6-digit password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <select id="signup-class-select">
+                <input type="text" id="signup-name-input" placeholder="Enter First and Last Name (max 25 letters)" maxlength="25" onkeypress="return (event.charCode !=8 && ((event.charCode >= 65 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122) || event.charCode == 32))" aria-label="Full name">
+                <input type="text" id="signup-cin-input" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="CIN">
+                <input type="password" id="signup-password-input" placeholder="Set 6-digit password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="Password">
+                <select id="signup-class-select" aria-label="Select class">
                     <option value="" disabled selected>Select your class</option>
                     <option value="IT">IT</option>
                     <option value="RSI">RSI</option>
                     <option value="DSI">DSI</option>
                 </select>
-                <input type="text" id="signup-class-number" placeholder="Enter class number (2 digits)" maxlength="2" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <select id="validation-question-select">
+                <input type="text" id="signup-class-number" placeholder="Enter class number (2 digits)" maxlength="2" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="Class number">
+                <select id="validation-question-select" aria-label="Select validation question">
                     <option value="" disabled selected>Select a validation question</option>
                     <option value="What is your dog's name?">What is your dog's name?</option>
                     <option value="What type of PC do you use?">What type of PC do you use?</option>
@@ -619,24 +598,22 @@
                     <option value="What is your favorite food?">What is your favorite food?</option>
                     <option value="What is your best friend's name?">What is your best friend's name?</option>
                 </select>
-                <input type="text" id="validation-answer-input" placeholder="Your answer">
-                <button id="signup-submit">Sign Up</button>
+                <input type="text" id="validation-answer-input" placeholder="Your answer" aria-label="Validation answer">
+                <button id="signup-submit" aria-label="Sign up">Sign Up</button>
             </div>
         </div>
-        <!-- Change Password Modal -->
         <div id="change-password-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Change Password</h2>
-                <input type="password" id="new-password-input" placeholder="Enter new 6-digit password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <input type="password" id="confirm-password-input" placeholder="Confirm new password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <button id="change-password-submit">Update</button>
+                <input type="password" id="new-password-input" placeholder="Enter new 6-digit password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="New password">
+                <input type="password" id="confirm-password-input" placeholder="Confirm new password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="Confirm password">
+                <button id="change-password-submit" aria-label="Update password">Update</button>
             </div>
         </div>
-        <!-- Select Question Modal -->
         <div id="select-question-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Select Validation Question</h2>
-                <select id="new-validation-question-select">
+                <select id="new-validation-question-select" aria-label="Select validation question">
                     <option value="" disabled selected>Select a validation question</option>
                     <option value="What is your dog's name?">What is your dog's name?</option>
                     <option value="What type of PC do you use?">What type of PC do you use?</option>
@@ -645,84 +622,91 @@
                     <option value="What is your favorite food?">What is your favorite food?</option>
                     <option value="What is your best friend's name?">What is your best friend's name?</option>
                 </select>
-                <input type="text" id="new-validation-answer-input" placeholder="Your answer">
-                <button id="select-question-submit">Submit</button>
+                <input type="text" id="new-validation-answer-input" placeholder="Your answer" aria-label="Validation answer">
+                <button id="select-question-submit" aria-label="Submit validation question">Submit</button>
             </div>
         </div>
-        <!-- Forgot Password Modal - Step 1: Enter CIN -->
         <div id="forgot-password-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Password Recovery</h2>
-                <input type="text" id="forgot-cin-input" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <button id="forgot-cin-submit">Submit</button>
+                <input type="text" id="forgot-cin-input" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="CIN">
+                <button id="forgot-cin-submit" aria-label="Submit CIN">Submit</button>
             </div>
         </div>
-        <!-- Forgot Password Modal - Step 2: Validation Question -->
         <div id="forgot-validation-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Answer Validation Question</h2>
-                <select id="forgot-validation-question" disabled>
+                <select id="forgot-validation-question" disabled aria-label="Validation question">
                     <option value="" disabled selected>Loading question...</option>
                 </select>
-                <input type="text" id="forgot-answer-input" placeholder="Your answer">
-                <button id="forgot-answer-submit">Submit</button>
-                <button class="action-btn" id="forgot-contact-us-link" style="background-color: #6c757d;">Contact Us</button>
+                <input type="text" id="forgot-answer-input" placeholder="Your answer" aria-label="Validation answer">
+                <button id="forgot-answer-submit" aria-label="Submit answer">Submit</button>
+                <button class="action-btn" id="forgot-contact-us-link" style="background-color: #6c757d;" aria-label="Contact support">Contact Us</button>
             </div>
         </div>
-        <!-- Forgot Password Modal - Step 3: Reset Password -->
         <div id="forgot-reset-password-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Reset Password</h2>
-                <input type="password" id="forgot-new-password" placeholder="Enter new 6-digit password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <input type="password" id="forgot-confirm-password" placeholder="Confirm new password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <button id="forgot-reset-submit">Update Password</button>
+                <input type="password" id="forgot-new-password" placeholder="Enter new 6-digit password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="New password">
+                <input type="password" id="forgot-confirm-password" placeholder="Confirm new password" maxlength="6" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="Confirm password">
+                <button id="forgot-reset-submit" aria-label="Update password">Update Password</button>
             </div>
         </div>
-        <!-- Contact Us Modal -->
         <div id="contact-us-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Contact Support</h2>
-                <input type="text" id="contact-fullname" placeholder="Full Name">
-                <input type="text" id="contact-cin" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <input type="email" id="contact-email" placeholder="Email Address">
-                <select id="contact-validation-question" class="hidden">
+                <input type="text" id="contact-fullname" placeholder="Full Name" aria-label="Full name">
+                <input type="text" id="contact-cin" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="CIN">
+                <input type="email" id="contact-email" placeholder="Email Address" aria-label="Email address">
+                <select id="contact-validation-question" class="hidden" aria-label="Validation question">
                     <option value="" disabled selected>Loading question...</option>
                 </select>
-                <input type="text" id="contact-answer" placeholder="Your answer" class="hidden">
+                <input type="text" id="contact-answer" placeholder="Your answer" class="hidden" aria-label="Validation answer">
                 <label for="contact-signup-date">Enter the date you created your account (optional)</label>
-                <input type="date" id="contact-signup-date">
+                <input type="date" id="contact-signup-date" aria-label="Signup date">
                 <label for="contact-forgot-password-date">Enter the date you forgot your password (optional)</label>
-                <input type="date" id="contact-forgot-password-date">
-                <button id="contact-submit">Submit</button>
+                <input type="date" id="contact-forgot-password-date" aria-label="Forgot password date">
+                <button id="contact-submit" aria-label="Submit contact form">Submit</button>
             </div>
         </div>
-        <!-- Parents Modal -->
         <div id="parents-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Parent Access</h2>
-                <input type="text" id="parents-cin-input" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)">
-                <button id="parents-submit">View Absences</button>
+                <input type="text" id="parents-cin-input" placeholder="Enter 8-digit CIN" maxlength="8" onkeypress="return (event.charCode !=8 && event.charCode >= 48 && event.charCode <= 57)" aria-label="Student CIN">
+                <button id="parents-submit" aria-label="View absences">View Absences</button>
             </div>
         </div>
-        <!-- Professor Modal -->
         <div id="professor-modal" class="modal hidden">
             <div class="modal-content">
                 <h2>Professor Login</h2>
-                <input type="email" id="professor-email" placeholder="Email">
-                <input type="password" id="professor-password" placeholder="Password">
-                <button id="professor-login">Login</button>
+                <input type="email" id="professor-email" placeholder="Email" aria-label="Professor email">
+                <input type="password" id="professor-password" placeholder="Password" aria-label="Professor password">
+                <button id="professor-login" aria-label="Login as professor">Login</button>
             </div>
         </div>
     </main>
     <div id="toast" class="toast hidden"></div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
-        // Define showToast and showModal in global scope for inline onclick handlers
-        function showToast(message) {
+        // Wait for Firebase to load
+        async function waitForFirebase() {
+            const maxAttempts = 10;
+            let attempts = 0;
+            while (attempts < maxAttempts) {
+                if (window.firebase && window.firebase.app) {
+                    return true;
+                }
+                await new Promise(resolve => setTimeout(resolve, 500));
+                attempts++;
+            }
+            throw new Error('Failed to load Firebase SDK');
+        }
+
+        // Toast and modal functions
+        function showToast(message, duration = 3000) {
             const toast = document.getElementById('toast');
             if (toast) {
                 toast.textContent = message;
@@ -731,14 +715,13 @@
                 setTimeout(() => {
                     toast.classList.remove('show');
                     toast.classList.add('hidden');
-                }, 3000);
+                }, duration);
             } else {
                 console.error('Toast element not found');
             }
         }
 
         function showModal(modalId) {
-            console.log(`Attempting to show modal: ${modalId}`);
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('hidden');
@@ -750,30 +733,17 @@
             }
         }
 
-        // Dark Mode Toggle Logic
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggleButton = document.getElementById('dark-mode-toggle');
-            const isDarkMode = document.body.classList.contains('dark-mode');
-
-            // Set initial button state based on applied mode
-            toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
-            toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
-
-            // Toggle dark mode on button click
-            toggleButton.addEventListener('click', () => {
-                console.log('Dark mode toggle clicked');
-                document.body.classList.toggle('dark-mode');
-                const isDarkModeAfterToggle = document.body.classList.contains('dark-mode');
-                toggleButton.querySelector('span:first-child').textContent = isDarkModeAfterToggle ? '🌞' : '🌙';
-                toggleButton.querySelector('span:last-child').textContent = isDarkModeAfterToggle ? 'Light Mode' : 'Dark Mode';
-                localStorage.setItem('darkMode', isDarkModeAfterToggle ? 'enabled' : 'disabled');
-                showToast(isDarkModeAfterToggle ? 'Dark mode enabled' : 'Light mode enabled');
-            });
-        });
-
-        // Main script with Firebase-dependent logic
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
+                // Apply dark mode
+                const toggleButton = document.getElementById('dark-mode-toggle');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                toggleButton.querySelector('span:first-child').textContent = isDarkMode ? '🌞' : '🌙';
+                toggleButton.querySelector('span:last-child').textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+
+                // Wait for Firebase
+                await waitForFirebase();
+
                 // Firebase Configuration
                 const firebaseConfig = {
                     apiKey: "AIzaSyAoXhEeGA22chByuIyxjWzmsFsQJSjqZJY",
@@ -789,12 +759,13 @@
                 const auth = firebase.auth();
                 const db = firebase.database();
 
-                // Sign out on page load to ensure fresh session
-                auth.signOut().catch(error => {
-                    console.error('Error signing out on page load:', error);
+                // Sign out on page load
+                await auth.signOut().catch(error => {
+                    console.error('Error signing out:', error);
                 });
 
-                // Update students without passwords or validation questions
+                // Note: Removed insecure students node query. To update missing fields, use a secure backend or admin script.
+                /*
                 db.ref('students').once('value', (snapshot) => {
                     snapshot.forEach((childSnapshot) => {
                         const studentData = childSnapshot.val();
@@ -809,32 +780,24 @@
                             updates.validationAnswer = 'default';
                         }
                         if (Object.keys(updates).length > 0) {
-                            db.ref('students/' + childSnapshot.key).update(updates)
-                                .then(() => {
-                                    console.log(`Updated student ${childSnapshot.key} with missing fields`);
-                                })
-                                .catch(error => {
-                                    console.error(`Error updating student ${childSnapshot.key}:`, error);
-                                });
+                            db.ref('students/' + childSnapshot.key).update(updates);
                         }
                     });
                 });
+                */
 
-                // Hamburger menu toggle
+                // Event listeners
                 const sidebar = document.getElementById('admin-sidebar');
                 document.getElementById('hamburger-btn').addEventListener('click', () => {
-                    console.log('Hamburger button clicked');
                     sidebar.classList.toggle('open');
                 });
 
-                // Close sidebar when clicking outside
                 document.addEventListener('click', (e) => {
                     if (!sidebar.contains(e.target) && !e.target.closest('#hamburger-btn') && sidebar.classList.contains('open')) {
                         sidebar.classList.remove('open');
                     }
                 });
 
-                // Close modals when clicking outside
                 document.querySelectorAll('.modal').forEach(modal => {
                     modal.addEventListener('click', (e) => {
                         if (e.target === modal) {
@@ -846,7 +809,7 @@
                     });
                 });
 
-                // Cookie-based registration limit
+                // Cookie-based signup limit
                 function setCookie(name, value, hours) {
                     const expires = new Date();
                     expires.setTime(expires.getTime() + (hours * 60 * 60 * 1000));
@@ -856,10 +819,9 @@
                 function getCookie(name) {
                     const nameEQ = name + "=";
                     const ca = document.cookie.split(';');
-                    for (let i = 0; i < ca.length; i++) {
-                        let c = ca[i];
-                        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-                        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+                    for (let c of ca) {
+                        c = c.trim();
+                        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length);
                     }
                     return null;
                 }
@@ -867,8 +829,7 @@
                 function checkSignupLimit() {
                     const lastSignup = getCookie('lastSignup');
                     const now = Date.now();
-                    const sixHours = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
-
+                    const sixHours = 6 * 60 * 60 * 1000;
                     if (lastSignup && (now - parseInt(lastSignup) < sixHours)) {
                         showToast('You can only sign up once every 6 hours from this device.');
                         return false;
@@ -877,21 +838,20 @@
                 }
 
                 function recordSignup() {
-                    setCookie('lastSignup', Date.now(), 6); // Cookie expires in 6 hours
+                    setCookie('lastSignup', Date.now(), 6);
                 }
 
-                // Input sanitization to prevent XSS
+                // Input sanitization
                 function sanitizeInput(input) {
-                    return input.replace(/[&<>"']/g, (char) => {
-                        const escapeMap = {
-                            '&': '&',
-                            '<': '<',
-                            '>': '>',
-                            '"': '"',
-                            "'": '\''
-                        };
-                        return escapeMap[char] || char;
-                    });
+                    const div = document.createElement('div');
+                    div.textContent = input;
+                    return div.innerHTML.replace(/[&<>"']/g, char => ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;'
+                    })[char] || char);
                 }
 
                 // Generate secure token
@@ -902,9 +862,7 @@
                 }
 
                 // Student Login
-                console.log('Attaching student login event listener');
                 document.getElementById('student-login').addEventListener('click', async () => {
-                    console.log('Student login button clicked');
                     const cin = sanitizeInput(document.getElementById('cin-input').value.trim());
                     const password = sanitizeInput(document.getElementById('password-input').value.trim());
 
@@ -928,23 +886,18 @@
                         }
 
                         const studentData = snapshot.val();
-                        if (!studentData.hasOwnProperty('password') || studentData.password === null) {
-                            await studentRef.update({ password: '123456' });
-                            studentData.password = '123456';
+                        if (!studentData.password) {
+                            showToast('Account incomplete. Please contact support.');
+                            return;
                         }
 
                         if (password !== studentData.password) {
                             const now = new Date();
                             const timestamp = now.toISOString();
-                            const failedAttempt = {
-                                timestamp: timestamp,
-                                passwordAttempted: password
-                            };
-
+                            const failedAttempt = { timestamp, passwordAttempted: password };
                             const failedLoginAttempts = studentData.failedLoginAttempts || [];
                             failedLoginAttempts.push(failedAttempt);
                             await studentRef.update({ failedLoginAttempts });
-
                             showToast('Incorrect password. Please try again.');
                             return;
                         }
@@ -960,7 +913,6 @@
                             return;
                         }
 
-                        // Check if validation question/answer are missing
                         if (!studentData.validationQuestion || !studentData.validationAnswer) {
                             document.getElementById('student-modal').classList.remove('show');
                             setTimeout(() => {
@@ -972,11 +924,10 @@
                             return;
                         }
 
-                        // Generate and store token
                         const token = generateToken();
                         const tokenRef = db.ref(`loginTokens/${cin}/${token}`);
                         await tokenRef.set({
-                            expires: Date.now() + 5 * 60 * 1000 // 5 minutes
+                            expires: Date.now() + 15 * 60 * 1000 // 15 minutes
                         });
 
                         document.getElementById('student-modal').classList.remove('show');
@@ -986,14 +937,13 @@
                         }, 300);
                         showToast('Login successful! Welcome!');
                     } catch (error) {
-                        console.error('Error during login:', error);
+                        console.error('Login error:', error);
                         showToast('An error occurred during login. Please try again.');
                     }
                 });
 
-                // Change Password Submission
+                // Change Password
                 document.getElementById('change-password-submit').addEventListener('click', async () => {
-                    console.log('Change password submit button clicked');
                     const cin = document.getElementById('change-password-modal').dataset.cin;
                     const newPassword = sanitizeInput(document.getElementById('new-password-input').value.trim());
                     const confirmPassword = sanitizeInput(document.getElementById('confirm-password-input').value.trim());
@@ -1009,7 +959,7 @@
                     }
 
                     if (newPassword === '123456') {
-                        showToast('The password "123456" is not allowed. Please choose a different password.');
+                        showToast('The password "123456" is not allowed.');
                         return;
                     }
 
@@ -1027,16 +977,15 @@
                             showModal('select-question-modal');
                             document.getElementById('select-question-modal').dataset.cin = cin;
                         }, 300);
-                        showToast('Password updated successfully! Please select a validation question.');
+                        showToast('Password updated! Please select a validation question.');
                     } catch (error) {
                         console.error('Error updating password:', error);
                         showToast('An error occurred while updating your password.');
                     }
                 });
 
-                // Select Validation Question Submission
+                // Select Validation Question
                 document.getElementById('select-question-submit').addEventListener('click', async () => {
-                    console.log('Select question submit button clicked');
                     const cin = document.getElementById('select-question-modal').dataset.cin;
                     const question = document.getElementById('new-validation-question-select').value;
                     const answer = sanitizeInput(document.getElementById('new-validation-answer-input').value.trim());
@@ -1063,7 +1012,7 @@
                             showModal('student-modal');
                             document.getElementById('cin-input').value = cin;
                         }, 300);
-                        showToast('Validation question set successfully! Please log in with your new password.');
+                        showToast('Validation question set! Please log in with your new password.');
                     } catch (error) {
                         console.error('Error setting validation question:', error);
                         showToast('An error occurred while setting your validation question.');
@@ -1072,7 +1021,6 @@
 
                 // Sign Up Link
                 document.getElementById('signup-link').addEventListener('click', (e) => {
-                    console.log('Sign up link clicked');
                     e.preventDefault();
                     const cin = sanitizeInput(document.getElementById('cin-input').value.trim());
                     document.getElementById('signup-cin-input').value = cin;
@@ -1084,9 +1032,7 @@
                 });
 
                 // Student Sign Up
-                console.log('Attaching signup submit event listener');
                 document.getElementById('signup-submit').addEventListener('click', async () => {
-                    console.log('Signup submit button clicked');
                     const fullName = sanitizeInput(document.getElementById('signup-name-input').value.trim());
                     const cin = sanitizeInput(document.getElementById('signup-cin-input').value.trim());
                     const password = sanitizeInput(document.getElementById('signup-password-input').value.trim());
@@ -1095,7 +1041,6 @@
                     const question = document.getElementById('validation-question-select').value;
                     const answer = sanitizeInput(document.getElementById('validation-answer-input').value.trim());
 
-                    // Validate full name
                     if (!fullName) {
                         showToast('Please enter your first and last name.');
                         return;
@@ -1131,7 +1076,7 @@
                     }
 
                     if (password === '123456') {
-                        showToast('The password "123456" is not allowed. Please choose a different password.');
+                        showToast('The password "123456" is not allowed.');
                         return;
                     }
 
@@ -1146,7 +1091,7 @@
                     }
 
                     if (!/^\d{2}$/.test(classNumber)) {
-                        showToast('Please enter a valid 2-digit class number (numbers only).');
+                        showToast('Please enter a valid 2-digit class number.');
                         return;
                     }
 
@@ -1160,7 +1105,6 @@
                         return;
                     }
 
-                    // Combine class and classNumber into a single field (e.g., "IT11")
                     const combinedClass = `${selectedClass}${classNumber}`;
 
                     try {
@@ -1176,15 +1120,15 @@
 
                         const signupDate = new Date().toISOString().split('T')[0];
                         await studentRef.set({
-                            firstName: firstName,
-                            lastName: lastName,
+                            firstName,
+                            lastName,
                             class: combinedClass,
                             absences: [],
-                            password: password,
+                            password,
                             validationQuestion: question,
                             validationAnswer: answer,
                             failedLoginAttempts: [],
-                            signupDate: signupDate
+                            signupDate
                         });
 
                         recordSignup();
@@ -1197,14 +1141,13 @@
                         }, 300);
                         showToast('Sign up successful! Please log in.');
                     } catch (error) {
-                        console.error('Error during sign up:', error);
+                        console.error('Sign up error:', error);
                         showToast('An error occurred during sign up. Please try again.');
                     }
                 });
 
-                // Forgot Password Link
+                // Forgot Password - Step 1: Submit CIN
                 document.getElementById('forgot-password-link').addEventListener('click', (e) => {
-                    console.log('Forgot password link clicked');
                     e.preventDefault();
                     document.getElementById('student-modal').classList.remove('show');
                     setTimeout(() => {
@@ -1213,9 +1156,7 @@
                     }, 300);
                 });
 
-                // Forgot Password - Step 1: Submit CIN
                 document.getElementById('forgot-cin-submit').addEventListener('click', async () => {
-                    console.log('Forgot CIN submit button clicked');
                     const cin = sanitizeInput(document.getElementById('forgot-cin-input').value.trim());
 
                     if (!/^\d{8}$/.test(cin)) {
@@ -1248,7 +1189,6 @@
 
                 // Forgot Password - Step 2: Submit Answer
                 document.getElementById('forgot-answer-submit').addEventListener('click', async () => {
-                    console.log('Forgot answer submit button clicked');
                     const cin = document.getElementById('forgot-validation-modal').dataset.cin;
                     const answer = sanitizeInput(document.getElementById('forgot-answer-input').value.trim());
 
@@ -1279,9 +1219,8 @@
                     }
                 });
 
-                // Forgot Password - Contact Us Link
+                // Forgot Password - Contact Us
                 document.getElementById('forgot-contact-us-link').addEventListener('click', (e) => {
-                    console.log('Forgot contact us link clicked');
                     e.preventDefault();
                     document.getElementById('forgot-validation-modal').classList.remove('show');
                     setTimeout(() => {
@@ -1292,7 +1231,6 @@
 
                 // Forgot Password - Step 3: Reset Password
                 document.getElementById('forgot-reset-submit').addEventListener('click', async () => {
-                    console.log('Forgot reset submit button clicked');
                     const cin = document.getElementById('forgot-reset-password-modal').dataset.cin;
                     const newPassword = sanitizeInput(document.getElementById('forgot-new-password').value.trim());
                     const confirmPassword = sanitizeInput(document.getElementById('forgot-confirm-password').value.trim());
@@ -1308,7 +1246,7 @@
                     }
 
                     if (newPassword === '123456') {
-                        showToast('The password "123456" is not allowed. Please choose a different password.');
+                        showToast('The password "123456" is not allowed.');
                         return;
                     }
 
@@ -1326,23 +1264,21 @@
                             showModal('student-modal');
                             document.getElementById('cin-input').value = cin;
                         }, 300);
-                        showToast('Password updated successfully! Please log in with your new password.');
+                        showToast('Password updated! Please log in with your new password.');
                     } catch (error) {
                         console.error('Error updating password:', error);
                         showToast('An error occurred while updating your password.');
                     }
                 });
 
-                // Contact Us Submission
+                // Contact Us
                 document.getElementById('contact-submit').addEventListener('click', async () => {
-                    console.log('Contact submit button clicked');
                     const fullName = sanitizeInput(document.getElementById('contact-fullname').value.trim());
                     const cin = sanitizeInput(document.getElementById('contact-cin').value.trim());
                     const email = sanitizeInput(document.getElementById('contact-email').value.trim());
                     const signupDate = document.getElementById('contact-signup-date').value;
                     const forgotPasswordDate = document.getElementById('contact-forgot-password-date').value;
 
-                    // Validate inputs
                     if (!fullName) {
                         showToast('Please enter your full name.');
                         return;
@@ -1364,7 +1300,6 @@
                     }
 
                     try {
-                        // Check if student exists
                         const studentRef = db.ref('students/' + cin);
                         const snapshot = await studentRef.once('value');
                         if (!snapshot.exists()) {
@@ -1372,25 +1307,21 @@
                             return;
                         }
 
-                        // Prepare submission data
                         const submissionData = {
-                            fullName: fullName,
-                            cin: cin,
-                            email: email,
+                            fullName,
+                            cin,
+                            email,
                             signupDate: signupDate || 'Not provided',
                             forgotPasswordDate: forgotPasswordDate || 'Not provided',
                             timestamp: new Date().toISOString()
                         };
 
-                        // Save to Firebase under contactUsSubmissions
                         const newSubmissionRef = db.ref('contactUsSubmissions').push();
                         await newSubmissionRef.set(submissionData);
 
-                        // Close modal and show success message
                         document.getElementById('contact-us-modal').classList.remove('show');
                         setTimeout(() => {
                             document.getElementById('contact-us-modal').classList.add('hidden');
-                            // Clear form
                             document.getElementById('contact-fullname').value = '';
                             document.getElementById('contact-cin').value = '';
                             document.getElementById('contact-email').value = '';
@@ -1406,7 +1337,6 @@
 
                 // Parents Submission
                 document.getElementById('parents-submit').addEventListener('click', async () => {
-                    console.log('Parents submit button clicked');
                     const cin = sanitizeInput(document.getElementById('parents-cin-input').value.trim());
 
                     if (!/^\d{8}$/.test(cin)) {
@@ -1434,8 +1364,7 @@
                 });
 
                 // Professor Login
-                document.getElementById('professor-login').addEventListener('click', () => {
-                    console.log('Professor login button clicked');
+                document.getElementById('professor-login').addEventListener('click', async () => {
                     const email = sanitizeInput(document.getElementById('professor-email').value.trim());
                     const password = sanitizeInput(document.getElementById('professor-password').value.trim());
 
@@ -1444,24 +1373,22 @@
                         return;
                     }
 
-                    auth.signInWithEmailAndPassword(email, password)
-                        .then((userCredential) => {
-                            showToast('Login successful!');
-                            document.getElementById('professor-modal').classList.remove('show');
-                            setTimeout(() => {
-                                document.getElementById('professor-modal').classList.add('hidden');
-                                window.location.href = 'professor.html';
-                            }, 300);
-                        })
-                        .catch((error) => {
-                            showToast('Login failed. Please check your credentials.');
-                            console.error('Professor login error:', error);
-                        });
+                    try {
+                        await auth.signInWithEmailAndPassword(email, password);
+                        showToast('Login successful!');
+                        document.getElementById('professor-modal').classList.remove('show');
+                        setTimeout(() => {
+                            document.getElementById('professor-modal').classList.add('hidden');
+                            window.location.href = 'professor.html';
+                        }, 300);
+                    } catch (error) {
+                        console.error('Professor login error:', error);
+                        showToast('Login failed. Please check your credentials.');
+                    }
                 });
 
                 // Admin Login
-                document.getElementById('admin-login').addEventListener('click', () => {
-                    console.log('Admin login button clicked');
+                document.getElementById('admin-login').addEventListener('click', async () => {
                     const email = sanitizeInput(document.getElementById('admin-email').value.trim());
                     const password = sanitizeInput(document.getElementById('admin-password').value.trim());
 
@@ -1470,29 +1397,36 @@
                         return;
                     }
 
-                    auth.signInWithEmailAndPassword(email, password)
-                        .then((userCredential) => {
-                            showToast('Login successful!');
-                            sidebar.classList.remove('open');
-                            setTimeout(() => {
-                                window.location.href = 'admin.html';
-                            }, 300);
-                        })
-                        .catch((error) => {
-                            showToast('Login failed. Please check your credentials.');
-                            console.error('Admin login error:', error);
-                        });
+                    try {
+                        await auth.signInWithEmailAndPassword(email, password);
+                        showToast('Login successful!');
+                        sidebar.classList.remove('open');
+                        setTimeout(() => {
+                            window.location.href = 'admin.html';
+                        }, 300);
+                    } catch (error) {
+                        console.error('Admin login error:', error);
+                        showToast('Login failed. Please check your credentials.');
+                    }
                 });
 
-                // Set max date for date inputs to today
-                const signupDateInput = document.getElementById('contact-signup-date');
-                const forgotPasswordDateInput = document.getElementById('contact-forgot-password-date');
+                // Dark Mode Toggle
+                document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+                    document.body.classList.toggle('dark-mode');
+                    const isDarkModeAfterToggle = document.body.classList.contains('dark-mode');
+                    toggleButton.querySelector('span:first-child').textContent = isDarkModeAfterToggle ? '🌞' : '🌙';
+                    toggleButton.querySelector('span:last-child').textContent = isDarkModeAfterToggle ? 'Light Mode' : 'Dark Mode';
+                    localStorage.setItem('darkMode', isDarkModeAfterToggle ? 'enabled' : 'disabled');
+                    showToast(isDarkModeAfterToggle ? 'Dark mode enabled' : 'Light mode enabled');
+                });
+
+                // Set max date for date inputs
                 const today = new Date().toISOString().split('T')[0];
-                signupDateInput.setAttribute('max', today);
-                forgotPasswordDateInput.setAttribute('max', today);
+                document.getElementById('contact-signup-date').setAttribute('max', today);
+                document.getElementById('contact-forgot-password-date').setAttribute('max', today);
             } catch (error) {
                 console.error('Initialization error:', error);
-                alert('An error occurred while loading the page. Please try again.');
+                showToast('An error occurred while loading the page. Please try again.');
             }
         });
     </script>
