@@ -874,8 +874,25 @@
             }, duration);
         }
 
+        // Wait for Firebase and CryptoJS to load
+        async function waitForDependencies() {
+            const maxAttempts = 10;
+            let attempts = 0;
+            while (attempts < maxAttempts) {
+                if (window.firebase && window.firebase.app && window.CryptoJS) {
+                    return true;
+                }
+                await new Promise(resolve => setTimeout(resolve, 500));
+                attempts++;
+            }
+            throw new Error('Failed to load Firebase or CryptoJS');
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             try {
+                // Wait for dependencies
+                await waitForDependencies();
+
                 // Firebase Configuration
                 const firebaseConfig = {
                     apiKey: "AIzaSyAoXhEeGA22chByuIyxjWzmsFsQJSjqZJY",
@@ -887,7 +904,11 @@
                     appId: "1:519382535146:web:94629d286b19b8c103c093",
                     measurementId: "G-3Q9F4KP217"
                 };
-                firebase.initializeApp(firebaseConfig);
+
+                // Initialize Firebase
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
                 const db = firebase.database();
 
                 // Base passphrase
@@ -917,7 +938,7 @@
                 // Prevent browser caching of this page
                 window.history.replaceState({}, document.title, window.location.pathname);
 
-                // Validate CIN and token
+                // Validate CIN
                 if (!cin || !/^\d{8}$/.test(cin)) {
                     showToast('Invalid or missing CIN. Please log in again.', 6000, true);
                     setTimeout(() => {
@@ -926,6 +947,7 @@
                     return;
                 }
 
+                // Validate token
                 if (!token) {
                     showToast('Access denied. Please log in first.', 6000, true);
                     setTimeout(() => {
@@ -936,12 +958,14 @@
 
                 // Validate token
                 const tokenRef = db.ref(`loginTokens/${cin}/${token}`);
-                const snapshot = await tokenRef.once('value');
+                const snapshot = await tokenRef.once('value').catch(error => {
+                    throw new Error(`Token validation failed: ${error.message}`);
+                });
                 const tokenData = snapshot.val();
 
                 if (!tokenData || tokenData.expires < Date.now()) {
+                    await tokenRef.remove().catch(() => {}); // Clean up invalid/expired token
                     showToast('Invalid or expired token. Please log in again.', 6000, true);
-                    await tokenRef.remove(); // Clean up invalid/expired token
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 6000);
@@ -949,7 +973,9 @@
                 }
 
                 // Token is valid, clean up and proceed
-                await tokenRef.remove();
+                await tokenRef.remove().catch(error => {
+                    console.error('Error cleaning up token:', error);
+                });
                 initializePage(cin);
 
                 function initializePage(cin) {
@@ -1083,13 +1109,20 @@
                         });
                         renderAbsences(allActions);
                     }, (error) => {
-                        showToast('Error loading absence data');
+                        showToast(`Error loading absence data: ${error.message}`);
                     });
 
                     // Listen for student data
                     studentRef.on('value', (snapshot) => {
                         if (snapshot.exists()) {
                             const student = snapshot.val();
+                            if (!student.firstName || !student.lastName) {
+                                showToast('Incomplete student data. Please contact support.', 6000, true);
+                                setTimeout(() => {
+                                    window.location.href = 'index.html';
+                                }, 6000);
+                                return;
+                            }
                             const fullName = `${student.firstName} ${student.lastName}`;
                             studentClass = student.class || 'Not specified';
                             document.getElementById('welcome-message').textContent = `Welcome, ${fullName}`;
@@ -1113,7 +1146,7 @@
                                 });
                                 renderClassmates();
                             }).catch(error => {
-                                showToast('Error loading classmates');
+                                showToast(`Error loading classmates: ${error.message}`);
                             });
                         } else {
                             showToast('Student not found. Please log in again.', 6000, true);
@@ -1122,7 +1155,7 @@
                             }, 6000);
                         }
                     }, (error) => {
-                        showToast('Error loading student data', 6000, true);
+                        showToast(`Error loading student data: ${error.message}`, 6000, true);
                     });
 
                     // Load shared files
@@ -1179,6 +1212,9 @@
                                     try {
                                         const fileSnapshot = await db.ref(`sharedFiles/${fileId}`).once('value');
                                         const fileData = fileSnapshot.val();
+                                        if (!fileData || !fileData.chunks) {
+                                            throw new Error('File data not found');
+                                        }
                                         const encryptedData = fileData.chunks.join('');
                                         const key = deriveKey(salt);
                                         const decrypted = CryptoJS.AES.decrypt(encryptedData, key);
@@ -1201,7 +1237,7 @@
                             });
                         }
                     }, (error) => {
-                        showToast('Error loading shared files');
+                        showToast(`Error loading shared files: ${error.message}`);
                     });
 
                     // Render classmates
@@ -1258,7 +1294,7 @@
                             showToast('Email updated successfully');
                             emailModal.style.display = 'none';
                         }).catch(error => {
-                            showToast('Error updating email');
+                            showToast(`Error updating email: ${error.message}`);
                         });
                     });
 
@@ -1280,7 +1316,7 @@
 
                     // Home button (logs out)
                     document.getElementById('home-btn').addEventListener('click', async () => {
-                        await db.ref(`loginTokens/${cin}`).remove(); // Clean up all tokens for this CIN
+                        await db.ref(`loginTokens/${cin}`).remove().catch(() => {});
                         window.location.href = 'index.html';
                     });
 
@@ -1297,7 +1333,7 @@
 
                     // Auto-logout after 15 minutes
                     setTimeout(async () => {
-                        await db.ref(`loginTokens/${cin}`).remove();
+                        await db.ref(`loginTokens/${cin}`).remove().catch(() => {});
                         showToast('Session expired. Please log in again.', 6000, true);
                         setTimeout(() => {
                             window.location.href = 'index.html';
@@ -1306,7 +1342,7 @@
                 }
             } catch (error) {
                 console.error('Initialization error:', error);
-                showToast('Error initializing page. Please try again.', 6000, true);
+                showToast(`Failed to initialize page: ${error.message}`, 6000, true);
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 6000);
