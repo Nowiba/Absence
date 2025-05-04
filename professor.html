@@ -851,8 +851,22 @@
                     toast.classList.remove('show');
                     toast.classList.add('hidden');
                 }, duration);
-            } else {
-                console.error('Toast element not found');
+            }
+        }
+
+        // Encryption functions (Note: Key should be managed server-side in production)
+        const ENCRYPTION_KEY = 'securePassphrase123'; // Placeholder; move to backend in production
+
+        function encryptData(data) {
+            return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
+        }
+
+        function decryptData(encryptedData) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
+                return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+            } catch (e) {
+                return null;
             }
         }
 
@@ -919,10 +933,6 @@
                 let currentSubject = '';
                 let professorKey = null;
 
-                // Note: ENCRYPTION_KEY should be managed server-side in production
-                // This is a placeholder; replace with secure key management
-                const ENCRYPTION_KEY = 'securePassphrase123'; // TODO: Move to backend
-
                 auth.onAuthStateChanged(async (user) => {
                     if (!user) {
                         showToast('Please log in');
@@ -930,32 +940,29 @@
                         return;
                     }
 
-                    professorEmail = user.email.replace(/[.@]/g, '_');
-                    professorKey = professorEmail;
+                    professorEmail = user.email;
+                    professorKey = professorEmail.replace(/[.@]/g, '_');
 
-                    // Fetch professor data securely
                     try {
                         const professorRef = db.ref(`professors/${professorKey}`);
                         const professorSnapshot = await professorRef.once('value');
                         if (!professorSnapshot.exists()) {
                             showToast('Professor data not found. Please contact support.');
-                            auth.signOut();
-                            window.location.href = 'index.html';
                             return;
                         }
 
                         professorData = professorSnapshot.val();
-                        professorName = professorData.name;
+                        professorName = professorData.name || 'Professor';
 
                         const hasSeenWelcome = professorData.hasSeenWelcome || false;
+                        welcomePhrase.textContent = hasSeenWelcome
+                            ? `Welcome, ${professorName}`
+                            : `Dear ${professorName}, Welcome to the ISET Siliana Professor Portal!`;
                         if (!hasSeenWelcome) {
-                            welcomePhrase.textContent = `Dear ${professorName}, Welcome to the ISET Siliana Professor Portal!`;
                             setTimeout(() => {
                                 welcomePhrase.textContent = `Welcome, ${professorName}`;
                                 professorRef.update({ hasSeenWelcome: true });
                             }, 30000);
-                        } else {
-                            welcomePhrase.textContent = `Welcome, ${professorName}`;
                         }
 
                         if (!professorData.schedule || !professorData.classes) {
@@ -971,46 +978,39 @@
                         const currentDay = daysOfWeek[today.getDay()];
                         const schedule = professorData.schedule.find(s => s.day === currentDay);
 
-                        if (!schedule) {
-                            showToast('No schedule for today');
-                            collectiveAbsentBtn.style.display = 'none';
-                            currentSubject = '';
-                        } else {
+                        if (schedule) {
                             currentSubject = schedule.subject;
-                            const startOfDay = new Date(today);
-                            startOfDay.setHours(0, 0, 0, 0);
-                            const endOfDay = new Date(today);
-                            endOfDay.setHours(23, 59, 59, 999);
-                            const currentTime = today.getTime();
-                            if (currentTime >= startOfDay.getTime() && currentTime <= endOfDay.getTime()) {
-                                canMark = true;
-                            } else {
+                            const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+                            const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+                            const currentTime = Date.now();
+                            canMark = currentTime >= startOfDay.getTime() && currentTime <= endOfDay.getTime();
+                            if (!canMark) {
                                 showToast('Marking window closed');
                                 collectiveAbsentBtn.style.display = 'none';
                                 markUnmarkedStudents(schedule.class);
                             }
+                        } else {
+                            showToast('No schedule for today');
+                            collectiveAbsentBtn.style.display = 'none';
+                            currentSubject = '';
                         }
 
                         await checkAndResetMarkings();
 
-                        // Fetch students for IT11 securely
-                        const studentCins = [];
-                        const studentsRef = db.ref('students');
-                        const studentSnapshots = await Promise.all(
-                            Object.keys(professorData.classes || {}).map(async (className) => {
-                                if (className === 'IT11') {
-                                    const snapshot = await studentsRef.orderByChild('class').equalTo('IT11').once('value');
-                                    snapshot.forEach(childSnapshot => {
-                                        const cin = childSnapshot.key;
-                                        const student = childSnapshot.val();
-                                        studentCins.push(cin);
-                                        studentsData.push({ cin, ...student });
-                                    });
+                        // Fetch students for IT11 with targeted query
+                        const studentsRef = db.ref('students').orderByChild('class').equalTo('IT11');
+                        const studentSnapshot = await studentsRef.once('value');
+                        if (studentSnapshot.exists()) {
+                            studentSnapshot.forEach(childSnapshot => {
+                                const cin = childSnapshot.key;
+                                const student = childSnapshot.val();
+                                // Decrypt sensitive fields if encrypted
+                                if (student.emailEncrypted) {
+                                    student.email = decryptData(student.emailEncrypted) || 'Not provided';
+                                    delete student.emailEncrypted;
                                 }
-                            })
-                        );
-
-                        if (studentsData.length > 0) {
+                                studentsData.push({ cin, ...student });
+                            });
                             selectedStudents = studentsData;
                             totalStudentsSpan.textContent = selectedStudents.length;
                             renderStudents();
@@ -1022,7 +1022,6 @@
 
                         loadActionHistory();
                     } catch (error) {
-                        console.error('Error loading professor/students data:', error);
                         showToast('Error loading data. Please try again.');
                     }
                 });
@@ -1030,15 +1029,9 @@
                 async function checkAndResetMarkings() {
                     const today = new Date().toISOString().split('T')[0];
                     const lastMarkingDate = professorData.lastMarkingDate || '';
-
                     if (lastMarkingDate !== today) {
-                        try {
-                            await db.ref(`professorActions/${professorEmail}`).remove();
-                            await db.ref(`professors/${professorKey}`).update({ lastMarkingDate: today });
-                        } catch (error) {
-                            showToast('Error resetting markings');
-                            console.error(error);
-                        }
+                        await db.ref(`professorActions/${professorKey}`).remove();
+                        await db.ref(`professors/${professorKey}`).update({ lastMarkingDate: today });
                     }
                 }
 
@@ -1060,7 +1053,6 @@
                     const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
                     const currentDay = daysOfWeek[today.getDay()];
                     const todaySchedule = schedule.find(s => s.day === currentDay);
-
                     if (todaySchedule) {
                         currentSchedule.style.display = 'block';
                         currentScheduleText.textContent = `${todaySchedule.start}-${todaySchedule.end}: ${todaySchedule.subject}`;
@@ -1079,7 +1071,7 @@
                         const today = new Date().toISOString().split('T')[0];
                         const absences = student.absences || [];
                         const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
-                        const statusClass = todayAbsence ? (todayAbsence.status === 'present' ? 'present' : todayAbsence.status === 'absent' ? 'absent' : 'not-marked') : 'not-marked';
+                        const statusClass = todayAbsence ? (todayAbsence.status === 'present' ? 'present' : 'absent') : 'not-marked';
                         studentItem.classList.add(statusClass);
 
                         const totalAbsencesForSubject = absences.reduce((total, a) => {
@@ -1110,16 +1102,9 @@
                     document.querySelectorAll('.student-item').forEach(item => {
                         item.addEventListener('click', (e) => {
                             if (e.target.classList.contains('action-btn')) return;
-
                             const cin = item.dataset.cin;
                             const details = document.getElementById(`details-${cin}`);
-                            const isVisible = details.classList.contains('show');
-
-                            document.querySelectorAll('.student-details').forEach(d => d.classList.remove('show'));
-
-                            if (!isVisible) {
-                                details.classList.add('show');
-                            }
+                            details.classList.toggle('show');
                         });
                     });
 
@@ -1129,7 +1114,6 @@
                                 showToast('Marking window closed');
                                 return;
                             }
-
                             const cin = e.target.dataset.cin;
                             const status = e.target.classList.contains('present') ? 'present' : 'absent';
                             markStudent(cin, status, 1);
@@ -1138,58 +1122,51 @@
                 }
 
                 async function markStudent(cin, status, weight) {
-                    try {
-                        const studentRef = db.ref('students/' + cin);
-                        const snapshot = await studentRef.once('value');
-                        const studentData = snapshot.val();
-                        if (!studentData) {
-                            showToast('Student not found');
-                            return;
-                        }
-
-                        const absences = studentData.absences || [];
-                        const today = new Date().toISOString().split('T')[0];
-                        const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
-
-                        if (todayAbsence && (todayAbsence.status === 'present' || todayAbsence.status === 'absent')) {
-                            showToast('Student already marked. Use undo to change.');
-                            return;
-                        }
-
-                        const action = {
-                            type: 'marking',
-                            cin: cin,
-                            studentName: `${studentData.firstName} ${studentData.lastName}`,
-                            status: status,
-                            weight: weight,
-                            date: today,
-                            subject: currentSubject || 'N/A',
-                            timestamp: new Date().toISOString(),
-                            previousAbsences: [...absences]
-                        };
-
-                        const actionRef = db.ref(`professorActions/${professorEmail}`).push();
-                        action.actionId = actionRef.key;
-                        await actionRef.set(action);
-
-                        const updatedAbsences = absences.filter(a => !(a.date === today && a.class === 'IT11'));
-                        updatedAbsences.push({ date: today, class: 'IT11', status, weight, subject: currentSubject || 'N/A' });
-                        await studentRef.update({ absences: updatedAbsences });
-
-                        showToast(`Marked as ${status}`);
-                        const studentItem = document.querySelector(`.student-item[data-cin="${cin}"]`);
-                        studentItem.classList.remove('present', 'absent', 'not-marked');
-                        studentItem.classList.add(status);
-
-                        studentItem.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
-                        collectiveAbsentBtn.disabled = true;
-
-                        const foundStudent = selectedStudents.find(s => s.cin === cin);
-                        if (foundStudent) foundStudent.absences = updatedAbsences;
-                    } catch (error) {
-                        console.error('Error marking student:', error);
-                        showToast('Error marking student');
+                    const studentRef = db.ref('students/' + cin);
+                    const snapshot = await studentRef.once('value');
+                    const studentData = snapshot.val();
+                    if (!studentData) {
+                        showToast('Student not found');
+                        return;
                     }
+
+                    const absences = studentData.absences || [];
+                    const today = new Date().toISOString().split('T')[0];
+                    const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
+                    if (todayAbsence && (todayAbsence.status === 'present' || todayAbsence.status === 'absent')) {
+                        showToast('Student already marked. Use undo to change.');
+                        return;
+                    }
+
+                    const action = {
+                        type: 'marking',
+                        cin: cin,
+                        studentName: `${studentData.firstName} ${studentData.lastName}`,
+                        status: status,
+                        weight: weight,
+                        date: today,
+                        subject: currentSubject || 'N/A',
+                        timestamp: new Date().toISOString(),
+                        previousAbsences: [...absences]
+                    };
+
+                    const actionRef = db.ref(`professorActions/${professorKey}`).push();
+                    action.actionId = actionRef.key;
+                    await actionRef.set(action);
+
+                    const updatedAbsences = absences.filter(a => !(a.date === today && a.class === 'IT11'));
+                    updatedAbsences.push({ date: today, class: 'IT11', status, weight, subject: currentSubject || 'N/A' });
+                    await studentRef.update({ absences: updatedAbsences });
+
+                    showToast(`Marked as ${status}`);
+                    const studentItem = document.querySelector(`.student-item[data-cin="${cin}"]`);
+                    studentItem.classList.remove('present', 'absent', 'not-marked');
+                    studentItem.classList.add(status);
+                    studentItem.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
+                    checkIfAllStudentsMarked();
+
+                    const foundStudent = selectedStudents.find(s => s.cin === cin);
+                    if (foundStudent) foundStudent.absences = updatedAbsences;
                 }
 
                 collectiveAbsentBtn.addEventListener('click', () => {
@@ -1205,67 +1182,61 @@
                 });
 
                 confirmYes.addEventListener('click', async () => {
-                    try {
-                        const today = new Date().toISOString().split('T')[0];
-                        const updates = {};
-                        const previousStates = {};
+                    const today = new Date().toISOString().split('T')[0];
+                    const updates = {};
+                    const previousStates = {};
 
-                        selectedStudents.forEach(s => {
-                            const absences = s.absences || [];
-                            const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
-                            if (todayAbsence && (todayAbsence.status === 'present' || todayAbsence.status === 'absent')) {
-                                return;
-                            }
+                    selectedStudents.forEach(s => {
+                        const absences = s.absences || [];
+                        const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
+                        if (!todayAbsence || (todayAbsence.status !== 'present' && todayAbsence.status !== 'absent')) {
                             previousStates[s.cin] = [...absences];
                             const updatedAbsences = absences.filter(a => !(a.date === today && a.class === 'IT11'));
                             updatedAbsences.push({ date: today, class: 'IT11', status: 'absent', weight: 2, subject: currentSubject || 'N/A' });
                             updates['students/' + s.cin + '/absences'] = updatedAbsences;
-                        });
-
-                        if (Object.keys(updates).length === 0) {
-                            showToast('All students already marked. Use undo to change.');
-                            confirmModal.style.display = 'none';
-                            return;
                         }
+                    });
 
-                        const action = {
-                            type: 'collective',
-                            previousStates: previousStates,
-                            date: today,
-                            subject: currentSubject || 'N/A',
-                            timestamp: new Date().toISOString(),
-                            students: selectedStudents.map(s => ({
-                                cin: s.cin,
-                                name: `${s.firstName} ${s.lastName}`
-                            }))
-                        };
-
-                        const actionRef = db.ref(`professorActions/${professorEmail}`).push();
-                        action.actionId = actionRef.key;
-                        await actionRef.set(action);
-                        await db.ref().update(updates);
-
-                        showToast('All students marked as absent (*2)');
+                    if (Object.keys(updates).length === 0) {
+                        showToast('All students already marked.');
                         confirmModal.style.display = 'none';
-                        document.querySelectorAll('.student-item').forEach(item => {
-                            const cin = item.dataset.cin;
-                            if (previousStates[cin]) {
-                                item.classList.remove('present', 'absent', 'not-marked');
-                                item.classList.add('absent');
-                                item.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
-                            }
-                        });
-                        collectiveAbsentBtn.disabled = true;
-
-                        selectedStudents.forEach(s => {
-                            if (previousStates[s.cin]) {
-                                s.absences = updates['students/' + s.cin + '/absences'];
-                            }
-                        });
-                    } catch (error) {
-                        console.error('Error marking collective absent:', error);
-                        showToast('Error marking collective absent');
+                        return;
                     }
+
+                    const action = {
+                        type: 'collective',
+                        previousStates: previousStates,
+                        date: today,
+                        subject: currentSubject || 'N/A',
+                        timestamp: new Date().toISOString(),
+                        students: selectedStudents.map(s => ({
+                            cin: s.cin,
+                            name: `${s.firstName} ${s.lastName}`
+                        }))
+                    };
+
+                    const actionRef = db.ref(`professorActions/${professorKey}`).push();
+                    action.actionId = actionRef.key;
+                    await actionRef.set(action);
+                    await db.ref().update(updates);
+
+                    showToast('All students marked as absent (*2)');
+                    confirmModal.style.display = 'none';
+                    document.querySelectorAll('.student-item').forEach(item => {
+                        const cin = item.dataset.cin;
+                        if (previousStates[cin]) {
+                            item.classList.remove('present', 'absent', 'not-marked');
+                            item.classList.add('absent');
+                            item.querySelectorAll('.action-btn').forEach(btn => btn.disabled = true);
+                        }
+                    });
+                    collectiveAbsentBtn.disabled = true;
+
+                    selectedStudents.forEach(s => {
+                        if (previousStates[s.cin]) {
+                            s.absences = updates['students/' + s.cin + '/absences'];
+                        }
+                    });
                 });
 
                 confirmNo.addEventListener('click', () => {
@@ -1285,82 +1256,60 @@
 
                     const maxSize = 10 * 1024 * 1024;
                     if (file.size > maxSize) {
-                        showToast('File too large. Please upload a file smaller than 10 MB.');
+                        showToast('File too large. Max 10 MB.');
                         return;
                     }
 
-                    try {
-                        const reader = new FileReader();
-                        reader.onload = async (e) => {
-                            try {
-                                const base64String = e.target.result;
-                                const rawData = base64String.split(',')[1];
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const base64String = e.target.result.split(',')[1];
+                        const encryptedData = encryptData(base64String);
+                        const chunkSize = 4 * 1024 * 1024;
+                        const chunks = [];
+                        for (let i = 0; i < encryptedData.length; i += chunkSize) {
+                            chunks.push(encryptedData.substring(i, i + chunkSize));
+                        }
 
-                                // Note: Encryption key should be managed server-side
-                                const encryptedData = CryptoJS.AES.encrypt(rawData, ENCRYPTION_KEY).toString();
+                        const fileName = sanitizeInput(file.name);
+                        const fileType = file.type || 'application/octet-stream';
+                        const uploadDate = new Date().toISOString();
 
-                                const chunkSize = 4 * 1024 * 1024;
-                                const chunks = [];
-                                for (let i = 0; i < encryptedData.length; i += chunkSize) {
-                                    chunks.push(encryptedData.substring(i, i + chunkSize));
-                                }
+                        const newFileRef = db.ref('sharedFiles').push();
+                        await newFileRef.set({
+                            fileName,
+                            fileType,
+                            uploadDate,
+                            professorName,
+                            chunks,
+                            chunkCount: chunks.length
+                        });
 
-                                const fileName = sanitizeInput(file.name);
-                                const fileType = file.type || 'application/octet-stream';
-                                const uploadDate = new Date().toISOString();
-
-                                const newFileRef = db.ref('sharedFiles').push();
-                                const fileData = {
-                                    fileName: fileName,
-                                    fileType: fileType,
-                                    uploadDate: uploadDate,
-                                    professorName: professorName,
-                                    chunks: chunks,
-                                    chunkCount: chunks.length
-                                };
-
-                                await newFileRef.set(fileData);
-
-                                const action = {
-                                    type: 'fileUpload',
-                                    fileId: newFileRef.key,
-                                    fileName: fileName,
-                                    timestamp: uploadDate
-                                };
-                                const actionRef = db.ref(`professorActions/${professorEmail}`).push();
-                                action.actionId = actionRef.key;
-                                await actionRef.set(action);
-
-                                showToast('File uploaded successfully');
-                                fileUploadModal.style.display = 'none';
-                                fileInput.value = '';
-                            } catch (error) {
-                                console.error('Error uploading file:', error);
-                                showToast('Error uploading file');
-                            }
+                        const action = {
+                            type: 'fileUpload',
+                            fileId: newFileRef.key,
+                            fileName,
+                            timestamp: uploadDate
                         };
-                        reader.onerror = () => {
-                            showToast('Error reading file');
-                        };
-                        reader.readAsDataURL(file);
-                    } catch (error) {
-                        console.error('Error initiating file upload:', error);
-                        showToast('Error uploading file');
-                    }
+                        const actionRef = db.ref(`professorActions/${professorKey}`).push();
+                        action.actionId = actionRef.key;
+                        await actionRef.set(action);
+
+                        showToast('File uploaded successfully');
+                        fileUploadModal.style.display = 'none';
+                        fileInput.value = '';
+                    };
+                    reader.readAsDataURL(file);
                 });
 
                 function loadActionHistory() {
-                    db.ref(`professorActions/${professorEmail}`).on('value', (snapshot) => {
+                    db.ref(`professorActions/${professorKey}`).on('value', (snapshot) => {
                         absencesHistory.innerHTML = '';
                         filesHistory.innerHTML = '';
 
                         const actions = [];
                         snapshot.forEach(childSnapshot => {
-                            const action = childSnapshot.val();
-                            action.actionId = childSnapshot.key;
-                            actions.push(action);
+                            actions.push({ ...childSnapshot.val(), actionId: childSnapshot.key });
                         });
-
                         actions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
                         const absenceActions = actions.filter(a => a.type === 'marking' || a.type === 'collective');
@@ -1370,30 +1319,15 @@
                             absencesHistory.innerHTML = `<div class="no-history">No absence actions</div>`;
                         } else {
                             absenceActions.forEach(action => {
-                                const actionDate = new Date(action.timestamp).toLocaleString('en-GB', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                });
-                                if (action.type === 'marking') {
-                                    const historyItem = document.createElement('div');
-                                    historyItem.className = 'history-item';
-                                    historyItem.innerHTML = `
-                                        Marked ${sanitizeInput(action.studentName)} as ${action.status} on ${actionDate}
-                                        <button class="undo-action-btn" data-action-id="${action.actionId}" aria-label="Undo action">Undo</button>
-                                    `;
-                                    absencesHistory.appendChild(historyItem);
-                                } else if (action.type === 'collective') {
-                                    const historyItem = document.createElement('div');
-                                    historyItem.className = 'history-item';
-                                    historyItem.innerHTML = `
-                                        Marked all students as absent on ${actionDate}
-                                        <button class="undo-action-btn" data-action-id="${action.actionId}" aria-label="Undo action">Undo</button>
-                                    `;
-                                    absencesHistory.appendChild(historyItem);
-                                }
+                                const actionDate = new Date(action.timestamp).toLocaleString('en-GB');
+                                const historyItem = document.createElement('div');
+                                historyItem.className = 'history-item';
+                                historyItem.innerHTML = action.type === 'marking'
+                                    ? `Marked ${sanitizeInput(action.studentName)} as ${action.status} on ${actionDate}
+                                       <button class="undo-action-btn" data-action-id="${action.actionId}" aria-label="Undo action">Undo</button>`
+                                    : `Marked all students as absent on ${actionDate}
+                                       <button class="undo-action-btn" data-action-id="${action.actionId}" aria-label="Undo action">Undo</button>`;
+                                absencesHistory.appendChild(historyItem);
                             });
                         }
 
@@ -1401,13 +1335,7 @@
                             filesHistory.innerHTML = `<div class="no-history">No file uploads</div>`;
                         } else {
                             fileActions.forEach(action => {
-                                const actionDate = new Date(action.timestamp).toLocaleString('en-GB', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                });
+                                const actionDate = new Date(action.timestamp).toLocaleString('en-GB');
                                 const historyItem = document.createElement('div');
                                 historyItem.className = 'history-item';
                                 historyItem.innerHTML = `
@@ -1419,108 +1347,70 @@
                         }
 
                         document.querySelectorAll('.undo-action-btn').forEach(btn => {
-                            btn.addEventListener('click', () => {
-                                const actionId = btn.dataset.actionId;
-                                undoAction(actionId);
-                            });
+                            btn.addEventListener('click', () => undoAction(btn.dataset.actionId));
                         });
-                    }, (error) => {
-                        showToast('Error loading action history');
-                        console.error(error);
                     });
                 }
 
                 async function undoAction(actionId) {
-                    try {
-                        const actionRef = db.ref(`professorActions/${professorEmail}/${actionId}`);
-                        const snapshot = await actionRef.once('value');
-                        const action = snapshot.val();
-                        if (!action) return;
+                    const actionRef = db.ref(`professorActions/${professorKey}/${actionId}`);
+                    const snapshot = await actionRef.once('value');
+                    const action = snapshot.val();
+                    if (!action) return;
 
-                        if (action.type === 'marking') {
-                            const { cin, previousAbsences } = action;
-                            await db.ref('students/' + cin).update({ absences: previousAbsences });
-                            showToast('Undo successful');
-                            await actionRef.remove();
+                    if (action.type === 'marking') {
+                        await db.ref('students/' + action.cin).update({ absences: action.previousAbsences });
+                        await actionRef.remove();
+                        showToast('Undo successful');
+                        const foundStudent = selectedStudents.find(s => s.cin === action.cin);
+                        if (foundStudent) foundStudent.absences = action.previousAbsences;
+                        renderStudents();
+                        checkIfAllStudentsMarked();
+                    } else if (action.type === 'collective') {
+                        const updates = {};
+                        for (const cin in action.previousStates) {
+                            updates['students/' + cin + '/absences'] = action.previousStates[cin];
                             const foundStudent = selectedStudents.find(s => s.cin === cin);
-                            if (foundStudent) foundStudent.absences = previousAbsences;
-                            renderStudents();
-
-                            const studentItem = document.querySelector(`.student-item[data-cin="${cin}"]`);
-                            studentItem.querySelectorAll('.action-btn').forEach(btn => btn.disabled = false);
-                            checkIfAllStudentsMarked();
-                        } else if (action.type === 'collective') {
-                            const updates = {};
-                            for (const cin in action.previousStates) {
-                                updates['students/' + cin + '/absences'] = action.previousStates[cin];
-                                const foundStudent = selectedStudents.find(s => s.cin === cin);
-                                if (foundStudent) foundStudent.absences = action.previousStates[cin];
-                            }
-                            await db.ref().update(updates);
-                            showToast('Undo successful');
-                            await actionRef.remove();
-                            renderStudents();
-                            collectiveAbsentBtn.disabled = false;
-                            document.querySelectorAll('.student-item').forEach(item => {
-                                const cin = item.dataset.cin;
-                                if (action.previousStates[cin]) {
-                                    item.querySelectorAll('.action-btn').forEach(btn => btn.disabled = false);
-                                }
-                            });
-                        } else if (action.type === 'fileUpload') {
-                            await db.ref('sharedFiles/' + action.fileId).remove();
-                            showToast('File removed successfully');
-                            await actionRef.remove();
+                            if (foundStudent) foundStudent.absences = action.previousStates[cin];
                         }
-                    } catch (error) {
-                        console.error('Error undoing action:', error);
-                        showToast('Error undoing action');
+                        await db.ref().update(updates);
+                        await actionRef.remove();
+                        showToast('Undo successful');
+                        renderStudents();
+                        collectiveAbsentBtn.disabled = false;
+                    } else if (action.type === 'fileUpload') {
+                        await db.ref('sharedFiles/' + action.fileId).remove();
+                        await actionRef.remove();
+                        showToast('File removed successfully');
                     }
                 }
 
                 function checkIfAllStudentsMarked() {
                     const today = new Date().toISOString().split('T')[0];
-                    let allMarked = true;
-                    selectedStudents.forEach(s => {
+                    collectiveAbsentBtn.disabled = selectedStudents.every(s => {
                         const absences = s.absences || [];
                         const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
-                        if (!todayAbsence || (todayAbsence.status !== 'present' && todayAbsence.status !== 'absent')) {
-                            allMarked = false;
-                        }
+                        return todayAbsence && (todayAbsence.status === 'present' || todayAbsence.status === 'absent');
                     });
-                    collectiveAbsentBtn.disabled = allMarked;
                 }
 
                 async function markUnmarkedStudents(className) {
-                    try {
-                        const today = new Date().toISOString().split('T')[0];
-                        const updates = {};
-                        selectedStudents.forEach(s => {
-                            const absences = s.absences || [];
-                            const hasMarkedToday = absences.some(a => a.date === today && a.class === className);
-                            if (!hasMarkedToday) {
-                                absences.push({ date: today, class: className, status: 'not_marked', weight: 0, subject: currentSubject || 'N/A' });
-                                updates['students/' + s.cin + '/absences'] = absences;
-                            }
-                        });
-                        await db.ref().update(updates);
-                    } catch (error) {
-                        console.error('Error marking unmarked students:', error);
-                        showToast('Error marking unmarked students');
-                    }
+                    const today = new Date().toISOString().split('T')[0];
+                    const updates = {};
+                    selectedStudents.forEach(s => {
+                        const absences = s.absences || [];
+                        if (!absences.some(a => a.date === today && a.class === className)) {
+                            absences.push({ date: today, class: className, status: 'not_marked', weight: 0, subject: currentSubject || 'N/A' });
+                            updates['students/' + s.cin + '/absences'] = absences;
+                        }
+                    });
+                    if (Object.keys(updates).length > 0) await db.ref().update(updates);
                 }
 
-                // Input sanitization
                 function sanitizeInput(input) {
                     const div = document.createElement('div');
                     div.textContent = input;
-                    return div.innerHTML.replace(/[&<>"']/g, char => ({
-                        '&': '&amp;',
-                        '<': '&lt;',
-                        '>': '&gt;',
-                        '"': '&quot;',
-                        "'": '&#39;'
-                    })[char] || char);
+                    return div.innerHTML;
                 }
 
                 hamburgerBtn.addEventListener('click', () => {
@@ -1530,7 +1420,7 @@
 
                 sidebarOverlay.addEventListener('click', () => {
                     sidebar.classList.remove('open');
-                    sidebarOverlay.classList.remove('show');
+                    sidebarOverlay.classList.remove(' iframe');
                 });
 
                 actionHistoryBtn.addEventListener('click', () => {
@@ -1546,44 +1436,26 @@
                 });
 
                 toggleAbsencesBtn.addEventListener('click', () => {
-                    const isVisible = absencesSection.classList.contains('show');
-                    absencesSection.classList.toggle('show', !isVisible);
+                    absencesSection.classList.toggle('show');
                     filesSection.classList.remove('show');
                 });
 
                 toggleFilesBtn.addEventListener('click', () => {
-                    const isVisible = filesSection.classList.contains('show');
-                    filesSection.classList.toggle('show', !isVisible);
+                    filesSection.classList.toggle('show');
                     absencesSection.classList.remove('show');
                 });
 
                 document.addEventListener('click', (e) => {
-                    if (!fileUploadModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#share-files-btn') && fileUploadModal.style.display === 'flex') {
-                        fileUploadModal.style.display = 'none';
-                        fileInput.value = '';
-                    }
-                    if (!undoModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#action-history-btn') && undoModal.style.display === 'flex') {
-                        undoModal.style.display = 'none';
-                        absencesSection.classList.remove('show');
-                        filesSection.classList.remove('show');
-                    }
-                    if (!scheduleModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#schedule-btn') && scheduleModal.style.display === 'flex') {
-                        scheduleModal.style.display = 'none';
-                    }
-                    if (!confirmModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#collective-absent') && confirmModal.style.display === 'flex') {
-                        confirmModal.style.display = 'none';
-                    }
+                    if (!fileUploadModal.contains(e.target) && e.target.id !== 'share-files-btn') fileUploadModal.style.display = 'none';
+                    if (!undoModal.contains(e.target) && e.target.id !== 'action-history-btn') undoModal.style.display = 'none';
+                    if (!scheduleModal.contains(e.target) && e.target.id !== 'schedule-btn') scheduleModal.style.display = 'none';
+                    if (!confirmModal.contains(e.target) && e.target.id !== 'collective-absent') confirmModal.style.display = 'none';
                 });
 
                 document.getElementById('home-btn').addEventListener('click', async () => {
-                    try {
-                        await auth.signOut();
-                        showToast('Logged out successfully');
-                        window.location.href = 'index.html';
-                    } catch (error) {
-                        console.error('Error logging out:', error);
-                        showToast('Error logging out');
-                    }
+                    await auth.signOut();
+                    showToast('Logged out successfully');
+                    window.location.href = 'index.html';
                 });
 
                 document.getElementById('dark-mode-toggle').addEventListener('click', () => {
@@ -1595,7 +1467,6 @@
                     showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
                 });
             } catch (error) {
-                console.error('Initialization error:', error);
                 showToast('Error initializing page');
             }
         });
