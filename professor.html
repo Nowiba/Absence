@@ -840,7 +840,7 @@
             throw new Error('Failed to load Firebase SDK');
         }
 
-        // Toast and modal functions
+        // Toast function
         function showToast(message, duration = 3000) {
             const toast = document.getElementById('toast');
             if (toast) {
@@ -855,10 +855,14 @@
         }
 
         // Encryption functions (Note: Key should be managed server-side in production)
-        const ENCRYPTION_KEY = 'securePassphrase123'; // Placeholder; move to backend in production
+        const ENCRYPTION_KEY = 'securePassphrase123'; // Placeholder; move to backend
 
         function encryptData(data) {
-            return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
+            try {
+                return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
+            } catch (e) {
+                return null;
+            }
         }
 
         function decryptData(encryptedData) {
@@ -941,18 +945,40 @@
                     }
 
                     professorEmail = user.email;
+                    // Try email-based key first, then fall back to UID
                     professorKey = professorEmail.replace(/[.@]/g, '_');
 
                     try {
-                        const professorRef = db.ref(`professors/${professorKey}`);
-                        const professorSnapshot = await professorRef.once('value');
+                        // Debug: Log professor key and UID for verification (remove in production)
+                        console.log('Attempting to fetch professor data with key:', professorKey);
+                        console.log('User UID:', user.uid);
+
+                        // Try email-based key
+                        let professorRef = db.ref(`professors/${professorKey}`);
+                        let professorSnapshot = await professorRef.once('value');
                         if (!professorSnapshot.exists()) {
-                            showToast('Professor data not found. Please contact support.');
+                            // Fallback to UID-based key
+                            console.log('Email-based key failed, trying UID:', user.uid);
+                            professorKey = user.uid;
+                            professorRef = db.ref(`professors/${professorKey}`);
+                            professorSnapshot = await professorRef.once('value');
+                        }
+
+                        if (!professorSnapshot.exists()) {
+                            showToast('Professor data not found. Please check database or contact support.');
+                            console.log('No professor data found at professors/' + professorKey);
+                            auth.signOut();
+                            window.location.href = 'index.html';
                             return;
                         }
 
                         professorData = professorSnapshot.val();
                         professorName = professorData.name || 'Professor';
+
+                        // Decrypt sensitive fields if present
+                        if (professorData.emailEncrypted) {
+                            professorData.email = decryptData(professorData.emailEncrypted) || professorEmail;
+                        }
 
                         const hasSeenWelcome = professorData.hasSeenWelcome || false;
                         welcomePhrase.textContent = hasSeenWelcome
@@ -967,6 +993,7 @@
 
                         if (!professorData.schedule || !professorData.classes) {
                             showToast('Incomplete professor data. Please contact support.');
+                            console.log('Professor data incomplete:', Object.keys(professorData));
                             return;
                         }
 
@@ -1004,10 +1031,18 @@
                             studentSnapshot.forEach(childSnapshot => {
                                 const cin = childSnapshot.key;
                                 const student = childSnapshot.val();
-                                // Decrypt sensitive fields if encrypted
+                                // Decrypt sensitive fields
                                 if (student.emailEncrypted) {
                                     student.email = decryptData(student.emailEncrypted) || 'Not provided';
                                     delete student.emailEncrypted;
+                                }
+                                if (student.passwordEncrypted) {
+                                    student.password = decryptData(student.passwordEncrypted) || 'N/A';
+                                    delete student.passwordEncrypted;
+                                }
+                                if (student.validationAnswerEncrypted) {
+                                    student.validationAnswer = decryptData(student.validationAnswerEncrypted) || 'N/A';
+                                    delete student.validationAnswerEncrypted;
                                 }
                                 studentsData.push({ cin, ...student });
                             });
@@ -1023,6 +1058,7 @@
                         loadActionHistory();
                     } catch (error) {
                         showToast('Error loading data. Please try again.');
+                        console.log('Error in auth state change:', error.message);
                     }
                 });
 
@@ -1420,7 +1456,7 @@
 
                 sidebarOverlay.addEventListener('click', () => {
                     sidebar.classList.remove('open');
-                    sidebarOverlay.classList.remove(' iframe');
+                    sidebarOverlay.classList.remove('show');
                 });
 
                 actionHistoryBtn.addEventListener('click', () => {
@@ -1468,6 +1504,7 @@
                 });
             } catch (error) {
                 showToast('Error initializing page');
+                console.log('Initialization error:', error.message);
             }
         });
     </script>
