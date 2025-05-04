@@ -933,9 +933,7 @@
                 let canMark = false;
                 let professorData = null;
                 let professorName = '';
-                let professorEmail = '';
                 let currentSubject = '';
-                let professorKey = null;
 
                 auth.onAuthStateChanged(async (user) => {
                     if (!user) {
@@ -944,28 +942,15 @@
                         return;
                     }
 
-                    professorEmail = user.email;
-                    // Try email-based key first, then fall back to UID
-                    professorKey = professorEmail.replace(/[.@]/g, '_');
+                    const professorKey = 'professor1_uid'; // Fixed key from database structure
 
                     try {
-                        // Debug: Log professor key and UID for verification (remove in production)
-                        console.log('Attempting to fetch professor data with key:', professorKey);
-                        console.log('User UID:', user.uid);
-
-                        // Try email-based key
-                        let professorRef = db.ref(`professors/${professorKey}`);
-                        let professorSnapshot = await professorRef.once('value');
-                        if (!professorSnapshot.exists()) {
-                            // Fallback to UID-based key
-                            console.log('Email-based key failed, trying UID:', user.uid);
-                            professorKey = user.uid;
-                            professorRef = db.ref(`professors/${professorKey}`);
-                            professorSnapshot = await professorRef.once('value');
-                        }
+                        console.log('Fetching professor data with key:', professorKey);
+                        const professorRef = db.ref(`professors/${professorKey}`);
+                        const professorSnapshot = await professorRef.once('value');
 
                         if (!professorSnapshot.exists()) {
-                            showToast('Professor data not found. Please check database or contact support.');
+                            showToast('Professor data not found. Please check database.');
                             console.log('No professor data found at professors/' + professorKey);
                             auth.signOut();
                             window.location.href = 'index.html';
@@ -977,7 +962,7 @@
 
                         // Decrypt sensitive fields if present
                         if (professorData.emailEncrypted) {
-                            professorData.email = decryptData(professorData.emailEncrypted) || professorEmail;
+                            professorData.email = decryptData(professorData.emailEncrypted) || user.email;
                         }
 
                         const hasSeenWelcome = professorData.hasSeenWelcome || false;
