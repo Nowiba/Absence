@@ -3,9 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>ISET Siliana Student</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" media="print" onload="this.media='all'">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -436,36 +441,6 @@
             padding: 10px;
         }
 
-        .file-viewer-modal .modal-content {
-            width: 90%;
-            max-width: 600px;
-            height: 85vh;
-            padding: 10px;
-            position: relative;
-        }
-
-        .file-viewer-modal .loading-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #3498db;
-            font-size: 16px;
-            font-weight: 700;
-            display: none;
-        }
-
-        .file-viewer-modal .loading-message.show {
-            display: block;
-        }
-
-        .file-viewer-modal img {
-            width: 100%;
-            max-height: 90%;
-            object-fit: contain;
-            border: none;
-        }
-
         .email-modal {
             display: none;
             position: fixed;
@@ -720,10 +695,6 @@
             color: #03dac6;
         }
 
-        body.dark-mode .file-viewer-modal .loading-message {
-            color: #bb86fc;
-        }
-
         body.dark-mode .email-modal .modal-content {
             background-color: #1e1e1e;
             border-color: #bb86fc;
@@ -822,10 +793,6 @@
                 font-size: 14px;
                 padding: 10px 12px;
             }
-            .file-viewer-modal .modal-content {
-                max-width: 90%;
-                height: 70vh;
-            }
             .email-modal .modal-content {
                 max-width: 90%;
             }
@@ -861,13 +828,6 @@
             <div id="modal-classmates-list"></div>
         </div>
     </div>
-    <!-- File Viewer Modal -->
-    <div id="file-viewer-modal" class="modal file-viewer-modal">
-        <div class="modal-content">
-            <div class="loading-message" id="loading-message">Loading image...</div>
-            <div id="file-viewer-content"></div>
-        </div>
-    </div>
     <!-- Email Update Modal -->
     <div id="email-modal" class="modal email-modal">
         <div class="modal-content">
@@ -894,11 +854,11 @@
     </div>
     <div id="toast" class="toast hidden"></div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <!-- CryptoJS for encryption/decryption -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- Firebase SDK (Lazy-loaded) -->
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- CryptoJS for encryption/decryption (Lazy-loaded) -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         // Toast notification
         function showToast(message, duration = 6000, showLoginButton = false) {
@@ -914,7 +874,7 @@
             }, duration);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
                 // Firebase Configuration
                 const firebaseConfig = {
@@ -954,23 +914,8 @@
                 const cin = urlParams.get('cin');
                 const token = urlParams.get('token');
 
-                // Log parameters for debugging
-                console.log('CIN:', cin);
-                console.log('Token:', token);
-                console.log('Referrer:', document.referrer);
-
-                // Check referrer to ensure navigation from index.html
-                const expectedOrigin = window.location.origin;
-                const referrer = document.referrer;
-                const isValidReferrer = referrer && new URL(referrer).origin === expectedOrigin;
-
-                if (!isValidReferrer) {
-                    showToast('Access denied. Please log in first.', 6000, true);
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 6000);
-                    return;
-                }
+                // Prevent browser caching of this page
+                window.history.replaceState({}, document.title, window.location.pathname);
 
                 // Validate CIN and token
                 if (!cin || !/^\d{8}$/.test(cin)) {
@@ -989,40 +934,23 @@
                     return;
                 }
 
-                // Validate token with retry mechanism
-                function validateToken(retryCount = 0, maxRetries = 2) {
-                    db.ref(`loginTokens/${cin}/${token}`).once('value').then((snapshot) => {
-                        const tokenData = snapshot.val();
-                        if (!tokenData || tokenData.expires < Date.now()) {
-                            if (retryCount < maxRetries) {
-                                console.log(`Retrying token validation (${retryCount + 1}/${maxRetries})`);
-                                setTimeout(() => validateToken(retryCount + 1), 1000);
-                            } else {
-                                showToast('Invalid or expired token. Please log in again.', 6000, true);
-                                setTimeout(() => {
-                                    window.location.href = 'index.html';
-                                }, 6000);
-                            }
-                            return;
-                        }
-                        // Token is valid, clean up and proceed
-                        db.ref(`loginTokens/${cin}/${token}`).remove();
-                        initializePage(cin);
-                    }).catch((error) => {
-                        console.error('Token validation error:', error);
-                        if (retryCount < maxRetries) {
-                            console.log(`Retrying token validation (${retryCount + 1}/${maxRetries})`);
-                            setTimeout(() => validateToken(retryCount + 1), 1000);
-                        } else {
-                            showToast('Error validating access. Please try again.', 6000, true);
-                            setTimeout(() => {
-                                window.location.href = 'index.html';
-                            }, 6000);
-                        }
-                    });
+                // Validate token
+                const tokenRef = db.ref(`loginTokens/${cin}/${token}`);
+                const snapshot = await tokenRef.once('value');
+                const tokenData = snapshot.val();
+
+                if (!tokenData || tokenData.expires < Date.now()) {
+                    showToast('Invalid or expired token. Please log in again.', 6000, true);
+                    await tokenRef.remove(); // Clean up invalid/expired token
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 6000);
+                    return;
                 }
 
-                validateToken();
+                // Token is valid, clean up and proceed
+                await tokenRef.remove();
+                initializePage(cin);
 
                 function initializePage(cin) {
                     // Subjects list
@@ -1066,15 +994,8 @@
                         return str ? str.trim().toLowerCase() : '';
                     }
 
-                    // Convert time to minutes
-                    function timeToMinutes(timeStr) {
-                        const [hours, minutes] = timeStr.split(':').map(Number);
-                        return hours * 60 + minutes;
-                    }
-
                     // Update details visibility
                     function updateDetailsVisibility() {
-                        const now = new Date();
                         const detailsContainer = document.getElementById('details-container');
                         const currentClassP = document.getElementById('current-class');
                         detailsContainer.classList.add('show');
@@ -1096,9 +1017,7 @@
                             const normalizedSubject = normalizeString(subject);
                             absenceBySubject[subject] = absences.filter(a => {
                                 const normalizedAbsenceSubject = normalizeString(a.mappedSubject);
-                                const normalizedStudentClass = normalizeString(studentClass);
-                                return normalizedAbsenceSubject === normalizedSubject &&
-                                       a.status === 'absent';
+                                return normalizedAbsenceSubject === normalizedSubject && a.status === 'absent';
                             });
                         });
 
@@ -1183,12 +1102,12 @@
                             }
 
                             // Load classmates
-                            db.ref('students').once('value').then((snapshot) => {
+                            db.ref('students').orderByChild('class').equalTo(studentClass).once('value').then((snapshot) => {
                                 classmates = [];
                                 snapshot.forEach(childSnapshot => {
                                     const s = childSnapshot.val();
                                     const sCin = childSnapshot.key;
-                                    if (s.class === studentClass && sCin !== cin) {
+                                    if (sCin !== cin) {
                                         classmates.push({ cin: sCin, firstName: s.firstName, lastName: s.lastName });
                                     }
                                 });
@@ -1208,9 +1127,7 @@
 
                     // Load shared files
                     const sharedFilesList = document.getElementById('shared-files-list');
-                    const fileViewerModal = document.getElementById('file-viewer-modal');
-                    const fileViewerContent = document.getElementById('file-viewer-content');
-                    const loadingMessage = document.getElementById('loading-message');
+                    const filesModal = document.getElementById('files-modal');
 
                     db.ref('sharedFiles').on('value', (snapshot) => {
                         sharedFilesList.innerHTML = '';
@@ -1236,14 +1153,11 @@
                                     hour12: true
                                 });
 
-                                const fileType = file.fileType.toLowerCase();
-                                const isImage = fileType.includes('image/png') || fileType.includes('image/jpeg') || fileType.includes('image/jpg') || fileType.includes('image/gif');
-
                                 const fileItem = document.createElement('div');
                                 fileItem.className = 'file-item';
                                 fileItem.innerHTML = `
                                     <div class="file-info">
-                                        <a href="#" class="file-name" data-id="${file.id}" data-type="${file.fileType}" data-salt="${file.salt}">${file.fileName}</a>
+                                        <span class="file-name">${file.fileName}</span>
                                         <div class="file-details">
                                             Uploaded by: ${file.professorName} (${file.subject || 'N/A'})<br>
                                             ${formattedDate}
@@ -1252,44 +1166,6 @@
                                     <a href="#" class="download-link" data-id="${file.id}" data-filename="${file.fileName}" data-type="${file.fileType}" data-salt="${file.salt}">Download</a>
                                 `;
                                 sharedFilesList.appendChild(fileItem);
-                            });
-
-                            document.querySelectorAll('.file-name').forEach(link => {
-                                link.addEventListener('click', async (e) => {
-                                    e.preventDefault();
-                                    const fileId = link.dataset.id;
-                                    const fileType = link.dataset.type.toLowerCase();
-                                    const salt = link.dataset.salt;
-                                    const isImage = fileType.includes('image/png') || fileType.includes('image/jpeg') || fileType.includes('image/jpg') || fileType.includes('image/gif');
-
-                                    if (isImage) {
-                                        try {
-                                            const fileSnapshot = await db.ref(`sharedFiles/${fileId}`).once('value');
-                                            const fileData = fileSnapshot.val();
-                                            const encryptedData = fileData.chunks.join('');
-                                            const key = deriveKey(salt);
-                                            const decrypted = CryptoJS.AES.decrypt(encryptedData, key);
-                                            const decryptedBase64 = decrypted.toString(CryptoJS.enc.Base64);
-                                            if (!decryptedBase64) {
-                                                throw new Error('Decryption resulted in empty data');
-                                            }
-                                            const base64String = `data:${fileType};base64,${decryptedBase64}`;
-
-                                            fileViewerContent.innerHTML = '';
-                                            loadingMessage.classList.add('show');
-                                            fileViewerModal.style.display = 'flex';
-                                            setTimeout(() => {
-                                                fileViewerContent.innerHTML = `<img src="${base64String}" alt="File preview">`;
-                                                loadingMessage.classList.remove('show');
-                                            }, 500);
-                                        } catch (error) {
-                                            showToast(`Error loading image: ${error.message}`);
-                                        }
-                                    } else {
-                                        const downloadLink = link.parentElement.nextElementSibling;
-                                        downloadLink.click();
-                                    }
-                                });
                             });
 
                             document.querySelectorAll('.download-link').forEach(link => {
@@ -1347,7 +1223,6 @@
                     // Event Listeners
                     const classmatesModal = document.getElementById('classmates-modal');
                     const emailModal = document.getElementById('email-modal');
-                    const filesModal = document.getElementById('files-modal');
                     const hamburgerSidebar = document.getElementById('hamburger-sidebar');
 
                     document.getElementById('hamburger-btn').addEventListener('click', () => {
@@ -1392,15 +1267,10 @@
                         if (!classmatesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#sidebar-classmates-btn') && classmatesModal.style.display === 'flex') {
                             classmatesModal.style.display = 'none';
                         }
-                        if (!fileViewerModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('.file-name') && !e.target.closest('#files-btn') && fileViewerModal.style.display === 'flex') {
-                            fileViewerModal.style.display = 'none';
-                            fileViewerContent.innerHTML = '';
-                            loadingMessage.classList.remove('show');
-                        }
                         if (!emailModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#sidebar-email-btn') && emailModal.style.display === 'flex') {
                             emailModal.style.display = 'none';
                         }
-                        if (!filesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#files-btn') && !e.target.closest('.file-name') && filesModal.style.display === 'flex') {
+                        if (!filesModal.querySelector('.modal-content').contains(e.target) && !e.target.closest('#files-btn') && !e.target.closest('.download-link') && filesModal.style.display === 'flex') {
                             filesModal.style.display = 'none';
                         }
                         if (!hamburgerSidebar.contains(e.target) && !e.target.closest('#hamburger-btn') && hamburgerSidebar.classList.contains('open')) {
@@ -1408,8 +1278,9 @@
                         }
                     });
 
-                    // Home button
-                    document.getElementById('home-btn').addEventListener('click', () => {
+                    // Home button (logs out)
+                    document.getElementById('home-btn').addEventListener('click', async () => {
+                        await db.ref(`loginTokens/${cin}`).remove(); // Clean up all tokens for this CIN
                         window.location.href = 'index.html';
                     });
 
@@ -1423,6 +1294,15 @@
                         localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
                         showToast(isDarkMode ? 'Dark mode enabled' : 'Light mode enabled');
                     });
+
+                    // Auto-logout after 15 minutes
+                    setTimeout(async () => {
+                        await db.ref(`loginTokens/${cin}`).remove();
+                        showToast('Session expired. Please log in again.', 6000, true);
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 6000);
+                    }, 15 * 60 * 1000); // 15 minutes
                 }
             } catch (error) {
                 console.error('Initialization error:', error);
