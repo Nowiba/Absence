@@ -933,6 +933,8 @@
                 let canMark = false;
                 let professorData = null;
                 let professorName = '';
+                let professorEmail = '';
+                let professorKey = null;
                 let currentSubject = '';
 
                 auth.onAuthStateChanged(async (user) => {
@@ -942,23 +944,30 @@
                         return;
                     }
 
-                    const professorKey = 'professor1_uid'; // Fixed key from database structure
+                    professorEmail = user.email.replace(/[.@]/g, '_');
 
                     try {
-                        console.log('Fetching professor data with key:', professorKey);
-                        const professorRef = db.ref(`professors/${professorKey}`);
-                        const professorSnapshot = await professorRef.once('value');
+                        // Fetch professor data by matching email
+                        const professorsRef = db.ref('professors');
+                        const professorSnapshot = await professorsRef.once('value');
+                        let professorFound = false;
 
-                        if (!professorSnapshot.exists()) {
+                        professorSnapshot.forEach((childSnapshot) => {
+                            const professor = childSnapshot.val();
+                            if (professor.email === user.email) {
+                                professorData = professor;
+                                professorKey = childSnapshot.key;
+                                professorFound = true;
+                                professorName = professor.name || 'Professor';
+                            }
+                        });
+
+                        if (!professorFound) {
                             showToast('Professor data not found. Please check database.');
-                            console.log('No professor data found at professors/' + professorKey);
                             auth.signOut();
                             window.location.href = 'index.html';
                             return;
                         }
-
-                        professorData = professorSnapshot.val();
-                        professorName = professorData.name || 'Professor';
 
                         // Decrypt sensitive fields if present
                         if (professorData.emailEncrypted) {
@@ -972,13 +981,12 @@
                         if (!hasSeenWelcome) {
                             setTimeout(() => {
                                 welcomePhrase.textContent = `Welcome, ${professorName}`;
-                                professorRef.update({ hasSeenWelcome: true });
+                                db.ref(`professors/${professorKey}`).update({ hasSeenWelcome: true });
                             }, 30000);
                         }
 
                         if (!professorData.schedule || !professorData.classes) {
                             showToast('Incomplete professor data. Please contact support.');
-                            console.log('Professor data incomplete:', Object.keys(professorData));
                             return;
                         }
 
@@ -1009,10 +1017,11 @@
 
                         await checkAndResetMarkings();
 
-                        // Fetch students for IT11 with targeted query
+                        // Fetch students for IT11
                         const studentsRef = db.ref('students').orderByChild('class').equalTo('IT11');
                         const studentSnapshot = await studentsRef.once('value');
                         if (studentSnapshot.exists()) {
+                            studentsData = [];
                             studentSnapshot.forEach(childSnapshot => {
                                 const cin = childSnapshot.key;
                                 const student = childSnapshot.val();
@@ -1043,7 +1052,7 @@
                         loadActionHistory();
                     } catch (error) {
                         showToast('Error loading data. Please try again.');
-                        console.log('Error in auth state change:', error.message);
+                        console.error('Error in auth state change:', error.message);
                     }
                 });
 
@@ -1051,7 +1060,7 @@
                     const today = new Date().toISOString().split('T')[0];
                     const lastMarkingDate = professorData.lastMarkingDate || '';
                     if (lastMarkingDate !== today) {
-                        await db.ref(`professorActions/${professorKey}`).remove();
+                        await db.ref(`professorActions/${professorEmail}`).remove();
                         await db.ref(`professors/${professorKey}`).update({ lastMarkingDate: today });
                     }
                 }
@@ -1084,6 +1093,10 @@
 
                 function renderStudents() {
                     studentsDiv.innerHTML = '';
+                    if (selectedStudents.length === 0) {
+                        studentsDiv.innerHTML = '<p>No students to display.</p>';
+                        return;
+                    }
                     selectedStudents.forEach(student => {
                         const studentItem = document.createElement('div');
                         studentItem.className = 'student-item';
@@ -1092,7 +1105,7 @@
                         const today = new Date().toISOString().split('T')[0];
                         const absences = student.absences || [];
                         const todayAbsence = absences.find(a => a.date === today && a.class === 'IT11');
-                        const statusClass = todayAbsence ? (todayAbsence.status === 'present' ? 'present' : 'absent') : 'not-marked';
+                        const statusClass = todayAbsence ? (todayAbsence.status === 'present' ? 'present' : todayAbsence.status === 'absent' ? 'absent' : 'not-marked') : 'not-marked';
                         studentItem.classList.add(statusClass);
 
                         const totalAbsencesForSubject = absences.reduce((total, a) => {
@@ -1140,6 +1153,8 @@
                             markStudent(cin, status, 1);
                         });
                     });
+
+                    checkIfAllStudentsMarked();
                 }
 
                 async function markStudent(cin, status, weight) {
@@ -1171,7 +1186,7 @@
                         previousAbsences: [...absences]
                     };
 
-                    const actionRef = db.ref(`professorActions/${professorKey}`).push();
+                    const actionRef = db.ref(`professorActions/${professorEmail}`).push();
                     action.actionId = actionRef.key;
                     await actionRef.set(action);
 
@@ -1236,7 +1251,7 @@
                         }))
                     };
 
-                    const actionRef = db.ref(`professorActions/${professorKey}`).push();
+                    const actionRef = db.ref(`professorActions/${professorEmail}`).push();
                     action.actionId = actionRef.key;
                     await actionRef.set(action);
                     await db.ref().update(updates);
@@ -1311,7 +1326,7 @@
                             fileName,
                             timestamp: uploadDate
                         };
-                        const actionRef = db.ref(`professorActions/${professorKey}`).push();
+                        const actionRef = db.ref(`professorActions/${professorEmail}`).push();
                         action.actionId = actionRef.key;
                         await actionRef.set(action);
 
@@ -1323,7 +1338,7 @@
                 });
 
                 function loadActionHistory() {
-                    db.ref(`professorActions/${professorKey}`).on('value', (snapshot) => {
+                    db.ref(`professorActions/${professorEmail}`).on('value', (snapshot) => {
                         absencesHistory.innerHTML = '';
                         filesHistory.innerHTML = '';
 
@@ -1374,7 +1389,7 @@
                 }
 
                 async function undoAction(actionId) {
-                    const actionRef = db.ref(`professorActions/${professorKey}/${actionId}`);
+                    const actionRef = db.ref(`professorActions/${professorEmail}/${actionId}`);
                     const snapshot = await actionRef.once('value');
                     const action = snapshot.val();
                     if (!action) return;
@@ -1489,7 +1504,7 @@
                 });
             } catch (error) {
                 showToast('Error initializing page');
-                console.log('Initialization error:', error.message);
+                console.error('Initialization error:', error.message);
             }
         });
     </script>
