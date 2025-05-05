@@ -1017,37 +1017,37 @@
 
                         await checkAndResetMarkings();
 
-                        // Fetch students for IT11
+                        // Fetch students for IT11 with real-time updates
                         const studentsRef = db.ref('students').orderByChild('class').equalTo('IT11');
-                        const studentSnapshot = await studentsRef.once('value');
-                        if (studentSnapshot.exists()) {
-                            studentsData = [];
-                            studentSnapshot.forEach(childSnapshot => {
-                                const cin = childSnapshot.key;
-                                const student = childSnapshot.val();
-                                // Decrypt sensitive fields
-                                if (student.emailEncrypted) {
-                                    student.email = decryptData(student.emailEncrypted) || 'Not provided';
-                                    delete student.emailEncrypted;
-                                }
-                                if (student.passwordEncrypted) {
-                                    student.password = decryptData(student.passwordEncrypted) || 'N/A';
-                                    delete student.passwordEncrypted;
-                                }
-                                if (student.validationAnswerEncrypted) {
-                                    student.validationAnswer = decryptData(student.validationAnswerEncrypted) || 'N/A';
-                                    delete student.validationAnswerEncrypted;
-                                }
-                                studentsData.push({ cin, ...student });
-                            });
-                            selectedStudents = studentsData;
-                            totalStudentsSpan.textContent = selectedStudents.length;
-                            renderStudents();
-                            studentList.style.display = 'block';
-                            collectiveAbsentBtn.style.display = canMark ? 'block' : 'none';
-                        } else {
-                            showToast('No students found for IT11');
-                        }
+                        studentsRef.on('value', (studentSnapshot) => {
+                            if (studentSnapshot.exists()) {
+                                studentsData = [];
+                                studentSnapshot.forEach(childSnapshot => {
+                                    const cin = childSnapshot.key;
+                                    const student = childSnapshot.val();
+                                    if (student.emailEncrypted) {
+                                        student.email = decryptData(student.emailEncrypted) || 'Not provided';
+                                        delete student.emailEncrypted;
+                                    }
+                                    if (student.passwordEncrypted) {
+                                        student.password = decryptData(student.passwordEncrypted) || 'N/A';
+                                        delete student.passwordEncrypted;
+                                    }
+                                    if (student.validationAnswerEncrypted) {
+                                        student.validationAnswer = decryptData(student.validationAnswerEncrypted) || 'N/A';
+                                        delete student.validationAnswerEncrypted;
+                                    }
+                                    studentsData.push({ cin, ...student });
+                                });
+                                selectedStudents = studentsData;
+                                totalStudentsSpan.textContent = selectedStudents.length;
+                                renderStudents();
+                                studentList.style.display = 'block';
+                                collectiveAbsentBtn.style.display = canMark ? 'block' : 'none';
+                            } else {
+                                showToast('No students found for IT11');
+                            }
+                        });
 
                         loadActionHistory();
                     } catch (error) {
@@ -1481,11 +1481,18 @@
                     absencesSection.classList.remove('show');
                 });
 
+                // Close all modals when clicking outside their content
                 document.addEventListener('click', (e) => {
-                    if (!fileUploadModal.contains(e.target) && e.target.id !== 'share-files-btn') fileUploadModal.style.display = 'none';
-                    if (!undoModal.contains(e.target) && e.target.id !== 'action-history-btn') undoModal.style.display = 'none';
-                    if (!scheduleModal.contains(e.target) && e.target.id !== 'schedule-btn') scheduleModal.style.display = 'none';
-                    if (!confirmModal.contains(e.target) && e.target.id !== 'collective-absent') confirmModal.style.display = 'none';
+                    const modals = [confirmModal, fileUploadModal, undoModal, scheduleModal];
+                    const openModalButtons = ['collective-absent', 'share-files-btn', 'action-history-btn', 'schedule-btn'];
+                    const isClickInsideModal = modals.some(modal => modal.contains(e.target));
+                    const isClickOnOpenButton = openModalButtons.some(id => e.target.id === id || (e.target.parentNode && e.target.parentNode.id === id));
+                    
+                    if (!isClickInsideModal && !isClickOnOpenButton) {
+                        modals.forEach(modal => {
+                            modal.style.display = 'none';
+                        });
+                    }
                 });
 
                 document.getElementById('home-btn').addEventListener('click', async () => {
